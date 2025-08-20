@@ -1,1 +1,0 @@
-export { getAnnotationTextDisplayStyle } from './getAnnotationTextDisplayStyle';

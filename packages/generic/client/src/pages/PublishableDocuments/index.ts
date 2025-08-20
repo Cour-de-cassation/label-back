@@ -1,1 +1,0 @@
-export { PublishableDocuments } from './PublishableDocuments';

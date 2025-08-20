@@ -1,1 +1,0 @@
-export { TreatedDocuments } from './TreatedDocuments';
