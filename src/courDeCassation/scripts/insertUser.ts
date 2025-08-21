@@ -38,7 +38,7 @@ function parseArgv() {
       },
     })
     .help()
-    .alias('help', 'h').argv;
+    .alias('help', 'h').parseSync();
 
   if (!['admin', 'annotator'].includes(argv.role)) {
     throw new Error('Bad role');

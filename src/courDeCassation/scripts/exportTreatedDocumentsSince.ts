@@ -24,7 +24,7 @@ function parseArgv() {
       },
     })
     .help()
-    .alias('help', 'h').argv;
+    .alias('help', 'h').parseSync();
 
   return { days: argv.days as number };
 }
