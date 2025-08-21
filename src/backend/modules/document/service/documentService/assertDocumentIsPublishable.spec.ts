@@ -9,7 +9,7 @@ describe('assertDocumentIsPublishable', () => {
     const document = documentModule.generator.generate({ status: 'free' });
     await documentRepository.insert(document);
 
-    expect(assertDocumentIsPublishable(document._id)).rejects.toThrowError(
+    await expect(assertDocumentIsPublishable(document._id)).rejects.toThrow(
       `The document is not publishable, because its current status is "free"`,
     );
   });
@@ -21,7 +21,7 @@ describe('assertDocumentIsPublishable', () => {
     });
     await documentRepository.insert(document);
 
-    expect(assertDocumentIsPublishable(document._id)).rejects.toThrowError(
+    expect(assertDocumentIsPublishable(document._id)).rejects.toThrow(
       `The document is not publishable, because its publication category is "N, W"`,
     );
   });

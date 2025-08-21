@@ -13,7 +13,7 @@ describe('buildPreAssignator', () => {
     });
     expect(
       preAssignator.preAssignDocument(documentNotFree),
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Document status must be loaded or nlpAnnotating before pre-assign it',
     );
   });

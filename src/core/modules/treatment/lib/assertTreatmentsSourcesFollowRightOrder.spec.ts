@@ -49,7 +49,7 @@ describe('assertTreatmentsSourcesFollowRightOrder', () => {
 
     const functionCall = () => assertTreatmentsSourcesFollowRightOrder(treatments);
 
-    expect(functionCall).toThrowError(
+    expect(functionCall).toThrow(
       Error('Treatment sources do not follow the pattern: [NLP, postProcess, NLP, postProcess]'),
     );
   });

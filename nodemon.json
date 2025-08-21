@@ -1,5 +1,5 @@
 {
   "watch": ["./src"],
   "ext": "ts,json",
-  "exec": "npm run compile:backend && node dist/courDeCassation/labelServer.js --settings $PWD/src/courDeCassation/settings/settings.json"
+  "exec": "npm run compile && node dist/courDeCassation/labelServer.js --settings $PWD/src/courDeCassation/settings/settings.json"
 }

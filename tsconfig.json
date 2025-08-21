@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["es2019"],
+    "lib": ["ES2022"],
     "baseUrl": ".",
     "declaration": true,
     "esModuleInterop": true,
@@ -12,8 +12,8 @@
     "removeComments": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2017"
+    "target": "ES2022"
   },
   "exclude": ["node_modules", "dist"],
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "src/setupTests.ts"]
 }
