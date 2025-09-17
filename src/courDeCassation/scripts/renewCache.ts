@@ -27,7 +27,7 @@ function parseArgv() {
       },
     })
     .help()
-    .alias('help', 'h').argv;
+    .alias('help', 'h').parseSync();
 
   return { beforeMinutes: argv.beforeMinutes as number };
 }

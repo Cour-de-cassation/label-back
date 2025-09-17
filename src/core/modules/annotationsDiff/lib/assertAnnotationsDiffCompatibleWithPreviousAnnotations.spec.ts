@@ -43,7 +43,7 @@ describe('assertAnnotationsDiffCompatibleWithPreviousAnnotations', () => {
     const functionCall = () =>
       assertAnnotationsDiffCompatibleWithPreviousAnnotations(previousAnnotations, annotationsDiff);
 
-    expect(functionCall).toThrowError(
+    expect(functionCall).toThrow(
       Error(
         'annotations diff previousAnnotation (nom / MACHIN / 20) overlaps with afterAnnotation (nom / BIDULE / 15)',
       ),
@@ -63,7 +63,7 @@ describe('assertAnnotationsDiffCompatibleWithPreviousAnnotations', () => {
     const functionCall = () =>
       assertAnnotationsDiffCompatibleWithPreviousAnnotations(previousAnnotations, annotationsDiff);
 
-    expect(functionCall).toThrowError(
+    expect(functionCall).toThrow(
       Error(
         'annotations diff previousAnnotation (nom / MACHIN / 20) overlaps with afterAnnotation (nom / BIDULE CHOSE / 10)',
       ),

@@ -132,7 +132,7 @@ function buildFetchDocumentsForUser(
     ) {
       // If the document is assignated, remove the document from the list
       documentIdsToSearchIn = documentIdsToSearchIn.filter(
-        (documentId) => documentId !== document?._id,
+        (documentId) => !documentId.equals(document?._id),
       );
       return assignDocumentByPriority(priority, documentIdsToSearchIn);
     }

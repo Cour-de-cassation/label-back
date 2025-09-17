@@ -30,7 +30,7 @@ describe('assertAnnotationsDiffCompatibleWithAvailableCategories', () => {
     const functionCall = () =>
       assertAnnotationsDiffCompatibleWithAvailableCategories(annotationsDiff, availableCategories);
 
-    expect(functionCall).toThrowError(
+    expect(functionCall).toThrow(
       '(nom / Benoit (nom_benoit) / 0) category is not in availableCategories: [prenom]',
     );
   });

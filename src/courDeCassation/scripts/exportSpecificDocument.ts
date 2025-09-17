@@ -37,7 +37,7 @@ function parseArgv() {
       },
     })
     .help()
-    .alias('help', 'h').argv;
+    .alias('help', 'h').parseSync();
 
   return {
     documentNumber: argv.documentNumber as number,

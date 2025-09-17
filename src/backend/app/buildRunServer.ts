@@ -1,5 +1,4 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import cors from 'cors';
 import { settingsType } from '@src/core';
 
@@ -27,7 +26,7 @@ function buildRunServer(settings: settingsType) {
       }),
     );
 
-    app.use(bodyParser.json({ limit: '1mb' }));
+    app.use(express.json({ limit: '1mb' }));
 
     buildApi(app);
 

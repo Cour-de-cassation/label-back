@@ -72,7 +72,7 @@ describe('fetch', () => {
         fetchAssignationsByDocumentIds([documents[0]._id, documents[1]._id], {
           assertEveryDocumentIsAssigned: true,
         }),
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         `The document ${idModule.lib.convertToString(
           documents[1]._id,
         )} has no matching assignations`,

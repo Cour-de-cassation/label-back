@@ -40,7 +40,7 @@ function getCommandParameters() {
       },
     })
     .help()
-    .alias('help', 'h').argv;
+    .alias('help', 'h').parseSync();
 
   return {
     settingsFile: argv.settings as string,

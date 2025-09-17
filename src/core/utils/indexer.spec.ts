@@ -10,7 +10,7 @@ describe('indexer', () => {
     });
 
     it('should throw error', () => {
-      expect(() => indexer.assertEveryIdIsDefined(['a', 'd'], datas, buildErrorDescription)).toThrowError(
+      expect(() => indexer.assertEveryIdIsDefined(['a', 'd'], datas, buildErrorDescription)).toThrow(
         buildErrorDescription('d'),
       );
     });

@@ -24,6 +24,6 @@ describe('assertDocumentIsAssignatedToUser', () => {
       documentId,
       userId,
     });
-    expect(failingAssertion()).rejects.toThrowError();
+    expect(failingAssertion()).rejects.toThrow();
   });
 });

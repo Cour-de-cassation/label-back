@@ -1,12 +1,10 @@
-import { decode, encode } from 'iconv-lite';
-
 const decoder = {
   convertLatinToUtf(buffer: Buffer) {
-    return decode(buffer, 'latin1');
+    return buffer.toString('latin1');
   },
 
   convertUtfToLatin(str: string) {
-    return encode(str, 'latin1');
+    return Buffer.from(str, 'latin1');
   },
 };
 

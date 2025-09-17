@@ -30,7 +30,7 @@ function buildMongo() {
     url: string;
   }) {
     dbName = newDbName;
-    client = await new MongoClient(url).connect();
+    client = await new MongoClient(url, { directConnection: true }).connect();
 
     return client;
   }
