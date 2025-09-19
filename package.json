@@ -21,7 +21,6 @@
     "lodash": "4.17.21",
     "mongodb": "6.18.0",
     "samlify": "^2.10.1",
-    "sder-core": "github:Cour-de-cassation/sder-core#8afb44f74c9ffefbbadc6f0d3de0def1c916dcc7",
     "yargs": "17.7.2"
   },
   "devDependencies": {

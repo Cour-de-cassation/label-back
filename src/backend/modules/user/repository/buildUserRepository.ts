@@ -1,5 +1,5 @@
-import { userModule, userType } from '@src/core';
-import { buildProjection, buildRepositoryBuilder, projectedType } from '../../../repository';
+import { userType } from '@src/core';
+import { buildRepositoryBuilder } from '../../../repository';
 import { customUserRepositoryType } from './customUserRepositoryType';
 
 export { buildUserRepository };
@@ -18,27 +18,18 @@ const buildUserRepository = buildRepositoryBuilder<
     } as const,
   ],
   buildCustomRepository: (collection) => ({
-    async findAllWithNoDeletionDateProjection(projections) {
-      return collection
-        .find({ deletionDate: undefined })
-        .project<projectedType<userType, typeof projections[number]>>(buildProjection(projections))
-        .toArray();
-    },
     async findByEmail(email) {
-      const formattedEmail = userModule.lib.formatEmail(email);
+      const formattedEmail = email.trim().toLowerCase();
       const result = await collection.findOne({ email: formattedEmail });
-      if (!result) {
-        throw new Error(`No matching user for email ${email}`);
-      }
       return result;
     },
-    async updateHashedPassword(userId, hashedPassword) {
-      const { modifiedCount } = await collection.updateOne(
+    async updateNameAndRoleById(userId, name, role) {
+      const { acknowledged } = await collection.updateOne(
         { _id: userId },
-        { $set: { hashedPassword, passwordLastUpdateDate: Date.now() } },
+        { $set: { name, role } },
       );
       return {
-        success: modifiedCount === 1,
+        success: acknowledged,
       };
     },
   }),
