@@ -16,15 +16,18 @@
     "cors": "2.8.5",
     "dotenv": "17.2.1",
     "express": "5.1.0",
+    "express-session": "^1.18.2",
     "joi": "18.0.1",
     "lodash": "4.17.21",
     "mongodb": "6.18.0",
+    "samlify": "^2.10.1",
     "sder-core": "github:Cour-de-cassation/sder-core#8afb44f74c9ffefbbadc6f0d3de0def1c916dcc7",
     "yargs": "17.7.2"
   },
   "devDependencies": {
     "@types/cors": "2.8.19",
     "@types/express": "5.0.3",
+    "@types/express-session": "^1.18.2",
     "@types/jest": "30.0.0",
     "@types/lodash": "4.17.20",
     "@types/mongodb": "4.0.7",
