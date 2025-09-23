@@ -8,5 +8,8 @@ services:
       - ${LABEL_API_PORT}:${LABEL_API_PORT}
     env_file:
       - .env
+    volumes:
+      - .:/home/node
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    
