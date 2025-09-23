@@ -20,29 +20,8 @@ You should take a look at [juridependencies](https://github.com/Cour-de-cassatio
 Install dependencies with:
 
 ```sh
-yarn
+npm i
 ```
-
-### Frontend
-
-#### With docker:
-
-Start the backend with:
-
-```sh
-yarn start:client:docker
-```
-
-#### Without docker:
-
-To lauch the frontend run:
-
-```sh
-yarn start:client:dev
-```
-
-Then, on your web browser, open http://localhost:55432
-
 ### Backend
 
 #### With docker:
@@ -50,7 +29,7 @@ Then, on your web browser, open http://localhost:55432
 Start the backend with:
 
 ```sh
-yarn start:backend:docker
+npm run start:docker
 ```
 
 #### Without docker:
@@ -58,18 +37,12 @@ yarn start:backend:docker
 Start the backend:
 
 ```sh
-yarn start:backend:dev
+npm run start:dev
 ```
 
 ### Database
 
-You can init database with :
-
-```sh
-yarn init:db
-```
-
-This script is lauch with the `.env` configuration.
+See juridependencies
 
 ### Launch scripts
 
