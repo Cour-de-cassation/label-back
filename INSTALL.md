@@ -7,6 +7,7 @@
 ## Configuration
 
 You can lauch the backend with or withour docker. To configure these methods you must have an env file :
+
 - `.env`
 
 Copy and rename `.env.example`.
@@ -22,6 +23,7 @@ Install dependencies with:
 ```sh
 npm i
 ```
+
 ### Backend
 
 #### With docker:
@@ -52,7 +54,7 @@ You can launch scripts with theses commands :
 #### With docker
 
 ```sh
-docker compose exec labelbk sh -c "cd packages/courDeCassation; sh scripts/runLocalScript.sh ./dist/scripts/myScript.js --myArgument"
+docker compose exec labelbk sh -c "node dist/courDeCassation/scripts/MYSCRIPT.js -s src/courDeCassation/settings/settings.json --MYARGUMENT XX"
 ```
 
 #### Without docker
@@ -66,7 +68,7 @@ scripts/runScriptLocally.sh "myScript.js --myArgument"
 Follow the [installation guide](packages/generic/sso/README.md).
 
 > The LABEL application leverages the SSO module as a dependency for its integration with the Single Sign-On (SSO) system. The details of this integration are documented in the [README](packages/generic/sso/README.md) of the SSO module.
-The backend exposes the following URLs to interact with the SSO:
+> The backend exposes the following URLs to interact with the SSO:
 
 1. /api/sso/login: Endpoint to initiate the login process via SSO.
 2. /api/sso/acs: Endpoint for processing SAML assertions following a successful authentication.

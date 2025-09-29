@@ -66,10 +66,6 @@ Free documents assignated to an annotator that is AFK after X minutes.
 
 Manual import of a specific document.
 
-## initializeTestDb
-
-Init db with test values (for local only).
-
 ## insertUser
 
 Create a new user.
