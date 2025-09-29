@@ -10,7 +10,7 @@ RUN npm config set proxy $http_proxy
 RUN npm config set https-proxy $https_proxy
 
 COPY package*.json ./
-RUN npm i
+RUN npm ci
 
 COPY --chown=node:node . .
 
