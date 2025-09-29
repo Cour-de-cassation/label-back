@@ -37,7 +37,7 @@ spec:
               image: "{{ label_backend_image }}"
               volumeMounts:
                 - name: "{{ rclone_app_id }}-pvc-sso"
-                  mountPath: /home/node/packages/courDeCassation/sso-files
+                  mountPath: /home/node/sso-files
               command:
                 - /bin/sh
               args:
