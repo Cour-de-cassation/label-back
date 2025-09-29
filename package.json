@@ -5,7 +5,6 @@
   "description": "Cour de cassation annotation tool.",
   "scripts": {
     "compile": "tsc && tsc-alias",
-    "init:db": "scripts/initializeTestDb.sh",
     "start:dev": "nodemon",
     "start:docker": "docker compose up -d",
     "test": "RUN_MODE=TEST jest --passWithNoTests --verbose --runInBand"
