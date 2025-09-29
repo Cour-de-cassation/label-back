@@ -3,13 +3,13 @@ name: opendata
 services:
   labelbk:
     build:
-      dockerfile: Dockerfile.label.local
+      dockerfile: Dockerfile
     ports:
       - ${LABEL_API_PORT}:${LABEL_API_PORT}
     env_file:
       - .env
-    volumes:
-      - .:/home/node
+    # volumes:
+    #   - .:/home/node
     extra_hosts:
       - "host.docker.internal:host-gateway"
     
