@@ -27,7 +27,7 @@ build_and_push_label_backend:
     - docker build
       --build-arg http_proxy=$HTTP_PROXY
       --build-arg https_proxy=$HTTPS_PROXY
-      --target label-backend
+      --target label-back
       -t $docker_image .
     - docker push $docker_image
   rules:

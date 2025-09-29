@@ -16,7 +16,7 @@ COPY --chown=node:node . .
 
 RUN npm run compile && npm prune --production
 
-FROM node:22-alpine AS labelbk
+FROM node:22-alpine AS label-back
 
 USER node
 WORKDIR /home/node
