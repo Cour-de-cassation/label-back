@@ -1,8 +1,5 @@
 import { idModule, treatmentModule } from '@src/core';
-import {
-  buildDocumentRepository,
-  documentService,
-} from '../../../modules/document';
+import { buildDocumentRepository, documentService } from '../../../modules/document';
 import { treatmentService } from '../../../modules/treatment';
 import { logger } from '../../../utils';
 
@@ -18,16 +15,12 @@ async function cleanUnconsistentTreatments() {
   const documentIds = documents.map(({ _id }) => _id);
   for (let i = 0, length = documents.length; i < length; i++) {
     try {
-      const treatments = await treatmentService.fetchTreatmentsByDocumentId(
-        documentIds[i],
-      );
+      const treatments = await treatmentService.fetchTreatmentsByDocumentId(documentIds[i]);
       treatmentModule.lib.computeAnnotations(treatments);
     } catch (error) {
       logger.error({
         operationName: 'cleanUnconsistentTreatments',
-        msg: `Resetting document ${idModule.lib.convertToString(
-          documents[i]._id,
-        )}`,
+        msg: `Resetting document ${idModule.lib.convertToString(documents[i]._id)}`,
         data: error as Record<string, unknown>,
       });
       await documentService.updateDocumentStatus(documentIds[i], 'loaded');

@@ -14,10 +14,7 @@ if (process.env.RUN_MODE === 'LOCAL') {
 }
 
 const buildApi = dependencyManager.inject({
-  forLocal:
-    process.env.NLP_PSEUDONYMISATION_API_ENABLED === 'true'
-      ? buildNlpApi
-      : buildNlpLocalApi,
+  forLocal: process.env.NLP_PSEUDONYMISATION_API_ENABLED === 'true' ? buildNlpApi : buildNlpLocalApi,
   forProd: buildNlpApi,
   forTest: buildNlpFakeApi,
 });

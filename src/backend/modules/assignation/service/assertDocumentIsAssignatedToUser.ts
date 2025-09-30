@@ -17,8 +17,6 @@ async function assertDocumentIsAssignatedToUser({
   });
 
   if (!assignation) {
-    throw new Error(
-      `No assignation found for userId ${userId} and documentId ${documentId}`,
-    );
+    throw new Error(`No assignation found for userId ${userId} and documentId ${documentId}`);
   }
 }

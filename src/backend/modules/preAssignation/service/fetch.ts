@@ -8,9 +8,7 @@ async function fetchAllPreAssignation() {
   const preAssignationRepository = buildPreAssignationRepository();
   const preAssignations = await preAssignationRepository.findAll();
 
-  const usersByIds = await userService.fetchUsersByIds(
-    preAssignations.map(({ userId }) => userId),
-  );
+  const usersByIds = await userService.fetchUsersByIds(preAssignations.map(({ userId }) => userId));
 
   return preAssignations.map((preAssignation) => {
     const userIdString = idModule.lib.convertToString(preAssignation.userId);

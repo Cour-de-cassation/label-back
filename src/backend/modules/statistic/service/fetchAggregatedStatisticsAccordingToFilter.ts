@@ -1,16 +1,9 @@
-import {
-  ressourceFilterType,
-  settingsType,
-  statisticModule,
-} from '@src/core';
+import { ressourceFilterType, settingsType, statisticModule } from '@src/core';
 import { fetchFilteredStatistics } from './fetchFilteredStatistics';
 
 export { fetchAggregatedStatisticsAccordingToFilter };
 
-async function fetchAggregatedStatisticsAccordingToFilter(
-  filter: ressourceFilterType,
-  settings: settingsType,
-) {
+async function fetchAggregatedStatisticsAccordingToFilter(filter: ressourceFilterType, settings: settingsType) {
   const statistics = await fetchFilteredStatistics(filter, settings);
   return statisticModule.lib.aggregate(statistics, filter);
 }

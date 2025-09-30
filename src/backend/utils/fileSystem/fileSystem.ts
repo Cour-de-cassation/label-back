@@ -30,11 +30,7 @@ async function listFilesOfDirectory(directoryPath: string) {
   return fileNames;
 }
 
-async function readFiles(
-  fileNames: Array<string>,
-  encoding: 'utf8' | 'latin1',
-  basePath?: string,
-) {
+async function readFiles(fileNames: Array<string>, encoding: 'utf8' | 'latin1', basePath?: string) {
   const fileContents: Array<{ fileName: string; content: string }> = [];
 
   for await (const fileName of fileNames) {

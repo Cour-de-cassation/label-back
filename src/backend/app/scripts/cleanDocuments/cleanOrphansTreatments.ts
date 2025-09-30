@@ -16,9 +16,7 @@ async function cleanOrphansTreatments() {
 
   const date = dateBuilder.monthsAgo(6);
 
-  const treatments = await treatmentRepository.findAllByLastUpdateDateLessThan(
-    date,
-  );
+  const treatments = await treatmentRepository.findAllByLastUpdateDateLessThan(date);
   logger.log({
     operationName: 'cleanOrphansTreatments',
     msg: `Find ${treatments.length} treatments with lastUpdateDate more than 6 months ago.`,

@@ -1,8 +1,5 @@
 import { dateBuilder, documentModule } from '@src/core';
-import {
-  buildDocumentRepository,
-  documentService,
-} from '../../modules/document';
+import { buildDocumentRepository, documentService } from '../../modules/document';
 import { logger } from '../../utils';
 
 export { freePendingDocuments };
@@ -16,18 +13,14 @@ async function freePendingDocuments() {
     operationName: 'freePendingDocuments',
     msg: 'Fetching pending documents',
   });
-  const pendingDocuments = await documentRepository.findAllByStatusProjection(
-    ['pending'],
-    ['_id', 'updateDate'],
-  );
+  const pendingDocuments = await documentRepository.findAllByStatusProjection(['pending'], ['_id', 'updateDate']);
   logger.log({
     operationName: 'freePendingDocuments',
     msg: `${pendingDocuments.length} documents fetched`,
   });
   const minutesBeforeFreeing = documentModule.lib.getMinutesBeforeFreeingPendingDocuments();
   const pendingDocumentsToFree = pendingDocuments.filter(
-    (document) =>
-      document.updateDate <= dateBuilder.minutesAgo(minutesBeforeFreeing),
+    (document) => document.updateDate <= dateBuilder.minutesAgo(minutesBeforeFreeing),
   );
   logger.log({
     operationName: 'freePendingDocuments',
@@ -39,10 +32,7 @@ async function freePendingDocuments() {
       operationName: 'freePendingDocuments',
       msg: `Freeing document ${index + 1}/${pendingDocumentsToFree.length}`,
     });
-    await documentService.updateDocumentStatus(
-      pendingDocumentsToFree[index]._id,
-      'free',
-    );
+    await documentService.updateDocumentStatus(pendingDocumentsToFree[index]._id, 'free');
   }
 
   logger.log({ operationName: 'freePendingDocuments', msg: 'DONE' });

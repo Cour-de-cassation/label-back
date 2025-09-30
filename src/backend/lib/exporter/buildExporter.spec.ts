@@ -1,17 +1,9 @@
-import {
-  dateBuilder,
-  documentModule,
-  settingsModule,
-  treatmentModule,
-  treatmentType,
-  Deprecated,
-} from '@src/core';
+import { dateBuilder, documentModule, settingsModule, treatmentModule, treatmentType, Deprecated } from '@src/core';
 import { buildDocumentRepository } from '../../modules/document';
 import { buildTreatmentRepository } from '../../modules/treatment';
 import { buildExporter } from './buildExporter';
 import { exporterConfigType } from './exporterConfigType';
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 describe('buildExporter', () => {
   const documentRepository = buildDocumentRepository();
   const treatmentRepository = buildTreatmentRepository();
@@ -32,25 +24,27 @@ describe('buildExporter', () => {
           metadata_text: [],
         },
       ];
-      const documents = ([
-        {
-          text: 'Benoit est ingénieur',
-          status: 'done',
-          updateDate: dateBuilder.daysAgo(5),
-          checklist: checklist,
-        },
-        { status: 'pending' },
-        {
-          text: 'Romain est designer',
-          status: 'done',
-          updateDate: dateBuilder.daysAgo(7),
-          checklist: checklist,
-        },
-        {
-          status: 'done',
-          updateDate: dateBuilder.daysAgo(2),
-        },
-      ] as const).map(documentModule.generator.generate);
+      const documents = (
+        [
+          {
+            text: 'Benoit est ingénieur',
+            status: 'done',
+            updateDate: dateBuilder.daysAgo(5),
+            checklist: checklist,
+          },
+          { status: 'pending' },
+          {
+            text: 'Romain est designer',
+            status: 'done',
+            updateDate: dateBuilder.daysAgo(7),
+            checklist: checklist,
+          },
+          {
+            status: 'done',
+            updateDate: dateBuilder.daysAgo(2),
+          },
+        ] as const
+      ).map(documentModule.generator.generate);
       const treatments = [
         {
           annotationsDiff: {
@@ -101,9 +95,7 @@ describe('buildExporter', () => {
       const exportedExternalIds = fakeExporterConfig.getExportedExternalIds();
       const exportedPseudonymizationTexts = fakeExporterConfig.getExportedPseudonymizationTexts();
       const exportedLabelTreatments = fakeExporterConfig.getExportedLabelTreatments();
-      expect(exportedExternalIds.sort()).toEqual(
-        [documents[0].externalId, documents[2].externalId].sort(),
-      );
+      expect(exportedExternalIds.sort()).toEqual([documents[0].externalId, documents[2].externalId].sort());
       expect(exportedPseudonymizationTexts.sort()).toEqual(
         ['[FIRST_NAME 1] est ingénieur', '[FIRST_NAME 1] est designer'].sort(),
       );
@@ -161,11 +153,7 @@ function buildFakeExporterConfig(): exporterConfigType & {
   return {
     name: 'FAKE_EXPORTER',
 
-    async sendDocumentPseudonymisationAndTreatments({
-      externalId,
-      pseudoText,
-      labelTreatments,
-    }) {
+    async sendDocumentPseudonymisationAndTreatments({ externalId, pseudoText, labelTreatments }) {
       exportedExternalIds.push(externalId);
       exportedpseudonymizationTexts.push(pseudoText);
       exportedlabelTreatments.push(...labelTreatments);

@@ -9,10 +9,7 @@ describe('updateDocumentRoute', () => {
     const document = documentModule.generator.generate({ route: 'simple' });
     await documentRepository.insert(document);
 
-    const updatedDocument = await updateDocumentRoute(
-      document._id,
-      'automatic',
-    );
+    const updatedDocument = await updateDocumentRoute(document._id, 'automatic');
 
     expect(updatedDocument.route).toEqual('automatic');
   });

@@ -4,10 +4,7 @@ import { buildAssignationRepository } from '../repository';
 
 export { updateAssignationDocumentStatus };
 
-async function updateAssignationDocumentStatus(
-  assignationId: assignationType['_id'],
-  status: documentType['status'],
-) {
+async function updateAssignationDocumentStatus(assignationId: assignationType['_id'], status: documentType['status']) {
   const assignationRepository = buildAssignationRepository();
   const assignation = await assignationRepository.findById(assignationId);
 

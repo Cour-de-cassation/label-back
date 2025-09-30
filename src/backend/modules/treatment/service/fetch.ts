@@ -26,37 +26,26 @@ async function fetchAnnotationsOfDocument(documentId: idType) {
   return treatmentModule.lib.computeAnnotations(treatments);
 }
 
-async function fetchAnnotationsDiffDetailsForDocument(
-  documentId: documentType['_id'],
-) {
+async function fetchAnnotationsDiffDetailsForDocument(documentId: documentType['_id']) {
   const treatmentRepository = buildTreatmentRepository();
   const documentRepository = buildDocumentRepository();
 
   const document = await documentRepository.findById(documentId);
   const treatments = await treatmentRepository.findAllByDocumentId(documentId);
   const humanTreatments = treatments.filter(
-    (treatment) =>
-      treatment.source === 'admin' || treatment.source === 'annotator',
+    (treatment) => treatment.source === 'admin' || treatment.source === 'annotator',
   );
-  const annotationsDiff = treatmentModule.lib.computeAnnotationsDiff(
-    humanTreatments,
-  );
+  const annotationsDiff = treatmentModule.lib.computeAnnotationsDiff(humanTreatments);
   const {
     addedAnnotations,
     categoryChangedAnnotations,
     deletedAnnotations,
     resizedBiggerAnnotations,
     resizedSmallerAnnotations,
-  } = annotationsDiffModule.lib.computeDetailsFromAnnotationsDiff(
-    annotationsDiff,
-  );
+  } = annotationsDiffModule.lib.computeDetailsFromAnnotationsDiff(annotationsDiff);
   return {
     addedAnnotations: addedAnnotations.map((addedAnnotation) => {
-      const {
-        text,
-        textStart,
-        annotation,
-      } = mapAnnotationToAnnotationsDiffDetails(addedAnnotation);
+      const { text, textStart, annotation } = mapAnnotationToAnnotationsDiffDetails(addedAnnotation);
       return {
         text,
         textStart,
@@ -64,11 +53,7 @@ async function fetchAnnotationsDiffDetailsForDocument(
       };
     }),
     deletedAnnotations: deletedAnnotations.map((deletedAnnotation) => {
-      const {
-        text,
-        textStart,
-        annotation,
-      } = mapAnnotationToAnnotationsDiffDetails(deletedAnnotation);
+      const { text, textStart, annotation } = mapAnnotationToAnnotationsDiffDetails(deletedAnnotation);
 
       return {
         text,
@@ -76,33 +61,20 @@ async function fetchAnnotationsDiffDetailsForDocument(
         deletedAnnotation: annotation,
       };
     }),
-    resizedBiggerAnnotations: resizedBiggerAnnotations.map(
-      mapAnnotationChangeToAnnotationsDiffDetails,
-    ),
-    resizedSmallerAnnotations: resizedSmallerAnnotations.map(
-      mapAnnotationChangeToAnnotationsDiffDetails,
-    ),
-    categoryChangedAnnotations: categoryChangedAnnotations.map(
-      mapAnnotationChangeToAnnotationsDiffDetails,
-    ),
+    resizedBiggerAnnotations: resizedBiggerAnnotations.map(mapAnnotationChangeToAnnotationsDiffDetails),
+    resizedSmallerAnnotations: resizedSmallerAnnotations.map(mapAnnotationChangeToAnnotationsDiffDetails),
+    categoryChangedAnnotations: categoryChangedAnnotations.map(mapAnnotationChangeToAnnotationsDiffDetails),
   };
 
-  function mapAnnotationChangeToAnnotationsDiffDetails([
-    annotationBefore,
-    annotationAfter,
-  ]: [annotationType, annotationType]) {
-    const {
-      textStart: annotationBeforeTextStart,
-      textEnd: annotationBeforeTextEnd,
-    } = annotationModule.lib.computeNearbyText(annotationBefore, document.text);
-    const {
-      textStart: annotationAfterTextStart,
-      textEnd: annotationAfterTextEnd,
-    } = annotationModule.lib.computeNearbyText(annotationAfter, document.text);
-    const textStart = Math.min(
-      annotationBeforeTextStart,
-      annotationAfterTextStart,
-    );
+  function mapAnnotationChangeToAnnotationsDiffDetails([annotationBefore, annotationAfter]: [
+    annotationType,
+    annotationType,
+  ]) {
+    const { textStart: annotationBeforeTextStart, textEnd: annotationBeforeTextEnd } =
+      annotationModule.lib.computeNearbyText(annotationBefore, document.text);
+    const { textStart: annotationAfterTextStart, textEnd: annotationAfterTextEnd } =
+      annotationModule.lib.computeNearbyText(annotationAfter, document.text);
+    const textStart = Math.min(annotationBeforeTextStart, annotationAfterTextStart);
     const textEnd = Math.max(annotationBeforeTextEnd, annotationAfterTextEnd);
 
     const text = document.text.substring(textStart, textEnd);
@@ -116,10 +88,7 @@ async function fetchAnnotationsDiffDetailsForDocument(
   }
 
   function mapAnnotationToAnnotationsDiffDetails(annotation: annotationType) {
-    const { textEnd, textStart } = annotationModule.lib.computeNearbyText(
-      annotation,
-      document.text,
-    );
+    const { textEnd, textStart } = annotationModule.lib.computeNearbyText(annotation, document.text);
     const text = document.text.substring(textStart, textEnd);
     return {
       text,
@@ -144,9 +113,7 @@ async function fetchTreatmentsByDocumentId(documentId: idType) {
 
 async function fetchTreatmentsByDocumentIds(documentIds: idType[]) {
   const treatmentRepository = buildTreatmentRepository();
-  const treatmentsByDocumentIds = await treatmentRepository.findAllByDocumentIds(
-    documentIds,
-  );
+  const treatmentsByDocumentIds = await treatmentRepository.findAllByDocumentIds(documentIds);
 
   indexer.assertEveryIdIsDefined(
     documentIds.map((documentId) => idModule.lib.convertToString(documentId)),

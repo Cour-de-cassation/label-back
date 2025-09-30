@@ -8,10 +8,22 @@ describe('computeFilteredSettings', () => {
   const motivationCategory = motivationCategoryHandler.getCategoryName();
   const settings = buildSettings({
     prenom: { order: 1, text: 'Prénom', status: 'hidden' },
-    professionnelMagistratGreffier: { order: 2, text: 'Magistrat et membre du greffe', status: 'visible' },
+    professionnelMagistratGreffier: {
+      order: 2,
+      text: 'Magistrat et membre du greffe',
+      status: 'visible',
+    },
     professionnelAvocat: { order: 3, text: 'Avocat', status: 'alwaysVisible' },
-    [additionalAnnotationCategory]: { order: 4, text: 'Occultation supplémentaire', status: 'hidden' },
-    [motivationCategory]: { order: 5, text: 'Motivations de la décision', status: 'hidden' },
+    [additionalAnnotationCategory]: {
+      order: 4,
+      text: 'Occultation supplémentaire',
+      status: 'hidden',
+    },
+    [motivationCategory]: {
+      order: 5,
+      text: 'Motivations de la décision',
+      status: 'hidden',
+    },
   });
   it('should compute filtered settings for an omitted hidden category', () => {
     const categoriesToOmit = ['prenom'];
@@ -125,7 +137,10 @@ describe('computeFilteredSettings', () => {
   it('should compute filtered settings for additional annotations when parsing succeed but no additional terms to annotate after parsing', () => {
     const categoriesToOmit = ['prenom', 'professionnelAvocat', 'professionnelMagistratGreffier'];
     const additionalTermsToAnnotate = 'thing';
-    const computedAdditionalTerms = { additionalTermsToAnnotate: [], additionalTermsToUnAnnotate: ['toUnanotate'] };
+    const computedAdditionalTerms = {
+      additionalTermsToAnnotate: [],
+      additionalTermsToUnAnnotate: ['toUnanotate'],
+    };
     const additionalTermsParsingFailed = false;
     const motivationOccultation = undefined;
 

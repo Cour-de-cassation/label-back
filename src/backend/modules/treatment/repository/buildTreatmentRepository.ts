@@ -4,10 +4,7 @@ import { customTreatmentRepositoryType } from './customTreatmentRepositoryType';
 
 export { buildTreatmentRepository };
 
-const buildTreatmentRepository = buildRepositoryBuilder<
-  treatmentType,
-  customTreatmentRepositoryType
->({
+const buildTreatmentRepository = buildRepositoryBuilder<treatmentType, customTreatmentRepositoryType>({
   collectionName: 'treatments',
   indexes: [
     {
@@ -36,17 +33,11 @@ const buildTreatmentRepository = buildRepositoryBuilder<
     },
 
     async findAllByDocumentIds(documentIds) {
-      const treatments = await collection
-        .find({ documentId: { $in: documentIds } })
-        .toArray();
+      const treatments = await collection.find({ documentId: { $in: documentIds } }).toArray();
 
-      const sortedTreatments = treatments.sort(
-        (treatmentA, treatmentB) => treatmentA.order - treatmentB.order,
-      );
+      const sortedTreatments = treatments.sort((treatmentA, treatmentB) => treatmentA.order - treatmentB.order);
 
-      return indexer.indexManyBy(sortedTreatments, (treatment) =>
-        idModule.lib.convertToString(treatment.documentId),
-      );
+      return indexer.indexManyBy(sortedTreatments, (treatment) => idModule.lib.convertToString(treatment.documentId));
     },
 
     async findExtremumLastUpdateDateBySources(sources) {
@@ -69,9 +60,7 @@ const buildTreatmentRepository = buildRepositoryBuilder<
     },
 
     async findAllByLastUpdateDateLessThan(lastUpdateDate) {
-      return collection
-        .find({ lastUpdateDate: { $lt: lastUpdateDate } })
-        .toArray();
+      return collection.find({ lastUpdateDate: { $lt: lastUpdateDate } }).toArray();
     },
   }),
 });

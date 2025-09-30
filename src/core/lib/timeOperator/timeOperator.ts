@@ -70,5 +70,9 @@ function convertTimestampToDate(timestamp: number) {
   const date = new Date();
   date.setTime(timestamp);
 
-  return { year: date.getFullYear(), month: date.getMonth(), dayOfMonth: date.getDate() };
+  return {
+    year: date.getFullYear(),
+    month: date.getMonth(),
+    dayOfMonth: date.getDate(),
+  };
 }

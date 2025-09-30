@@ -12,36 +12,21 @@ function buildNlpFetcher(nlpApiBaseUrl: string | undefined) {
   const nlpApi = buildNlpApi(nlpApiBaseUrl);
 
   return {
-    async fetchAnnotationOfDocument(
-      settings: settingsType,
-      document: documentType,
-    ) {
-      const nlpAnnotations = await nlpApi.fetchNlpAnnotations(
-        settings,
-        document,
-      );
+    async fetchAnnotationOfDocument(settings: settingsType, document: documentType) {
+      const nlpAnnotations = await nlpApi.fetchNlpAnnotations(settings, document);
 
       return {
-        annotations: nlpMapper.mapNlpAnnotationsToAnnotations(
-          nlpAnnotations,
-          document,
-        ),
+        annotations: nlpMapper.mapNlpAnnotationsToAnnotations(nlpAnnotations, document),
         documentId: document._id,
         checklist: nlpAnnotations.checklist ?? [],
         newCategoriesToAnnotate: nlpAnnotations.newCategoriesToAnnotate,
         newCategoriesToUnAnnotate: nlpAnnotations.newCategoriesToUnAnnotate,
-        computedAdditionalTerms: nlpMapper.mapNlpAdditionalTerms(
-          nlpAnnotations,
-        ),
-        additionalTermsParsingFailed:
-          nlpAnnotations.additionalTermsParsingFailed,
+        computedAdditionalTerms: nlpMapper.mapNlpAdditionalTerms(nlpAnnotations),
+        additionalTermsParsingFailed: nlpAnnotations.additionalTermsParsingFailed,
         version: nlpAnnotations.versions,
       };
     },
-    async fetchLossOfDocument(
-      document: documentType,
-      treatments: Deprecated.LabelTreatment[],
-    ) {
+    async fetchLossOfDocument(document: documentType, treatments: Deprecated.LabelTreatment[]) {
       const nlpLoss = await nlpApi.fetchNlpLoss(document, treatments);
 
       return nlpLoss;

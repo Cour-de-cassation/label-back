@@ -21,17 +21,12 @@ async function listDocumentsWithProblemReports() {
   });
   for (let index = 0; index < problemReports.length; index++) {
     const problemReport = problemReports[index];
-    const document = await documentRepository.findById(
-      problemReport['documentId'],
-    );
+    const document = await documentRepository.findById(problemReport['documentId']);
 
     logger.log({
       operationName: 'listDocumentsWithProblemReports',
-      msg: `${index + 1} | ${document['_id']} | ${document['source']} | ${
-        document['documentNumber']
-      } | ${
-        document['creationDate'] &&
-        timeOperator.convertTimestampToReadableDate(document['creationDate'])
+      msg: `${index + 1} | ${document['_id']} | ${document['source']} | ${document['documentNumber']} | ${
+        document['creationDate'] && timeOperator.convertTimestampToReadableDate(document['creationDate'])
       }`,
     });
   }

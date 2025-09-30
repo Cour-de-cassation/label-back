@@ -2,11 +2,7 @@ import { range } from 'lodash';
 import { assignationModule, documentModule, idModule } from '@src/core';
 import { buildDocumentRepository } from '../../document';
 import { buildAssignationRepository } from '../repository';
-import {
-  fetchAssignationId,
-  fetchDocumentIdsAssignatedToUserId,
-  fetchAssignationsByDocumentIds,
-} from './fetch';
+import { fetchAssignationId, fetchDocumentIdsAssignatedToUserId, fetchAssignationsByDocumentIds } from './fetch';
 
 describe('fetch', () => {
   describe('fetchAssignationId', () => {
@@ -42,9 +38,7 @@ describe('fetch', () => {
   describe('fetchAssignationsByDocumentIds', () => {
     const documentRepository = buildDocumentRepository();
     const assignationRepository = buildAssignationRepository();
-    const documents = range(3).map(() =>
-      documentModule.generator.generate({ status: 'pending' }),
-    );
+    const documents = range(3).map(() => documentModule.generator.generate({ status: 'pending' }));
     const assignations = documents.map((document) =>
       assignationModule.generator.generate({ documentId: document._id }),
     );
@@ -53,10 +47,9 @@ describe('fetch', () => {
       await documentRepository.insertMany(documents);
       await assignationRepository.insertMany(assignations);
 
-      const assignationsByDocumentIds = await fetchAssignationsByDocumentIds(
-        [documents[0]._id, documents[1]._id],
-        { assertEveryDocumentIsAssigned: true },
-      );
+      const assignationsByDocumentIds = await fetchAssignationsByDocumentIds([documents[0]._id, documents[1]._id], {
+        assertEveryDocumentIsAssigned: true,
+      });
 
       expect(assignationsByDocumentIds).toEqual({
         [idModule.lib.convertToString(documents[0]._id)]: [assignations[0]],
@@ -72,11 +65,7 @@ describe('fetch', () => {
         fetchAssignationsByDocumentIds([documents[0]._id, documents[1]._id], {
           assertEveryDocumentIsAssigned: true,
         }),
-      ).rejects.toThrow(
-        `The document ${idModule.lib.convertToString(
-          documents[1]._id,
-        )} has no matching assignations`,
-      );
+      ).rejects.toThrow(`The document ${idModule.lib.convertToString(documents[1]._id)} has no matching assignations`);
     });
   });
 
@@ -87,16 +76,12 @@ describe('fetch', () => {
     const userId2 = idModule.lib.buildId();
 
     it('should fetch all the document id assignated to the given userId', async () => {
-      const assignations = ([
-        { userId: userId1 },
-        { userId: userId1 },
-        { userId: userId2 },
-      ] as const).map(assignationModule.generator.generate);
+      const assignations = ([{ userId: userId1 }, { userId: userId1 }, { userId: userId2 }] as const).map(
+        assignationModule.generator.generate,
+      );
       await Promise.all(assignations.map(assignationRepository.insert));
 
-      const documentIdAssignatedToUserId = await fetchDocumentIdsAssignatedToUserId(
-        userId1,
-      );
+      const documentIdAssignatedToUserId = await fetchDocumentIdsAssignatedToUserId(userId1);
 
       expect(documentIdAssignatedToUserId.sort()).toEqual(
         [
@@ -112,14 +97,10 @@ describe('fetch', () => {
       );
     });
     it('should return an empty array if there is no document id assignated to the given userId', async () => {
-      const assignements = ([{ userId: userId1 }] as const).map(
-        assignationModule.generator.generate,
-      );
+      const assignements = ([{ userId: userId1 }] as const).map(assignationModule.generator.generate);
       await Promise.all(assignements.map(assignationRepository.insert));
 
-      const documentIdAssignatedToUserId = await fetchDocumentIdsAssignatedToUserId(
-        userId2,
-      );
+      const documentIdAssignatedToUserId = await fetchDocumentIdsAssignatedToUserId(userId2);
 
       expect(documentIdAssignatedToUserId).toEqual([]);
     });

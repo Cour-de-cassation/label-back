@@ -20,10 +20,6 @@ describe('fetchPublishableDocumentsToExport', () => {
 
     const publishableDocumentsToExport = await fetchPublishableDocumentsToExport();
 
-    expect(publishableDocumentsToExport.sort()).toEqual([
-      documents[0],
-      documents[3],
-      documents[4],
-    ]);
+    expect(publishableDocumentsToExport.sort()).toEqual([documents[0], documents[3], documents[4]]);
   });
 });

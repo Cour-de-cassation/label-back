@@ -4,10 +4,7 @@ import { customUserRepositoryType } from './customUserRepositoryType';
 
 export { buildFakeUserRepository };
 
-const buildFakeUserRepository = buildFakeRepositoryBuilder<
-  userType,
-  customUserRepositoryType
->({
+const buildFakeUserRepository = buildFakeRepositoryBuilder<userType, customUserRepositoryType>({
   collectionName: 'users',
   buildCustomFakeRepository: (collection) => ({
     async findByEmail(email) {

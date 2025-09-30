@@ -175,6 +175,9 @@ describe('computeAnnotationsDiff', () => {
 
     const annotationDiffs = computeAnnotationsDiff(treatments);
 
-    expect(annotationDiffs).toEqual({ before: [], after: [annotations[2], annotations[3], annotations[4]] });
+    expect(annotationDiffs).toEqual({
+      before: [],
+      after: [annotations[2], annotations[3], annotations[4]],
+    });
   });
 });

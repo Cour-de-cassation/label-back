@@ -2,10 +2,7 @@ import { range } from 'lodash';
 import { buildDocumentRepository } from '../../../modules/document';
 import { documentModule, settingsModule, userModule } from '@src/core';
 import { buildAssignationRepository } from '../../../modules/assignation';
-import {
-  buildTreatmentRepository,
-  treatmentService,
-} from '../../../modules/treatment';
+import { buildTreatmentRepository, treatmentService } from '../../../modules/treatment';
 import { buildUserRepository } from '../../../modules/user';
 import { cleanDocuments } from './cleanDocuments';
 
@@ -31,10 +28,7 @@ describe('cleanDocuments', () => {
     );
     await documentRepository.insertMany(documentsToInsert);
     for (let i = 0; i < FREE_DOCUMENTS_COUNT; i++) {
-      await documentRepository.updateStatusById(
-        documentsToInsert[i]._id,
-        'free',
-      );
+      await documentRepository.updateStatusById(documentsToInsert[i]._id, 'free');
     }
     await Promise.all(
       range(FREE_DOCUMENTS_COUNT).map(async (i) => {
@@ -49,10 +43,7 @@ describe('cleanDocuments', () => {
       }),
     );
     for (let i = 0; i < DONE_DOCUMENTS_COUNT; i++) {
-      await documentRepository.updateStatusById(
-        documentsToInsert[i]._id,
-        'done',
-      );
+      await documentRepository.updateStatusById(documentsToInsert[i]._id, 'done');
     }
     await Promise.all(
       range(DONE_DOCUMENTS_COUNT).map((i) =>
@@ -69,30 +60,15 @@ describe('cleanDocuments', () => {
 
     await cleanDocuments();
 
-    const fetchedLoadedDocuments = await documentRepository.findAllByStatusProjection(
-      ['loaded'],
-      ['_id'],
-    );
-    expect(fetchedLoadedDocuments.length).toBe(
-      LOADED_DOCUMENTS_COUNT - FREE_DOCUMENTS_COUNT,
-    );
-    const fetchedFreeDocuments = await documentRepository.findAllByStatusProjection(
-      ['free'],
-      ['_id'],
-    );
-    expect(fetchedFreeDocuments.length).toBe(
-      FREE_DOCUMENTS_COUNT - DONE_DOCUMENTS_COUNT,
-    );
-    const fetchedDoneDocuments = await documentRepository.findAllByStatusProjection(
-      ['done'],
-      ['_id'],
-    );
+    const fetchedLoadedDocuments = await documentRepository.findAllByStatusProjection(['loaded'], ['_id']);
+    expect(fetchedLoadedDocuments.length).toBe(LOADED_DOCUMENTS_COUNT - FREE_DOCUMENTS_COUNT);
+    const fetchedFreeDocuments = await documentRepository.findAllByStatusProjection(['free'], ['_id']);
+    expect(fetchedFreeDocuments.length).toBe(FREE_DOCUMENTS_COUNT - DONE_DOCUMENTS_COUNT);
+    const fetchedDoneDocuments = await documentRepository.findAllByStatusProjection(['done'], ['_id']);
     expect(fetchedDoneDocuments.length).toBe(DONE_DOCUMENTS_COUNT);
     const assignations = await assignationRepository.findAll();
     const treatments = await treatmentRepository.findAll();
     expect(assignations.length).toBe(DONE_DOCUMENTS_COUNT);
-    expect(treatments.length).toBe(
-      DONE_DOCUMENTS_COUNT + FREE_DOCUMENTS_COUNT * 2,
-    );
+    expect(treatments.length).toBe(DONE_DOCUMENTS_COUNT + FREE_DOCUMENTS_COUNT * 2);
   });
 });

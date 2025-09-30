@@ -14,10 +14,7 @@ import { exporterConfigType } from './exporterConfigType';
 
 export { buildExporter };
 
-function buildExporter(
-  exporterConfig: exporterConfigType,
-  settings: settingsType,
-) {
+function buildExporter(exporterConfig: exporterConfigType, settings: settingsType) {
   return {
     exportAllTreatedDocuments,
     exportSpecificDocument,
@@ -35,9 +32,7 @@ function buildExporter(
       operationName: 'exportTreatedDocumentsSince',
       msg: `Fetching treated documents...`,
     });
-    const documentsReadyToExport = await documentService.fetchDocumentsReadyToExport(
-      days,
-    );
+    const documentsReadyToExport = await documentService.fetchDocumentsReadyToExport(days);
     logger.log({
       operationName: 'exportTreatedDocumentsSince',
       msg: `${documentsReadyToExport.length} documents to export`,
@@ -50,9 +45,7 @@ function buildExporter(
     for (let index = 0; index < documentsReadyToExport.length; index++) {
       logger.log({
         operationName: 'exportTreatedDocumentsSince',
-        msg: `Exportation of document ${index + 1}/${
-          documentsReadyToExport.length
-        }`,
+        msg: `Exportation of document ${index + 1}/${documentsReadyToExport.length}`,
       });
       const document = documentsReadyToExport[index];
 
@@ -85,9 +78,7 @@ function buildExporter(
     for (let index = 0; index < documentsReadyToExport.length; index++) {
       logger.log({
         operationName: 'exportTreatedPublishableDocuments',
-        msg: `Exportation of document ${index + 1}/${
-          documentsReadyToExport.length
-        }`,
+        msg: `Exportation of document ${index + 1}/${documentsReadyToExport.length}`,
       });
       const document = documentsReadyToExport[index];
 
@@ -100,20 +91,15 @@ function buildExporter(
     });
   }
 
-  async function exportSpecificDocument({
-    documentNumber,
-    source,
-  }: {
-    documentNumber: number;
-    source: string;
-  }) {
+  async function exportSpecificDocument({ documentNumber, source }: { documentNumber: number; source: string }) {
     logger.log({
       operationName: 'exportSpecificDocument',
       msg: `START: documentNumber ${documentNumber} - source ${source}`,
     });
-    const document = await documentService.fetchDocumentBySourceAndDocumentNumber(
-      { documentNumber, source },
-    );
+    const document = await documentService.fetchDocumentBySourceAndDocumentNumber({
+      documentNumber,
+      source,
+    });
 
     if (!document) {
       logger.error({
@@ -175,9 +161,7 @@ function buildExporter(
   }
 
   async function exportDocument(document: documentType) {
-    const treatments = await treatmentService.fetchTreatmentsByDocumentId(
-      document._id,
-    );
+    const treatments = await treatmentService.fetchTreatmentsByDocumentId(document._id);
     const annotations = treatmentModule.lib.computeAnnotations(treatments);
     const seed = documentModule.lib.computeCaseNumber(document);
     const settingsForDocument = settingsModule.lib.computeFilteredSettings(
@@ -194,11 +178,7 @@ function buildExporter(
       await exporterConfig.sendDocumentPseudonymisationAndTreatments({
         externalId: document.externalId,
         pseudoText: anonymizer.anonymizeDocument(document).text,
-        labelTreatments: treatmentModule.lib.concat(
-          treatments,
-          document.nlpVersions,
-          document.checklist,
-        ),
+        labelTreatments: treatmentModule.lib.concat(treatments, document.nlpVersions, document.checklist),
       });
       logger.log({
         operationName: 'exportDocument',
@@ -211,11 +191,7 @@ function buildExporter(
         },
       });
 
-      await statisticService.saveStatisticsOfDocument(
-        document,
-        settings,
-        'exported',
-      );
+      await statisticService.saveStatisticsOfDocument(document, settings, 'exported');
 
       await documentService.deleteDocument(document._id);
     } catch (error) {

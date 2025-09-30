@@ -5,12 +5,8 @@ export type { projectedType, repositoryType };
 type repositoryType<T> = {
   clear: () => Promise<void>;
   deleteById: (_id: ObjectId) => Promise<void>;
-  deleteManyByIds: (
-    ids: ObjectId[],
-  ) => Promise<{ success: boolean; count: number }>;
-  distinct: <fieldNameT extends keyof T>(
-    fieldName: fieldNameT,
-  ) => Promise<Array<T[fieldNameT]>>;
+  deleteManyByIds: (ids: ObjectId[]) => Promise<{ success: boolean; count: number }>;
+  distinct: <fieldNameT extends keyof T>(fieldName: fieldNameT) => Promise<Array<T[fieldNameT]>>;
   distinctNested: <fieldT>(fieldNameNested: string) => Promise<Array<fieldT>>;
   findAll: () => Promise<WithId<T>[]>;
   findAllProjection: <projectionT extends keyof T>(
@@ -20,10 +16,7 @@ type repositoryType<T> = {
   findById: (id: ObjectId) => Promise<WithId<T>>;
   insert: (newObject: T) => Promise<{ success: boolean }>;
   insertMany: (newObjects: T[]) => Promise<void>;
-  deletePropertiesForMany: (
-    filter: Filter<T>,
-    fieldNames: Array<string>,
-  ) => Promise<void>;
+  deletePropertiesForMany: (filter: Filter<T>, fieldNames: Array<string>) => Promise<void>;
   setIndexes: () => Promise<void>;
   updateOne: (id: ObjectId, objectFields: Partial<T>) => Promise<WithId<T> | undefined>;
   updateMany: (filter: Partial<T>, objectFields: Partial<T>) => Promise<void>;

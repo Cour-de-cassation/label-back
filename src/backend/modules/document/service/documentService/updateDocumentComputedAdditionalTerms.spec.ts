@@ -13,13 +13,10 @@ describe('updateDocumentComputedAdditionalTerms', () => {
     });
     await documentRepository.insert(document);
 
-    const updatedDocument = await updateDocumentComputedAdditionalTerms(
-      document._id,
-      {
-        additionalTermsToAnnotate: ['Pierre', 'Paul'],
-        additionalTermsToUnAnnotate: ['Jacques'],
-      },
-    );
+    const updatedDocument = await updateDocumentComputedAdditionalTerms(document._id, {
+      additionalTermsToAnnotate: ['Pierre', 'Paul'],
+      additionalTermsToUnAnnotate: ['Jacques'],
+    });
 
     expect(updatedDocument.decisionMetadata.computedAdditionalTerms).toEqual({
       additionalTermsToAnnotate: ['Pierre', 'Paul'],

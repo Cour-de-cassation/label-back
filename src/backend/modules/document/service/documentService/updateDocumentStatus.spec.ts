@@ -1,8 +1,4 @@
-import {
-  assignationModule,
-  documentModule,
-  treatmentModule,
-} from '@src/core';
+import { assignationModule, documentModule, treatmentModule } from '@src/core';
 import { buildAssignationRepository } from '../../../assignation/repository';
 import { buildTreatmentRepository } from '../../../treatment/repository';
 import { buildDocumentRepository } from '../../repository';

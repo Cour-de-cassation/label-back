@@ -18,10 +18,7 @@ import { extractRoute } from '../extractRoute';
 
 export { buildAnnotator };
 
-function buildAnnotator(
-  settings: settingsType,
-  annotatorConfig: annotatorConfigType,
-) {
+function buildAnnotator(settings: settingsType, annotatorConfig: annotatorConfigType) {
   return {
     annotateDocumentsWithoutAnnotations,
     reAnnotateFreeDocuments,
@@ -35,9 +32,7 @@ function buildAnnotator(
     });
 
     const failedDocumentIds: documentType['_id'][] = [];
-    const documentsCountToFill = await documentService.countDoneDocumentsWithoutLossNotIn(
-      failedDocumentIds,
-    );
+    const documentsCountToFill = await documentService.countDoneDocumentsWithoutLossNotIn(failedDocumentIds);
     logger.log({
       operationName: 'fillLossOfAllTreatedDocuments',
       msg: `Found ${documentsCountToFill} documents without loss`,
@@ -45,9 +40,7 @@ function buildAnnotator(
     let currentDocumentToFillLoss: documentType | undefined;
     let documentsFilledLossCount = 0;
     do {
-      currentDocumentToFillLoss = await documentService.fetchDoneDocumentWithoutLossNotIn(
-        failedDocumentIds,
-      );
+      currentDocumentToFillLoss = await documentService.fetchDoneDocumentWithoutLossNotIn(failedDocumentIds);
       if (currentDocumentToFillLoss) {
         documentsFilledLossCount++;
         try {
@@ -58,24 +51,16 @@ function buildAnnotator(
             currentDocumentToFillLoss,
             treatmentModule.lib.concat(currentTreatmentsOfDocument),
           );
-          await documentService.updateDocumentLoss(
-            currentDocumentToFillLoss._id,
-            loss,
-          );
+          await documentService.updateDocumentLoss(currentDocumentToFillLoss._id, loss);
         } catch (error) {
           failedDocumentIds.push(currentDocumentToFillLoss._id);
           logger.log({
             operationName: 'fillLossOfAllTreatedDocuments',
-            msg: `Error while filling loss of document ${idModule.lib.convertToString(
-              currentDocumentToFillLoss._id,
-            )}`,
+            msg: `Error while filling loss of document ${idModule.lib.convertToString(currentDocumentToFillLoss._id)}`,
           });
         }
       }
-    } while (
-      currentDocumentToFillLoss !== undefined &&
-      documentsFilledLossCount < documentsCountToFill
-    );
+    } while (currentDocumentToFillLoss !== undefined && documentsFilledLossCount < documentsCountToFill);
   }
 
   async function annotateDocumentsWithoutAnnotations() {
@@ -96,9 +81,7 @@ function buildAnnotator(
 
     do {
       previousDocumentStatus = undefined;
-      currentDocumentToAnnotate = await documentService.fetchDocumentWithoutAnnotationsNotIn(
-        failedDocumentIds,
-      );
+      currentDocumentToAnnotate = await documentService.fetchDocumentWithoutAnnotationsNotIn(failedDocumentIds);
       if (currentDocumentToAnnotate) {
         documentsAnnotatedCount++;
         logger.log({
@@ -137,22 +120,14 @@ function buildAnnotator(
               },
             },
           });
-          await documentService.updateDocumentStatus(
-            currentDocumentToAnnotate._id,
-            previousDocumentStatus,
-          );
+          await documentService.updateDocumentStatus(currentDocumentToAnnotate._id, previousDocumentStatus);
           logger.log({
             operationName: 'annotateDocumentsWithoutAnnotations',
-            msg: `Document ${formatDocumentInfos(
-              currentDocumentToAnnotate,
-            )} free!`,
+            msg: `Document ${formatDocumentInfos(currentDocumentToAnnotate)} free!`,
           });
         }
       }
-    } while (
-      currentDocumentToAnnotate !== undefined &&
-      documentsAnnotatedCount < documentsCountToAnnotate
-    );
+    } while (currentDocumentToAnnotate !== undefined && documentsAnnotatedCount < documentsCountToAnnotate);
 
     logger.log({
       operationName: 'annotateDocumentsWithoutAnnotations',
@@ -176,15 +151,9 @@ function buildAnnotator(
   }
 
   async function annotateDocument(document: documentType) {
-    const previousTreatments = await treatmentService.fetchTreatmentsByDocumentId(
-      document._id,
-    );
+    const previousTreatments = await treatmentService.fetchTreatmentsByDocumentId(document._id);
     if (previousTreatments.length > 0) {
-      throw new Error(
-        `Conflict of annotation on document ${formatDocumentInfos(
-          document,
-        )}. Skipping...`,
-      );
+      throw new Error(`Conflict of annotation on document ${formatDocumentInfos(document)}. Skipping...`);
     }
 
     const {
@@ -238,13 +207,8 @@ function buildAnnotator(
           },
         });
 
-        if (
-          (motivations && motivations?.length > 1) ||
-          (exposeDuLitige && exposeDuLitige?.length > 1)
-        ) {
-          throw new Error(
-            'Cannot annotate motifs with multiple motivations or expose du litige zones',
-          );
+        if ((motivations && motivations?.length > 1) || (exposeDuLitige && exposeDuLitige?.length > 1)) {
+          throw new Error('Cannot annotate motifs with multiple motivations or expose du litige zones');
         } else {
           createMotifOccultationTreatment(
             documentId,
@@ -270,10 +234,7 @@ function buildAnnotator(
         },
       });
     }
-    if (
-      additionalTermsParsingFailed !== null &&
-      additionalTermsParsingFailed !== undefined
-    ) {
+    if (additionalTermsParsingFailed !== null && additionalTermsParsingFailed !== undefined) {
       logger.log({
         operationName: 'annotateDocument',
         msg: `additionalTermsParsingFailed found, updating with value ${additionalTermsParsingFailed}`,
@@ -284,10 +245,7 @@ function buildAnnotator(
           },
         },
       });
-      await documentService.updateDocumentAdditionalTermsParsingFailed(
-        documentId,
-        additionalTermsParsingFailed,
-      );
+      await documentService.updateDocumentAdditionalTermsParsingFailed(documentId, additionalTermsParsingFailed);
     }
 
     let newCategoriesToOmit = document.decisionMetadata.categoriesToOmit;
@@ -302,9 +260,7 @@ function buildAnnotator(
           },
         },
       });
-      newCategoriesToOmit = Array.from(
-        new Set(newCategoriesToOmit.concat(newCategoriesToUnAnnotate)),
-      );
+      newCategoriesToOmit = Array.from(new Set(newCategoriesToOmit.concat(newCategoriesToUnAnnotate)));
     }
 
     if (!!newCategoriesToAnnotate) {
@@ -318,9 +274,7 @@ function buildAnnotator(
           },
         },
       });
-      newCategoriesToOmit = newCategoriesToOmit.filter(
-        (category) => !newCategoriesToAnnotate.includes(category),
-      );
+      newCategoriesToOmit = newCategoriesToOmit.filter((category) => !newCategoriesToAnnotate.includes(category));
     }
 
     if (document.decisionMetadata.categoriesToOmit != newCategoriesToOmit) {
@@ -334,17 +288,13 @@ function buildAnnotator(
           },
         },
       });
-      await documentService.updateDocumentCategoriesToOmit(
-        documentId,
-        newCategoriesToOmit,
-      );
+      await documentService.updateDocumentCategoriesToOmit(documentId, newCategoriesToOmit);
     }
 
     if (!!computedAdditionalTerms) {
       logger.log({
         operationName: 'annotateDocument',
-        msg:
-          'Additionals terms to annotate or to unannotate found, adding to document...',
+        msg: 'Additionals terms to annotate or to unannotate found, adding to document...',
         data: {
           decision: {
             sourceId: document.documentNumber,
@@ -353,10 +303,7 @@ function buildAnnotator(
         },
       });
 
-      await documentService.updateDocumentComputedAdditionalTerms(
-        documentId,
-        computedAdditionalTerms,
-      );
+      await documentService.updateDocumentComputedAdditionalTerms(documentId, computedAdditionalTerms);
     }
 
     const preAssignator = buildPreAssignator();
@@ -372,10 +319,7 @@ function buildAnnotator(
         publicationCategory: document.publicationCategory,
         route: documentRoute,
       });
-      await documentService.updateDocumentStatus(
-        document._id,
-        nextDocumentStatus,
-      );
+      await documentService.updateDocumentStatus(document._id, nextDocumentStatus);
     }
 
     logger.log({
@@ -417,10 +361,7 @@ function buildAnnotator(
   ) {
     const motifsAnnotations: annotationType[] = [];
 
-    function extractAndAnnotate(
-      range: { start: number; end: number },
-      source: string,
-    ): annotationType | null {
+    function extractAndAnnotate(range: { start: number; end: number }, source: string): annotationType | null {
       const rawZoneText = documentText.substring(range.start, range.end);
       const trimmedStart = rawZoneText.replace(/^[\s\r\n]+/, '');
       const removedCharactersAtStart = rawZoneText.length - trimmedStart.length;
@@ -459,9 +400,10 @@ function buildAnnotator(
       }
     }
 
-    const annotationWithoutOverlapping = annotationModule.lib.removeOverlappingAnnotations(
-      [...previousAnnotations, ...motifsAnnotations],
-    );
+    const annotationWithoutOverlapping = annotationModule.lib.removeOverlappingAnnotations([
+      ...previousAnnotations,
+      ...motifsAnnotations,
+    ]);
 
     await treatmentService.createTreatment(
       {
@@ -475,8 +417,6 @@ function buildAnnotator(
   }
 
   function formatDocumentInfos(document: documentType) {
-    return `[${idModule.lib.convertToString(document._id)} ${document.source} ${
-      document.documentNumber
-    }]`;
+    return `[${idModule.lib.convertToString(document._id)} ${document.source} ${document.documentNumber}]`;
   }
 }

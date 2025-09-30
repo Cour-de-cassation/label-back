@@ -1,9 +1,6 @@
 import { annotationModule, documentModule, settingsModule } from '@src/core';
 import { range } from 'lodash';
-import {
-  documentService,
-  buildDocumentRepository,
-} from '../../modules/document';
+import { documentService, buildDocumentRepository } from '../../modules/document';
 import { annotatorConfigType } from './annotatorConfigType';
 import { buildAnnotator } from './buildAnnotator';
 
@@ -19,18 +16,14 @@ describe('buildAnnotator', () => {
 
       await annotator.annotateDocumentsWithoutAnnotations();
 
-      const documentWithoutAnnotations = await documentService.fetchDocumentWithoutAnnotationsNotIn(
-        [],
-      );
+      const documentWithoutAnnotations = await documentService.fetchDocumentWithoutAnnotationsNotIn([]);
       expect(documentWithoutAnnotations).toEqual(undefined);
     });
   });
 });
 
 async function insertNDocumentsWithoutAnnotationsInDb(n: number) {
-  const documents = [...Array(n).keys()].map(() =>
-    documentModule.generator.generate({ status: 'loaded' }),
-  );
+  const documents = [...Array(n).keys()].map(() => documentModule.generator.generate({ status: 'loaded' }));
 
   const documentRepository = buildDocumentRepository();
   await Promise.all(documents.map(documentRepository.insert));

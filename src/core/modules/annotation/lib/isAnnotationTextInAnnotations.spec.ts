@@ -11,8 +11,20 @@ describe('isAnnotationTextInAnnotations', () => {
       source: 'agent',
     });
     const annotationsToSearchIn = [
-      { start: 90, text: 'Harry', category: 'personnePhysiqueNom', score: 1, source: 'agent' },
-      { start: 96, text: 'Potter', category: 'personnePhysiqueNom', score: 1, source: 'agent' },
+      {
+        start: 90,
+        text: 'Harry',
+        category: 'personnePhysiqueNom',
+        score: 1,
+        source: 'agent',
+      },
+      {
+        start: 96,
+        text: 'Potter',
+        category: 'personnePhysiqueNom',
+        score: 1,
+        source: 'agent',
+      },
     ].map(buildAnnotation);
 
     expect(isAnnotationTextInAnnotations(annotation, annotationsToSearchIn)).toBe(true);
@@ -27,8 +39,20 @@ describe('isAnnotationTextInAnnotations', () => {
       source: 'agent',
     });
     const annotationsToSearchIn = [
-      { start: 90, text: 'Bruni', category: 'personnePhysiqueNom', score: 1, source: 'agent' },
-      { start: 96, text: 'Sarkozy', category: 'personnePhysiqueNom', score: 1, source: 'agent' },
+      {
+        start: 90,
+        text: 'Bruni',
+        category: 'personnePhysiqueNom',
+        score: 1,
+        source: 'agent',
+      },
+      {
+        start: 96,
+        text: 'Sarkozy',
+        category: 'personnePhysiqueNom',
+        score: 1,
+        source: 'agent',
+      },
     ].map(buildAnnotation);
 
     expect(isAnnotationTextInAnnotations(annotation, annotationsToSearchIn)).toBe(true);
@@ -43,8 +67,20 @@ describe('isAnnotationTextInAnnotations', () => {
       source: 'agent',
     });
     const annotationsToSearchIn = [
-      { start: 90, text: 'Harry', category: 'personnePhysiqueNom', score: 1, source: 'agent' },
-      { start: 150, text: 'Potter', category: 'personnePhysiqueNom', score: 1, source: 'agent' },
+      {
+        start: 90,
+        text: 'Harry',
+        category: 'personnePhysiqueNom',
+        score: 1,
+        source: 'agent',
+      },
+      {
+        start: 150,
+        text: 'Potter',
+        category: 'personnePhysiqueNom',
+        score: 1,
+        source: 'agent',
+      },
     ].map(buildAnnotation);
 
     expect(isAnnotationTextInAnnotations(annotation, annotationsToSearchIn)).toBe(false);

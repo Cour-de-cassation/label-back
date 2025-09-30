@@ -2,7 +2,6 @@ import { documentModule, documentType } from '@src/core';
 import { buildDocumentRepository } from '../../repository';
 import { fetchPublishableDocuments } from './fetchPublishableDocuments';
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 describe('fetchPublishableDocuments', () => {
   const documentRepository = buildDocumentRepository();
 
@@ -73,12 +72,7 @@ describe('fetchPublishableDocuments', () => {
       route: 'exhaustive' as documentType['route'],
     });
 
-    await documentRepository.insertMany([
-      ...document1,
-      document2,
-      document3,
-      document4,
-    ]);
+    await documentRepository.insertMany([...document1, document2, document3, document4]);
     const publishableDocuments = await fetchPublishableDocuments();
 
     // Check if the expected documents are included in the result

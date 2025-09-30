@@ -85,9 +85,7 @@ function buildNlpApi(nlpApiBaseUrl: string): nlpApiType {
               operationName: 'callNlpNerEndpoint',
               msg: `${error.response.status} ${error.response.statusText}`,
             });
-            throw new Error(
-              `${error.response.status} ${error.response.statusText}`,
-            );
+            throw new Error(`${error.response.status} ${error.response.statusText}`);
           }
           logger.error({
             operationName: 'callNlpNerEndpoint',
@@ -120,9 +118,7 @@ function buildNlpApi(nlpApiBaseUrl: string): nlpApiType {
               operationName: 'callNlpLossEndpoint',
               msg: `${error.response.status} ${error.response.statusText}`,
             });
-            throw new Error(
-              `${error.response.status} ${error.response.statusText}`,
-            );
+            throw new Error(`${error.response.status} ${error.response.statusText}`);
           }
           logger.error({
             operationName: 'callNlpLossEndpoint',

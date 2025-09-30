@@ -1,9 +1,4 @@
-import {
-  buildAnonymizer,
-  documentModule,
-  documentType,
-  settingsModule,
-} from '@src/core';
+import { buildAnonymizer, documentModule, documentType, settingsModule } from '@src/core';
 import { settingsLoader } from '../../../../lib/settingsLoader';
 import { treatmentService } from '../../../treatment';
 import { buildDocumentRepository } from '../../repository';
@@ -14,9 +9,7 @@ async function fetchAnonymizedDocumentText(documentId: documentType['_id']) {
   const documentRepository = buildDocumentRepository();
   const document = await documentRepository.findById(documentId);
 
-  const annotations = await treatmentService.fetchAnnotationsOfDocument(
-    documentId,
-  );
+  const annotations = await treatmentService.fetchAnnotationsOfDocument(documentId);
   const settings = settingsLoader.getSettings();
   const settingsForDocument = settingsModule.lib.computeFilteredSettings(
     settings,

@@ -19,8 +19,7 @@ async function listAllCaches() {
     logger.log({
       operationName: 'listAllCaches',
       msg: `${index + 1} | ${cache['key']} | ${
-        cache['updateDate'] &&
-        timeOperator.convertTimestampToReadableDate(cache['updateDate'])
+        cache['updateDate'] && timeOperator.convertTimestampToReadableDate(cache['updateDate'])
       } | ${cache['content']}`,
     });
   }

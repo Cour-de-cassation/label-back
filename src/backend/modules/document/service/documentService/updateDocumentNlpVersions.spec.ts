@@ -26,10 +26,7 @@ describe('updateDocumentNlpVersions', () => {
       },
     };
 
-    const updatedDocument = await updateDocumentNlpVersions(
-      document._id,
-      nlpVersionsMock,
-    );
+    const updatedDocument = await updateDocumentNlpVersions(document._id, nlpVersionsMock);
 
     expect(updatedDocument).toEqual(nlpVersionsMock);
   });

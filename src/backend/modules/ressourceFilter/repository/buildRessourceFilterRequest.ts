@@ -14,9 +14,7 @@ type ressourceFilterRequestType = {
   'treatmentsSummary.userId'?: ressourceFilterType['userId'];
 };
 
-function buildRessourceFilterRequest(
-  ressourceFilter: ressourceFilterType,
-): ressourceFilterRequestType {
+function buildRessourceFilterRequest(ressourceFilter: ressourceFilterType): ressourceFilterRequestType {
   const ressourceFilterRequest = {} as ressourceFilterRequestType;
 
   if (ressourceFilter.mustHaveSubAnnotations) {
@@ -28,9 +26,7 @@ function buildRessourceFilterRequest(
   }
 
   if (ressourceFilter.publicationCategory) {
-    ressourceFilterRequest.publicationCategory = [
-      ressourceFilter.publicationCategory,
-    ];
+    ressourceFilterRequest.publicationCategory = [ressourceFilter.publicationCategory];
   }
 
   if (ressourceFilter.startDate) {

@@ -78,10 +78,7 @@ const document = documentModule.generator.generate({
 describe('nlpMapper', () => {
   describe('mapNlpAnnotationsToAnnotations', () => {
     it('should convert the nlp annotations into our annotations', () => {
-      const annotations = nlpMapper.mapNlpAnnotationsToAnnotations(
-        nlpAnnotations,
-        document,
-      );
+      const annotations = nlpMapper.mapNlpAnnotationsToAnnotations(nlpAnnotations, document);
 
       expect(annotations[0]).toEqual({
         category: 'LABEL1',
@@ -110,9 +107,7 @@ describe('nlpMapper', () => {
   });
   describe('mapNlpAdditionalTerms', () => {
     it('should return mapped additional terms', () => {
-      const additionalTerms = nlpMapper.mapNlpAdditionalTerms(
-        nlpAnnotationsWithAdditionalTerms,
-      );
+      const additionalTerms = nlpMapper.mapNlpAdditionalTerms(nlpAnnotationsWithAdditionalTerms);
 
       expect(additionalTerms).toEqual({
         additionalTermsToAnnotate: [],

@@ -1,9 +1,4 @@
-import {
-  annotationType,
-  documentType,
-  idType,
-  settingsType,
-} from '@src/core';
+import { annotationType, documentType, idType, settingsType } from '@src/core';
 import { Deprecated } from '@src/core';
 
 export type { annotatorConfigType };
@@ -23,8 +18,5 @@ type annotatorConfigType = {
     additionalTermsParsingFailed?: boolean;
     version: documentType['nlpVersions'];
   }>;
-  fetchLossOfDocument: (
-    document: documentType,
-    treatments: Deprecated.LabelTreatment[],
-  ) => Promise<number>;
+  fetchLossOfDocument: (document: documentType, treatments: Deprecated.LabelTreatment[]) => Promise<number>;
 };

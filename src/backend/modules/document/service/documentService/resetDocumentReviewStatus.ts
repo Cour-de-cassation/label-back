@@ -11,11 +11,7 @@ async function resetDocumentReviewStatus(_id: documentType['_id']) {
   });
 
   if (!updatedDocument) {
-    throw new Error(
-      `The document ${idModule.lib.convertToString(
-        _id,
-      )} was not found in the document collection`,
-    );
+    throw new Error(`The document ${idModule.lib.convertToString(_id)} was not found in the document collection`);
   }
 
   return updatedDocument;

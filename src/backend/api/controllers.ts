@@ -1,9 +1,4 @@
-import {
-  apiSchema,
-  documentType,
-  idModule,
-  replacementTermType,
-} from '@src/core';
+import { apiSchema, documentType, idModule, replacementTermType } from '@src/core';
 import { settingsLoader } from '../lib/settingsLoader';
 import { assignationService } from '../modules/assignation';
 import { cacheService } from '../modules/cache';
@@ -28,10 +23,7 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
         return statisticService.fetchAggregatedStatisticsAccordingToFilter(
           {
             ...ressourceFilter,
-            userId:
-              ressourceFilter.userId !== undefined
-                ? idModule.lib.buildId(ressourceFilter.userId)
-                : undefined,
+            userId: ressourceFilter.userId !== undefined ? idModule.lib.buildId(ressourceFilter.userId) : undefined,
           },
           settings,
         );
@@ -48,31 +40,23 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
     annotationsDiffDetails: buildAuthenticatedController({
       permissions: ['admin', 'scrutator'],
       controllerWithUser: async (_, { args: { documentId } }) =>
-        treatmentService.fetchAnnotationsDiffDetailsForDocument(
-          idModule.lib.buildId(documentId),
-        ),
+        treatmentService.fetchAnnotationsDiffDetailsForDocument(idModule.lib.buildId(documentId)),
     }),
 
     annotations: buildAuthenticatedController({
       permissions: ['admin', 'annotator', 'scrutator'],
       controllerWithUser: async (_, { args: { documentId } }) =>
-        treatmentService.fetchAnnotationsOfDocument(
-          idModule.lib.buildId(documentId),
-        ),
+        treatmentService.fetchAnnotationsOfDocument(idModule.lib.buildId(documentId)),
     }),
 
     anonymizedDocumentText({ args: { documentId } }) {
-      return documentService.fetchAnonymizedDocumentText(
-        idModule.lib.buildId(documentId),
-      );
+      return documentService.fetchAnonymizedDocumentText(idModule.lib.buildId(documentId));
     },
 
     availableStatisticFilters: buildAuthenticatedController({
       permissions: ['admin', 'scrutator'],
       controllerWithUser: async () => {
-        const cache = (
-          await cacheService.fetchAllByKey('availableStatisticFilters')
-        )[0];
+        const cache = (await cacheService.fetchAllByKey('availableStatisticFilters'))[0];
         if (cache) {
           return JSON.parse(cache.content) as {
             publicationCategories: string[];
@@ -101,10 +85,9 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
       permissions: ['admin', 'scrutator'],
       controllerWithUser: async (user, { args: { documentId } }) => {
         if (user.role === 'admin') {
-          await documentService.updateDocumentReviewStatus(
-            idModule.lib.buildId(documentId),
-            { viewerNameToAdd: user.name },
-          );
+          await documentService.updateDocumentReviewStatus(idModule.lib.buildId(documentId), {
+            viewerNameToAdd: user.name,
+          });
         }
         return documentService.fetchDocument(idModule.lib.buildId(documentId));
       },
@@ -113,19 +96,14 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
     documentStatus: buildAuthenticatedController({
       permissions: ['admin', 'annotator', 'publicator'],
       controllerWithUser: async (_, { args: { documentId } }) => {
-        return (
-          await documentService.fetchDocument(idModule.lib.buildId(documentId))
-        ).status;
+        return (await documentService.fetchDocument(idModule.lib.buildId(documentId))).status;
       },
     }),
 
     documentsForUser: buildAuthenticatedController({
       permissions: ['admin', 'annotator'],
       controllerWithUser: async (user, { args: { documentsMaxCount } }) =>
-        documentService.fetchDocumentsForUser(
-          idModule.lib.buildId(user._id),
-          documentsMaxCount,
-        ),
+        documentService.fetchDocumentsForUser(idModule.lib.buildId(user._id), documentsMaxCount),
     }),
 
     async health() {
@@ -135,8 +113,7 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
 
     problemReportsWithDetails: buildAuthenticatedController({
       permissions: ['admin', 'scrutator'],
-      controllerWithUser: async () =>
-        problemReportService.fetchProblemReportsWithDetails(),
+      controllerWithUser: async () => problemReportService.fetchProblemReportsWithDetails(),
     }),
 
     settings: buildAuthenticatedController({
@@ -163,8 +140,7 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
 
     publishableDocuments: buildAuthenticatedController({
       permissions: ['admin', 'publicator'],
-      controllerWithUser: async () =>
-        documentService.fetchPublishableDocuments(),
+      controllerWithUser: async () => documentService.fetchPublishableDocuments(),
     }),
 
     toBeConfirmedDocuments: buildAuthenticatedController({
@@ -199,8 +175,7 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
 
     preAssignations: buildAuthenticatedController({
       permissions: ['admin', 'scrutator'],
-      controllerWithUser: async () =>
-        preAssignationService.fetchAllPreAssignation(),
+      controllerWithUser: async () => preAssignationService.fetchAllPreAssignation(),
     }),
   },
 
@@ -216,10 +191,7 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
           documentId: idModule.lib.buildId(documentId),
           userId: idModule.lib.buildId(userId),
         });
-        return documentService.updateDocumentStatus(
-          idModule.lib.buildId(documentId),
-          'saved',
-        );
+        return documentService.updateDocumentStatus(idModule.lib.buildId(documentId), 'saved');
       },
     }),
 
@@ -237,39 +209,25 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
     deleteProblemReport: buildAuthenticatedController({
       permissions: ['admin'],
       controllerWithUser: async (_, { args: { problemReportId } }) =>
-        problemReportService.deleteProblemReportById(
-          idModule.lib.buildId(problemReportId),
-        ),
+        problemReportService.deleteProblemReportById(idModule.lib.buildId(problemReportId)),
     }),
     deletePreAssignation: buildAuthenticatedController({
       permissions: ['admin'],
       controllerWithUser: async (_, { args: { preAssignationId } }) =>
-        preAssignationService.deletePreAssignation(
-          idModule.lib.buildId(preAssignationId),
-        ),
+        preAssignationService.deletePreAssignation(idModule.lib.buildId(preAssignationId)),
     }),
     deleteHumanTreatmentsForDocument: buildAuthenticatedController({
       permissions: ['admin'],
       controllerWithUser: async (_, { args: { documentId } }) => {
-        await assignationService.deleteAssignationsByDocumentId(
-          idModule.lib.buildId(documentId),
-        );
-        await documentService.updateDocumentStatus(
-          idModule.lib.buildId(documentId),
-          'free',
-        );
-        await documentService.resetDocumentReviewStatus(
-          idModule.lib.buildId(documentId),
-        );
+        await assignationService.deleteAssignationsByDocumentId(idModule.lib.buildId(documentId));
+        await documentService.updateDocumentStatus(idModule.lib.buildId(documentId), 'free');
+        await documentService.resetDocumentReviewStatus(idModule.lib.buildId(documentId));
       },
     }),
 
     problemReport: buildAuthenticatedController({
       permissions: ['admin', 'annotator', 'scrutator'],
-      controllerWithUser: async (
-        user,
-        { args: { documentId, problemText, problemType } },
-      ) => {
+      controllerWithUser: async (user, { args: { documentId, problemText, problemType } }) => {
         await problemReportService.createProblemReport({
           userId: idModule.lib.buildId(user._id),
           documentId: idModule.lib.buildId(documentId),
@@ -282,15 +240,9 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
     deleteDocument: buildAuthenticatedController({
       permissions: ['admin'],
       controllerWithUser: async (_, { args: { documentId } }) => {
-        const documentToDelete = await documentService.fetchDocument(
-          idModule.lib.buildId(documentId),
-        );
+        const documentToDelete = await documentService.fetchDocument(idModule.lib.buildId(documentId));
         const settings = settingsLoader.getSettings();
-        await statisticService.saveStatisticsOfDocument(
-          documentToDelete,
-          settings,
-          'deleted from the interface',
-        );
+        await statisticService.saveStatisticsOfDocument(documentToDelete, settings, 'deleted from the interface');
         await documentService.deleteDocument(idModule.lib.buildId(documentId));
       },
     }),
@@ -298,16 +250,9 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
     resetTreatmentLastUpdateDate: buildAuthenticatedController({
       permissions: ['admin', 'annotator'],
       controllerWithUser: async (user, { args: { assignationId } }) => {
-        const assignation = await assignationService.fetchAssignation(
-          idModule.lib.buildId(assignationId),
-        );
+        const assignation = await assignationService.fetchAssignation(idModule.lib.buildId(assignationId));
 
-        if (
-          !idModule.lib.equalId(
-            idModule.lib.buildId(user._id),
-            assignation.userId,
-          )
-        ) {
+        if (!idModule.lib.equalId(idModule.lib.buildId(user._id), assignation.userId)) {
           throw new Error(
             `User ${idModule.lib.convertToString(
               user._id,
@@ -315,19 +260,14 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
           );
         }
 
-        return treatmentService.resetTreatmentLastUpdateDate(
-          assignation.treatmentId,
-        );
+        return treatmentService.resetTreatmentLastUpdateDate(assignation.treatmentId);
       },
     }),
 
     updateAssignationDocumentStatus: buildAuthenticatedController({
       permissions: ['admin'],
       controllerWithUser: async (_, { args: { assignationId, status } }) => {
-        return assignationService.updateAssignationDocumentStatus(
-          idModule.lib.buildId(assignationId),
-          status,
-        );
+        return assignationService.updateAssignationDocumentStatus(idModule.lib.buildId(assignationId), status);
       },
     }),
 
@@ -341,62 +281,38 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
           });
         }
 
-        return documentService.updateDocumentStatus(
-          idModule.lib.buildId(documentId),
-          status,
-        );
+        return documentService.updateDocumentStatus(idModule.lib.buildId(documentId), status);
       },
     }),
 
     updateDocumentRoute: buildAuthenticatedController({
       permissions: ['admin'],
       controllerWithUser: async (user, { args: { documentId, route } }) => {
-        return documentService.updateDocumentRoute(
-          idModule.lib.buildId(documentId),
-          route,
-        );
+        return documentService.updateDocumentRoute(idModule.lib.buildId(documentId), route);
       },
     }),
 
     updatePublishableDocumentStatus: buildAuthenticatedController({
       permissions: ['admin', 'publicator'],
       controllerWithUser: async (_, { args: { documentId, status } }) => {
-        await documentService.assertDocumentIsPublishable(
-          idModule.lib.buildId(documentId),
-        );
-        return documentService.updateDocumentStatus(
-          idModule.lib.buildId(documentId),
-          status,
-        );
+        await documentService.assertDocumentIsPublishable(idModule.lib.buildId(documentId));
+        return documentService.updateDocumentStatus(idModule.lib.buildId(documentId), status);
       },
     }),
 
     updateProblemReportHasBeenRead: buildAuthenticatedController({
       permissions: ['admin'],
-      controllerWithUser: async (
-        _,
-        { args: { problemReportId, hasBeenRead } },
-      ) => {
-        await problemReportService.updateHasBeenRead(
-          idModule.lib.buildId(problemReportId),
-          hasBeenRead,
-        );
+      controllerWithUser: async (_, { args: { problemReportId, hasBeenRead } }) => {
+        await problemReportService.updateHasBeenRead(idModule.lib.buildId(problemReportId), hasBeenRead);
       },
     }),
 
     updateTreatmentDuration: buildAuthenticatedController({
       permissions: ['admin', 'annotator'],
       controllerWithUser: async (user, { args: { assignationId } }) => {
-        const assignation = await assignationService.fetchAssignation(
-          idModule.lib.buildId(assignationId),
-        );
+        const assignation = await assignationService.fetchAssignation(idModule.lib.buildId(assignationId));
 
-        if (
-          !idModule.lib.equalId(
-            idModule.lib.buildId(user._id),
-            assignation.userId,
-          )
-        ) {
+        if (!idModule.lib.equalId(idModule.lib.buildId(user._id), assignation.userId)) {
           throw new Error(
             `User ${idModule.lib.convertToString(
               user._id,
@@ -404,27 +320,15 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
           );
         }
 
-        return treatmentService.updateTreatmentDuration(
-          assignation.treatmentId,
-        );
+        return treatmentService.updateTreatmentDuration(assignation.treatmentId);
       },
     }),
 
     updateTreatmentForAssignationId: buildAuthenticatedController({
       permissions: ['admin', 'annotator'],
-      controllerWithUser: async (
-        user,
-        { args: { annotationsDiff, assignationId } },
-      ) => {
-        const assignation = await assignationService.fetchAssignation(
-          idModule.lib.buildId(assignationId),
-        );
-        if (
-          !idModule.lib.equalId(
-            idModule.lib.buildId(user._id),
-            assignation.userId,
-          )
-        ) {
+      controllerWithUser: async (user, { args: { annotationsDiff, assignationId } }) => {
+        const assignation = await assignationService.fetchAssignation(idModule.lib.buildId(assignationId));
+        if (!idModule.lib.equalId(idModule.lib.buildId(user._id), assignation.userId)) {
           throw new Error(
             `User ${idModule.lib.convertToString(
               user._id,
@@ -443,10 +347,7 @@ const controllers: controllersFromSchemaType<typeof apiSchema> = {
 
     updateTreatmentForDocumentId: buildAuthenticatedController({
       permissions: ['admin'],
-      controllerWithUser: async (
-        user,
-        { args: { annotationsDiff, documentId } },
-      ) => {
+      controllerWithUser: async (user, { args: { annotationsDiff, documentId } }) => {
         const settings = settingsLoader.getSettings();
         return treatmentService.updateTreatmentForDocumentIdAndUserId(
           {

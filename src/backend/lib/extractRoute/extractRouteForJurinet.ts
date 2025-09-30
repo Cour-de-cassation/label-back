@@ -42,21 +42,13 @@ function extractRouteForJurinet(document: documentType): documentType['route'] {
     return 'automatic';
   }
   if (
-    [
-      'Déchéance',
-      'Déchéance par ordonnance',
-      'Désistement',
-      'Désistement par arrêt',
-    ].some((text) => stringComparator.compareNormalizedStrings(text, solution))
+    ['Déchéance', 'Déchéance par ordonnance', 'Désistement', 'Désistement par arrêt'].some((text) =>
+      stringComparator.compareNormalizedStrings(text, solution),
+    )
   ) {
     return 'automatic';
   }
-  if (
-    stringComparator.compareNormalizedStrings(
-      'Rejet non spécialement motivé',
-      solution,
-    )
-  ) {
+  if (stringComparator.compareNormalizedStrings('Rejet non spécialement motivé', solution)) {
     return 'automatic';
   }
 

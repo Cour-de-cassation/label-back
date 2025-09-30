@@ -29,20 +29,10 @@ async function createTreatment(
 ): Promise<treatmentType['_id']> {
   const treatmentRepository = buildTreatmentRepository();
 
-  const previousTreatments = await treatmentRepository.findAllByDocumentId(
-    documentId,
-  );
-  const sortedTreatments = treatmentModule.lib.sortInConsistentOrder(
-    previousTreatments,
-  );
-  const order =
-    sortedTreatments.length > 0
-      ? sortedTreatments[sortedTreatments.length - 1].order + 1
-      : 0;
-  const annotationsDiff = annotationsDiffModule.lib.computeAnnotationsDiff(
-    previousAnnotations,
-    nextAnnotations,
-  );
+  const previousTreatments = await treatmentRepository.findAllByDocumentId(documentId);
+  const sortedTreatments = treatmentModule.lib.sortInConsistentOrder(previousTreatments);
+  const order = sortedTreatments.length > 0 ? sortedTreatments[sortedTreatments.length - 1].order + 1 : 0;
+  const annotationsDiff = annotationsDiffModule.lib.computeAnnotationsDiff(previousAnnotations, nextAnnotations);
 
   const document = await documentService.fetchDocument(documentId);
 
@@ -65,9 +55,7 @@ async function createTreatment(
     settingsForDocument,
   );
 
-  const actionToPerform = `create treatment "${source}" for documentId ${idModule.lib.convertToString(
-    documentId,
-  )}`;
+  const actionToPerform = `create treatment "${source}" for documentId ${idModule.lib.convertToString(documentId)}`;
 
   annotationsDiffModule.lib.assertAnnotationsDiffAreConsistent(
     annotationsDiff,
@@ -79,10 +67,7 @@ async function createTreatment(
     actionToPerform,
   );
 
-  treatmentModule.lib.assertTreatmentsSourcesFollowRightOrder([
-    ...sortedTreatments,
-    treatment,
-  ]);
+  treatmentModule.lib.assertTreatmentsSourcesFollowRightOrder([...sortedTreatments, treatment]);
 
   await treatmentRepository.insert(treatment);
 

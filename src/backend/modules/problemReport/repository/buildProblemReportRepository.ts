@@ -4,10 +4,7 @@ import { customProblemReportRepositoryType } from './customProblemReportReposito
 
 export { buildProblemReportRepository };
 
-const buildProblemReportRepository = buildRepositoryBuilder<
-  problemReportType,
-  customProblemReportRepositoryType
->({
+const buildProblemReportRepository = buildRepositoryBuilder<problemReportType, customProblemReportRepositoryType>({
   collectionName: 'problemReports',
   indexes: [],
   buildCustomRepository: (collection) => ({

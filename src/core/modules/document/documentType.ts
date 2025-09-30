@@ -176,7 +176,10 @@ const zoning = {
         visa: {
           kind: 'or',
           content: [
-            { kind: 'array', content: { kind: 'primitive', content: 'string' } },
+            {
+              kind: 'array',
+              content: { kind: 'primitive', content: 'string' },
+            },
             { kind: 'primitive', content: 'undefined' },
           ],
         },
@@ -190,7 +193,10 @@ const zoning = {
         is_public_text: {
           kind: 'or',
           content: [
-            { kind: 'array', content: { kind: 'primitive', content: 'string' } },
+            {
+              kind: 'array',
+              content: { kind: 'primitive', content: 'string' },
+            },
             { kind: 'primitive', content: 'undefined' },
           ],
         },
@@ -237,7 +243,10 @@ const checklistModel = {
           },
         },
       },
-      metadata_text: { kind: 'array', content: { kind: 'primitive', content: 'string' } },
+      metadata_text: {
+        kind: 'array',
+        content: { kind: 'primitive', content: 'string' },
+      },
     },
   },
 } as const;
@@ -261,8 +270,14 @@ const documentModelCommonFields = {
           {
             kind: 'object',
             content: {
-              additionalTermsToAnnotate: { kind: 'array', content: { kind: 'primitive', content: 'string' } },
-              additionalTermsToUnAnnotate: { kind: 'array', content: { kind: 'primitive', content: 'string' } },
+              additionalTermsToAnnotate: {
+                kind: 'array',
+                content: { kind: 'primitive', content: 'string' },
+              },
+              additionalTermsToUnAnnotate: {
+                kind: 'array',
+                content: { kind: 'primitive', content: 'string' },
+              },
             },
           },
           { kind: 'primitive', content: 'undefined' },
@@ -275,8 +290,14 @@ const documentModelCommonFields = {
           { kind: 'primitive', content: 'undefined' },
         ],
       },
-      boundDecisionDocumentNumbers: { kind: 'array', content: { kind: 'primitive', content: 'number' } },
-      categoriesToOmit: { kind: 'array', content: { kind: 'primitive', content: 'string' } },
+      boundDecisionDocumentNumbers: {
+        kind: 'array',
+        content: { kind: 'primitive', content: 'number' },
+      },
+      categoriesToOmit: {
+        kind: 'array',
+        content: { kind: 'primitive', content: 'string' },
+      },
       chamberName: { kind: 'primitive', content: 'string' },
       civilCaseCode: { kind: 'primitive', content: 'string' },
       civilMatterCode: { kind: 'primitive', content: 'string' },
@@ -411,11 +432,17 @@ const documentModelCommonFields = {
       { kind: 'primitive', content: 'undefined' },
     ],
   },
-  publicationCategory: { kind: 'array', content: { kind: 'primitive', content: 'string' } },
+  publicationCategory: {
+    kind: 'array',
+    content: { kind: 'primitive', content: 'string' },
+  },
   reviewStatus: {
     kind: 'object',
     content: {
-      viewerNames: { kind: 'array', content: { kind: 'primitive', content: 'string' } },
+      viewerNames: {
+        kind: 'array',
+        content: { kind: 'primitive', content: 'string' },
+      },
       hasBeenAmended: { kind: 'primitive', content: 'boolean' },
     },
   },

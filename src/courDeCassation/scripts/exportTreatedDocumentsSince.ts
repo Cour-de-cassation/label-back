@@ -2,7 +2,6 @@ import yargs from 'yargs';
 import { buildBackend } from '@src/backend';
 import { buildSderExporter } from '../exporter';
 import { parametersHandler } from '../lib/parametersHandler';
-
 (async () => {
   const { settings } = await parametersHandler.getParameters();
   const { days } = parseArgv();
@@ -24,7 +23,8 @@ function parseArgv() {
       },
     })
     .help()
-    .alias('help', 'h').parseSync();
+    .alias('help', 'h')
+    .parseSync();
 
   return { days: argv.days as number };
 }

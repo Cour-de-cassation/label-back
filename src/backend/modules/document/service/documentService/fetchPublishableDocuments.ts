@@ -8,27 +8,11 @@ async function fetchPublishableDocuments() {
   const allDocuments = await documentRepository.findAllByRoutesOrPublicationCategoryLettersProjection(
     ['confirmation'],
     documentModule.lib.publicationHandler.getPublishedPublicationCategory(),
-    [
-      '_id',
-      'creationDate',
-      'decisionMetadata',
-      'documentNumber',
-      'publicationCategory',
-      'route',
-      'status',
-    ],
+    ['_id', 'creationDate', 'decisionMetadata', 'documentNumber', 'publicationCategory', 'route', 'status'],
   );
 
   return allDocuments.map(
-    ({
-      _id,
-      creationDate,
-      decisionMetadata,
-      documentNumber,
-      publicationCategory,
-      route,
-      status,
-    }) => ({
+    ({ _id, creationDate, decisionMetadata, documentNumber, publicationCategory, route, status }) => ({
       _id,
       appealNumber: decisionMetadata.appealNumber,
       chamberName: decisionMetadata.chamberName,

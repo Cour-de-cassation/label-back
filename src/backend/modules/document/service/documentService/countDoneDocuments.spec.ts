@@ -49,29 +49,19 @@ describe('countDoneDocuments', () => {
       userId: user._id,
     });
     await Promise.all(
-      [
-        freeDocument,
-        pendingDocument,
-        savedDocument,
-        doneDocument,
-        toBePublishedDocument,
-        lockedDocument,
-      ].map(documentRepository.insert),
+      [freeDocument, pendingDocument, savedDocument, doneDocument, toBePublishedDocument, lockedDocument].map(
+        documentRepository.insert,
+      ),
     );
     await Promise.all(
-      [
-        pendingDocumentAssignation,
-        savedDocumentAssignation,
-        doneDocumentAssignation,
-        lockedDocumentAssignation,
-      ].map(assignationRepository.insert),
+      [pendingDocumentAssignation, savedDocumentAssignation, doneDocumentAssignation, lockedDocumentAssignation].map(
+        assignationRepository.insert,
+      ),
     );
     await userRepository.insert(user);
 
     const doneDocumentsCount = await countDoneDocuments();
 
-    expect(doneDocumentsCount).toEqual(
-      [doneDocument, toBePublishedDocument].length,
-    );
+    expect(doneDocumentsCount).toEqual([doneDocument, toBePublishedDocument].length);
   });
 });

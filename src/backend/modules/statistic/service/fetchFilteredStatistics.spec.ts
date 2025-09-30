@@ -1,9 +1,4 @@
-import {
-  idModule,
-  ressourceFilterModule,
-  statisticModule,
-  settingsModule,
-} from '@src/core';
+import { idModule, ressourceFilterModule, statisticModule, settingsModule } from '@src/core';
 import { buildStatisticRepository } from '../repository';
 import { fetchFilteredStatistics } from './fetchFilteredStatistics';
 
@@ -50,10 +45,7 @@ describe('fetchFilteredStatistics', () => {
       ].map(statisticModule.generator.generate);
       await Promise.all(statistics.map(statisticRepository.insert));
 
-      const aggregatedStatistics = await fetchFilteredStatistics(
-        ressourceFilter,
-        settings,
-      );
+      const aggregatedStatistics = await fetchFilteredStatistics(ressourceFilter, settings);
 
       expect(aggregatedStatistics.length).toEqual(1);
       expect(aggregatedStatistics[0]._id).toEqual(id1);

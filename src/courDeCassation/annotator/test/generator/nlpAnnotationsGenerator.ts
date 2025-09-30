@@ -7,9 +7,7 @@ export { nlpAnnotationsGenerator };
 const nlpAnnotationsGenerator: generatorType<nlpResponseType> = {
   generate: ({ entities, checklist, versions } = {}) => ({
     entities: entities ? entities : generateRandomNlpAnnotations(),
-    checklist: checklist
-      ? checklist
-      : documentModule.checklistGenerator.generate(2),
+    checklist: checklist ? checklist : documentModule.checklistGenerator.generate(2),
     versions: versions ? versions : generateRandomNlpVersion(),
   }),
 };

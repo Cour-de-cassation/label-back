@@ -10,40 +10,21 @@ async function fetchUntreatedDocuments() {
   const documentRepository = buildDocumentRepository();
   const untreatedDocuments = await documentRepository.findAllByStatusProjection(
     ['free', 'pending', 'saved', 'locked'],
-    [
-      '_id',
-      'creationDate',
-      'decisionMetadata',
-      'documentNumber',
-      'publicationCategory',
-      'source',
-      'route',
-      'status',
-    ],
+    ['_id', 'creationDate', 'decisionMetadata', 'documentNumber', 'publicationCategory', 'source', 'route', 'status'],
   );
   const assignedDocumentIds = untreatedDocuments
-    .filter((document) =>
-      ['pending', 'saved', 'locked'].includes(document.status),
-    )
+    .filter((document) => ['pending', 'saved', 'locked'].includes(document.status))
     .map((document) => document._id);
-  const assignationsByDocumentId = await assignationService.fetchAssignationsByDocumentIds(
-    assignedDocumentIds,
-    { assertEveryDocumentIsAssigned: false },
-  );
+  const assignationsByDocumentId = await assignationService.fetchAssignationsByDocumentIds(assignedDocumentIds, {
+    assertEveryDocumentIsAssigned: false,
+  });
   const allAssignations = flatten(Object.values(assignationsByDocumentId));
-  const usersByAssignationId = await userService.fetchUsersByAssignations(
-    allAssignations,
-  );
+  const usersByAssignationId = await userService.fetchUsersByAssignations(allAssignations);
   return untreatedDocuments.map((untreatedDocument) => {
-    const assignationsForDocument =
-      assignationsByDocumentId[
-        idModule.lib.convertToString(untreatedDocument._id)
-      ];
+    const assignationsForDocument = assignationsByDocumentId[idModule.lib.convertToString(untreatedDocument._id)];
     const userNames = assignationsForDocument
       ? assignationsForDocument.map(
-          (assignation) =>
-            usersByAssignationId[idModule.lib.convertToString(assignation._id)]
-              .name,
+          (assignation) => usersByAssignationId[idModule.lib.convertToString(assignation._id)].name,
         )
       : [];
 

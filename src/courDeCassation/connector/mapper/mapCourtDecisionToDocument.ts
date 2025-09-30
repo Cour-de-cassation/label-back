@@ -1,9 +1,4 @@
-import {
-  documentType,
-  documentModule,
-  idModule,
-  timeOperator,
-} from '@src/core';
+import { documentType, documentModule, idModule, timeOperator } from '@src/core';
 import {
   extractReadableChamberName,
   extractReadableJurisdictionName,
@@ -14,7 +9,6 @@ import { Deprecated } from '@src/core';
 
 export { mapCourtDecisionToDocument };
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 async function mapCourtDecisionToDocument(
   sderCourtDecision: Deprecated.DecisionDTO,
   importer: documentType['importer'],
@@ -23,18 +17,14 @@ async function mapCourtDecisionToDocument(
     chamberName: sderCourtDecision.chamberName,
     chamberId: sderCourtDecision.chamberId,
   });
-  const readableJurisdictionName = extractReadableJurisdictionName(
-    sderCourtDecision.jurisdictionName,
-  );
+  const readableJurisdictionName = extractReadableJurisdictionName(sderCourtDecision.jurisdictionName);
   const creationDate = convertToValidDate(sderCourtDecision.dateCreation);
   const decisionDate = convertToValidDate(sderCourtDecision.dateDecision);
   const source = sderCourtDecision.sourceName;
 
   const registerNumber = sderCourtDecision.registerNumber;
   const appeal = sderCourtDecision.appeals[0];
-  const numeroRoleGeneral = isDecisionTJ(sderCourtDecision)
-    ? sderCourtDecision.numeroRoleGeneral
-    : '';
+  const numeroRoleGeneral = isDecisionTJ(sderCourtDecision) ? sderCourtDecision.numeroRoleGeneral : '';
   const appealNumber = extractAppealRegisterRoleGeneralNumber(
     sderCourtDecision.originalText,
     source,
@@ -44,23 +34,17 @@ async function mapCourtDecisionToDocument(
     numeroRoleGeneral,
   );
 
-  const publicationCategory = computePublicationCategory(
-    sderCourtDecision.pubCategory,
-    sderCourtDecision.publication,
-  );
+  const publicationCategory = computePublicationCategory(sderCourtDecision.pubCategory, sderCourtDecision.publication);
 
   const categoriesToOmit = categoriesMapper.mapSderCategoriesToLabelCategories(
     sderCourtDecision.occultation?.categoriesToOmit,
   );
 
-  const solution = sderCourtDecision.solution
-    ? sderCourtDecision.solution.trim()
-    : '';
+  const solution = sderCourtDecision.solution ? sderCourtDecision.solution.trim() : '';
 
   const session = sderCourtDecision.formation?.trim() || '';
 
-  const additionalTermsToAnnotate =
-    sderCourtDecision.occultation?.additionalTerms || '';
+  const additionalTermsToAnnotate = sderCourtDecision.occultation?.additionalTerms || '';
   const civilCaseCode = sderCourtDecision.natureAffaireCivil?.trim() || '';
   const civilMatterCode = sderCourtDecision.codeMatiereCivil?.trim() || '';
   const criminalCaseCode = sderCourtDecision.natureAffairePenal?.trim() || '';
@@ -98,17 +82,10 @@ async function mapCourtDecisionToDocument(
 
   let expose_du_litige = undefined;
   if (sderCourtDecision.originalTextZoning?.zones?.['expose du litige']) {
-    if (
-      Array.isArray(
-        sderCourtDecision.originalTextZoning.zones['expose du litige'],
-      )
-    ) {
-      expose_du_litige =
-        sderCourtDecision.originalTextZoning.zones['expose du litige'];
+    if (Array.isArray(sderCourtDecision.originalTextZoning.zones['expose du litige'])) {
+      expose_du_litige = sderCourtDecision.originalTextZoning.zones['expose du litige'];
     } else {
-      expose_du_litige = [
-        sderCourtDecision.originalTextZoning.zones['expose du litige'],
-      ];
+      expose_du_litige = [sderCourtDecision.originalTextZoning.zones['expose du litige']];
     }
   }
 
@@ -122,40 +99,22 @@ async function mapCourtDecisionToDocument(
   }
 
   const zoningZones = {
-    introduction:
-      sderCourtDecision.originalTextZoning?.zones?.introduction || undefined,
+    introduction: sderCourtDecision.originalTextZoning?.zones?.introduction || undefined,
     moyens: moyens,
     'expose du litige': expose_du_litige,
     motivations: motivations,
-    dispositif:
-      sderCourtDecision.originalTextZoning?.zones?.dispositif || undefined,
-    'moyens annexes':
-      sderCourtDecision.originalTextZoning?.zones?.['moyens annexes'] ||
-      undefined,
+    dispositif: sderCourtDecision.originalTextZoning?.zones?.dispositif || undefined,
+    'moyens annexes': sderCourtDecision.originalTextZoning?.zones?.['moyens annexes'] || undefined,
   };
 
   const introduction_subzonage = {
-    n_arret:
-      sderCourtDecision.originalTextZoning?.introduction_subzonage?.n_arret ||
-      undefined,
-    formation:
-      sderCourtDecision.originalTextZoning?.introduction_subzonage?.formation ||
-      undefined,
-    publication:
-      sderCourtDecision.originalTextZoning?.introduction_subzonage
-        ?.publication || undefined,
-    juridiction:
-      sderCourtDecision.originalTextZoning?.introduction_subzonage
-        ?.juridiction || undefined,
-    chambre:
-      sderCourtDecision.originalTextZoning?.introduction_subzonage?.chambre ||
-      undefined,
-    pourvoi:
-      sderCourtDecision.originalTextZoning?.introduction_subzonage?.pourvoi ||
-      undefined,
-    composition:
-      sderCourtDecision.originalTextZoning?.introduction_subzonage
-        ?.composition || undefined,
+    n_arret: sderCourtDecision.originalTextZoning?.introduction_subzonage?.n_arret || undefined,
+    formation: sderCourtDecision.originalTextZoning?.introduction_subzonage?.formation || undefined,
+    publication: sderCourtDecision.originalTextZoning?.introduction_subzonage?.publication || undefined,
+    juridiction: sderCourtDecision.originalTextZoning?.introduction_subzonage?.juridiction || undefined,
+    chambre: sderCourtDecision.originalTextZoning?.introduction_subzonage?.chambre || undefined,
+    pourvoi: sderCourtDecision.originalTextZoning?.introduction_subzonage?.pourvoi || undefined,
+    composition: sderCourtDecision.originalTextZoning?.introduction_subzonage?.composition || undefined,
   };
 
   let zoning = undefined;
@@ -165,8 +124,7 @@ async function mapCourtDecisionToDocument(
       introduction_subzonage: introduction_subzonage || undefined,
       visa: sderCourtDecision.originalTextZoning?.visa || undefined,
       is_public: sderCourtDecision.originalTextZoning?.is_public || undefined,
-      is_public_text:
-        sderCourtDecision.originalTextZoning?.is_public_text || undefined,
+      is_public_text: sderCourtDecision.originalTextZoning?.is_public_text || undefined,
       arret_id: sderCourtDecision.originalTextZoning?.arret_id,
     };
   }
@@ -192,8 +150,7 @@ async function mapCourtDecisionToDocument(
       occultationBlock: sderCourtDecision.blocOccultation || undefined,
       session,
       solution,
-      motivationOccultation:
-        sderCourtDecision.occultation.motivationOccultation ?? undefined,
+      motivationOccultation: sderCourtDecision.occultation.motivationOccultation ?? undefined,
       selection: sderCourtDecision.selection ?? undefined,
       sommaire: sderCourtDecision.sommaire ?? '',
     },
@@ -213,11 +170,7 @@ async function mapCourtDecisionToDocument(
   });
 }
 
-function getPrefixedNumber(
-  numberToPrefix: string | undefined,
-  source: string,
-  readableJurisdictionName: string,
-) {
+function getPrefixedNumber(numberToPrefix: string | undefined, source: string, readableJurisdictionName: string) {
   if (numberToPrefix === undefined) {
     return undefined;
   }
@@ -247,11 +200,7 @@ function computeTitleFromParsedCourtDecision({
   NAOCode: string;
   date?: Date;
 }) {
-  const prefixedNumber = getPrefixedNumber(
-    appealNumber,
-    source,
-    readableJurisdictionName,
-  );
+  const prefixedNumber = getPrefixedNumber(appealNumber, source, readableJurisdictionName);
 
   if (source === Deprecated.Sources.TJ) {
     readableJurisdictionName = `TJ de ${readableJurisdictionName}`;
@@ -264,17 +213,13 @@ function computeTitleFromParsedCourtDecision({
   const nomenclatureNumber =
     source === Deprecated.Sources.CC && NAOCode
       ? `NAO ${NAOCode}`
-      : (source === Deprecated.Sources.TJ ||
-          source === Deprecated.Sources.CA) &&
-        NACCode
-      ? `NAC ${NACCode}`
-      : undefined;
+      : (source === Deprecated.Sources.TJ || source === Deprecated.Sources.CA) && NACCode
+        ? `NAC ${NACCode}`
+        : undefined;
 
   const readableNumber = `Décision n°${number}`;
   const readableAppealNumber = prefixedNumber ? prefixedNumber : undefined;
-  const readableDate = date
-    ? timeOperator.convertTimestampToReadableDate(date.getTime())
-    : undefined;
+  const readableDate = date ? timeOperator.convertTimestampToReadableDate(date.getTime()) : undefined;
   const title = [
     readableNumber,
     readableAppealNumber,
@@ -309,12 +254,7 @@ function computePriority(
   importer: documentType['importer'],
   selection: documentType['decisionMetadata']['selection'],
 ): documentType['priority'] {
-  if (
-    documentModule.lib.publicationHandler.mustBePublished(
-      publicationCategory,
-      NACCode,
-    )
-  ) {
+  if (documentModule.lib.publicationHandler.mustBePublished(publicationCategory, NACCode)) {
     return 4;
   }
   if (selection === true) {
@@ -344,8 +284,6 @@ function convertToValidDate(date: string | undefined) {
   return convertedDate;
 }
 
-function isDecisionTJ(
-  decision: Deprecated.DecisionDTO,
-): decision is Deprecated.DecisionTJDTO {
+function isDecisionTJ(decision: Deprecated.DecisionDTO): decision is Deprecated.DecisionTJDTO {
   return decision.sourceName === Deprecated.Sources.TJ;
 }

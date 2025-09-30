@@ -4,23 +4,13 @@ import { buildStatisticRepository } from '../repository';
 
 export { deleteStaticticsBefore };
 
-async function deleteStaticticsBefore({
-  since,
-  unit,
-}: {
-  since: number;
-  unit: 'MONTHS';
-}) {
+async function deleteStaticticsBefore({ since, unit }: { since: number; unit: 'MONTHS' }) {
   const statisticRepository = buildStatisticRepository();
 
   const statisticsExpirationDate = computeExpirationDate();
-  const statisticToDeleteIds = await statisticRepository.findAllIdsBefore(
-    statisticsExpirationDate,
-  );
+  const statisticToDeleteIds = await statisticRepository.findAllIdsBefore(statisticsExpirationDate);
 
-  const { count } = await statisticRepository.deleteManyByIds(
-    statisticToDeleteIds,
-  );
+  const { count } = await statisticRepository.deleteManyByIds(statisticToDeleteIds);
 
   logger.log({
     operationName: 'deleteStaticticsBefore',

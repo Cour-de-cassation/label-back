@@ -3,10 +3,7 @@ import { buildCacheRepository } from '../repository';
 
 export { updateCacheContent };
 
-async function updateCacheContent(
-  key: cacheType['key'],
-  content: cacheType['content'],
-) {
+async function updateCacheContent(key: cacheType['key'], content: cacheType['content']) {
   const cacheRepository = buildCacheRepository();
   const caches = await cacheRepository.findAllByKey(key);
   caches.forEach((cache: cacheType, index: number) => {

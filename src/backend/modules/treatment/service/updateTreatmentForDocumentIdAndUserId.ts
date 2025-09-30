@@ -16,9 +16,10 @@ async function updateTreatmentForDocumentIdAndUserId(
   },
   settings: settingsType,
 ) {
-  const assignation = await assignationService.findOrCreateByDocumentIdAndUserId(
-    { documentId, userId },
-  );
+  const assignation = await assignationService.findOrCreateByDocumentIdAndUserId({
+    documentId,
+    userId,
+  });
 
   return updateTreatment({ annotationsDiff, assignation, settings });
 }

@@ -5,13 +5,9 @@ import { ObjectId } from 'mongodb';
 
 export { fetchDocumentStatistics };
 
-async function fetchDocumentStatistics(
-  documentNumber: statisticType['documentNumber'],
-) {
+async function fetchDocumentStatistics(documentNumber: statisticType['documentNumber']) {
   const documentStatisticsRepository = buildStatisticRepository();
-  const documentStatistics = await documentStatisticsRepository.findAllStatisticsByDocumentNumber(
-    documentNumber,
-  );
+  const documentStatistics = await documentStatisticsRepository.findAllStatisticsByDocumentNumber(documentNumber);
 
   const usersDocumentsStatistics = await Promise.all(
     documentStatistics.map(async (documentStatistic) => {

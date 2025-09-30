@@ -25,9 +25,7 @@ describe('clearDb', () => {
   it('should clear the db with the given collection pattern', async () => {
     const assignations = [{}, {}, {}].map(assignationModule.generator.generate);
     const documents = [{}, {}, {}].map(documentModule.generator.generate);
-    const problemReports = [{}, {}, {}].map(
-      problemReportModule.generator.generate,
-    );
+    const problemReports = [{}, {}, {}].map(problemReportModule.generator.generate);
     const statistics = [{}, {}, {}].map(statisticModule.generator.generate);
     const treatments = [{}, {}, {}].map(treatmentModule.generator.generate);
     const users = [{}, {}, {}].map(userModule.generator.generate);

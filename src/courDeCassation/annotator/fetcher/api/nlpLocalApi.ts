@@ -18,27 +18,19 @@ function buildNlpLocalApi(): nlpApiType {
         document.decisionMetadata.motivationOccultation,
       );
       const annotations = JSON.parse(
-        await fs.readFile(
-          `${pathToNlpAnnotations}${document.documentNumber}.json`,
-          {
-            encoding: 'utf8',
-          },
-        ),
+        await fs.readFile(`${pathToNlpAnnotations}${document.documentNumber}.json`, {
+          encoding: 'utf8',
+        }),
       ) as nlpResponseType;
 
-      const availableCategories = settingsModule.lib.getCategories(
-        filteredSettings,
-        {
-          status: ['visible', 'alwaysVisible', 'annotable'],
-          canBeAnnotatedBy: 'NLP',
-        },
-      );
+      const availableCategories = settingsModule.lib.getCategories(filteredSettings, {
+        status: ['visible', 'alwaysVisible', 'annotable'],
+        canBeAnnotatedBy: 'NLP',
+      });
 
       return {
         ...annotations,
-        entities: annotations.entities.filter((entity) =>
-          availableCategories.includes(entity.category),
-        ),
+        entities: annotations.entities.filter((entity) => availableCategories.includes(entity.category)),
         checklist: annotations.checklist,
         newCategoriesToAnnotate: annotations.newCategoriesToAnnotate,
         newCategoriesToUnAnnotate: annotations.newCategoriesToUnAnnotate,

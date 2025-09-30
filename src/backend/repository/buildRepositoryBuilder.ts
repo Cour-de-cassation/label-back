@@ -11,10 +11,9 @@ type indexesType<T extends { [key: string]: any }> = Array<{
   mustBeUnique?: boolean;
 }>;
 
-type indexType<T extends { [key: string]: any }> =
-  {
-    [key in keyof Partial<T>]: 1 | -1;
-  };
+type indexType<T extends { [key: string]: any }> = {
+  [key in keyof Partial<T>]: 1 | -1;
+};
 
 function buildRepositoryBuilder<T extends { _id: idType }, U>({
   collectionName,
@@ -57,9 +56,7 @@ function buildRepositoryBuilder<T extends { _id: idType }, U>({
     async function deleteById(_id: idType) {
       const result = await collection.deleteOne({ _id } as any);
       if (result.deletedCount !== 1) {
-        throw new Error(
-          `No ${collectionName} with _id ${idModule.lib.convertToString(_id)}`,
-        );
+        throw new Error(`No ${collectionName} with _id ${idModule.lib.convertToString(_id)}`);
       }
     }
 
@@ -78,10 +75,7 @@ function buildRepositoryBuilder<T extends { _id: idType }, U>({
     }
 
     async function distinctNested<fieldT>(fieldName: string) {
-      const distinctFields = (await collection.distinct(
-        fieldName,
-        {},
-      )) as fieldT[];
+      const distinctFields = (await collection.distinct(fieldName, {})) as fieldT[];
       return distinctFields.filter(Boolean);
     }
 
@@ -92,25 +86,21 @@ function buildRepositoryBuilder<T extends { _id: idType }, U>({
     async function findAllProjection<projectionT extends keyof T>(
       projection: Array<projectionT>,
     ): Promise<Array<projectedType<T, projectionT>>> {
-      return (collection
+      return collection
         .find()
         .project(buildProjection(projection as string[]))
-        .toArray() as any) as Array<projectedType<T, projectionT>>;
+        .toArray() as any as Array<projectedType<T, projectionT>>;
     }
 
     async function findAllByIds(idsToSearchIn?: idType[]) {
       let items = [] as WithId<T>[];
       if (idsToSearchIn) {
-        items = await collection
-          .find({ _id: { $in: idsToSearchIn } } as any)
-          .toArray();
+        items = await collection.find({ _id: { $in: idsToSearchIn } } as any).toArray();
       } else {
         items = await collection.find().toArray();
       }
 
-      return indexer.indexBy(items, (item) =>
-        idModule.lib.convertToString(item._id),
-      );
+      return indexer.indexBy(items, (item) => idModule.lib.convertToString(item._id));
     }
 
     async function findById(id: idType) {
@@ -135,10 +125,7 @@ function buildRepositoryBuilder<T extends { _id: idType }, U>({
       await collection.insertMany(newObjects as any[]);
     }
 
-    async function deletePropertiesForMany(
-      filter: Filter<T>,
-      fieldNames: Array<string>,
-    ) {
+    async function deletePropertiesForMany(filter: Filter<T>, fieldNames: Array<string>) {
       await collection.updateMany(filter, buildUnsetQuery(fieldNames));
     }
 
@@ -180,10 +167,7 @@ function buildRepositoryBuilder<T extends { _id: idType }, U>({
 
     function buildUnsetQuery(fieldNames: Array<string>) {
       return {
-        $unset: fieldNames.reduce(
-          (accumulator, fieldName) => ({ ...accumulator, [fieldName]: 1 }),
-          {},
-        ),
+        $unset: fieldNames.reduce((accumulator, fieldName) => ({ ...accumulator, [fieldName]: 1 }), {}),
       };
     }
   };

@@ -3,14 +3,10 @@ import { buildDocumentRepository } from '../../repository';
 
 export { fetchDocumentsReadyToExport };
 
-async function fetchDocumentsReadyToExport(
-  days: number,
-): Promise<documentType[]> {
+async function fetchDocumentsReadyToExport(days: number): Promise<documentType[]> {
   const documentRepository = buildDocumentRepository();
 
-  const documentsCompletelyTreated = await documentRepository.findAllByStatus([
-    'done',
-  ]);
+  const documentsCompletelyTreated = await documentRepository.findAllByStatus(['done']);
 
   const documentsReadyToExport = documentsCompletelyTreated.filter(
     (document) => document.updateDate < dateBuilder.daysAgo(days),

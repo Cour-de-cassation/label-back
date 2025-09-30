@@ -4,12 +4,8 @@ import { projectedType } from '../../../repository';
 export type { customStatisticRepositoryType };
 
 type customStatisticRepositoryType = {
-  findAllStatisticsByDocumentNumber: (
-    documentNumber: statisticType['documentNumber'],
-  ) => Promise<Array<statisticType>>;
-  findAllByRessourceFilter: (
-    ressourceFilter: ressourceFilterType,
-  ) => Promise<Array<statisticType>>;
+  findAllStatisticsByDocumentNumber: (documentNumber: statisticType['documentNumber']) => Promise<Array<statisticType>>;
+  findAllByRessourceFilter: (ressourceFilter: ressourceFilterType) => Promise<Array<statisticType>>;
   findAllIdsBefore: (date: number) => Promise<Array<idType>>;
   findExtremumTreatmentDateBySources: (
     sources: statisticType['source'][],

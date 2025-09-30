@@ -56,32 +56,24 @@ describe('fetchTreatedDocuments', () => {
       documentId: pendingDocument._id,
       userId: user._id,
     });
-    const toBePublishedDocumentAssignation = assignationModule.generator.generate(
-      {
-        documentId: toBePublishedDocument._id,
-        userId: user._id,
-        treatmentId: toBePublishedTreatment._id,
-      },
-    );
+    const toBePublishedDocumentAssignation = assignationModule.generator.generate({
+      documentId: toBePublishedDocument._id,
+      userId: user._id,
+      treatmentId: toBePublishedTreatment._id,
+    });
     const doneDocumentAssignation = assignationModule.generator.generate({
       documentId: doneDocument._id,
       userId: user._id,
       treatmentId: doneTreatment._id,
     });
     await Promise.all(
-      [freeDocument, pendingDocument, toBePublishedDocument, doneDocument].map(
-        documentRepository.insert,
+      [freeDocument, pendingDocument, toBePublishedDocument, doneDocument].map(documentRepository.insert),
+    );
+    await Promise.all([toBePublishedTreatment, doneTreatment].map(treatmentRepository.insert));
+    await Promise.all(
+      [pendingDocumentAssignation, toBePublishedDocumentAssignation, doneDocumentAssignation].map(
+        assignationRepository.insert,
       ),
-    );
-    await Promise.all(
-      [toBePublishedTreatment, doneTreatment].map(treatmentRepository.insert),
-    );
-    await Promise.all(
-      [
-        pendingDocumentAssignation,
-        toBePublishedDocumentAssignation,
-        doneDocumentAssignation,
-      ].map(assignationRepository.insert),
     );
     await userRepository.insert(user);
 

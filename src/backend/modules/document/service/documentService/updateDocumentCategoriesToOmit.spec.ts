@@ -13,14 +13,8 @@ describe('updateDocumentCategoriesToOmit', () => {
     });
     await documentRepository.insert(document);
 
-    const updatedDocument = await updateDocumentCategoriesToOmit(document._id, [
-      'categorie3',
-      'category4',
-    ]);
+    const updatedDocument = await updateDocumentCategoriesToOmit(document._id, ['categorie3', 'category4']);
 
-    expect(updatedDocument.decisionMetadata.categoriesToOmit).toEqual([
-      'categorie3',
-      'category4',
-    ]);
+    expect(updatedDocument.decisionMetadata.categoriesToOmit).toEqual(['categorie3', 'category4']);
   });
 });

@@ -1,9 +1,6 @@
 import { buildPreAssignationRepository } from '../repository';
 import { preAssignationModule, userModule } from '@src/core';
-import {
-  fetchPreAssignationBySourceAndNumber,
-  fetchAllPreAssignation,
-} from './fetch';
+import { fetchPreAssignationBySourceAndNumber, fetchAllPreAssignation } from './fetch';
 import { buildUserRepository } from '../../user';
 
 describe('fetch', () => {
@@ -42,10 +39,7 @@ describe('fetch', () => {
 
   it('should fetch one pre assignation with documentNumber and source provided', async () => {
     await preAssignationRepository.insert(preAssignation1);
-    const myPreAssignation = await fetchPreAssignationBySourceAndNumber(
-      '123456',
-      'mySource',
-    );
+    const myPreAssignation = await fetchPreAssignationBySourceAndNumber('123456', 'mySource');
     expect(myPreAssignation).toEqual(preAssignation1);
   });
 });

@@ -39,7 +39,10 @@ type modelCaseCustomType = {
   content: string;
 };
 
-type modelCaseOrType = { kind: 'or'; content: Readonly<[modelOrEntryType, modelOrEntryType]> };
+type modelCaseOrType = {
+  kind: 'or';
+  content: Readonly<[modelOrEntryType, modelOrEntryType]>;
+};
 
 type modelCaseObjectType = {
   kind: 'object';
@@ -64,58 +67,59 @@ type modelOrEntryType =
 
 type modelObjectType = { [key in string]: modelType };
 
-/* eslint-disable @typescript-eslint/ban-types */
 type buildType<
   modelT extends modelType,
-  customMappingT extends customMappingType = {}
+  customMappingT extends customMappingType = {},
 > = modelT extends modelCasePrimitiveType
   ? buildPrimitiveType<modelT['content']>
   : modelT extends modelCaseConstantType
-  ? buildConstantType<modelT['content']>
-  : modelT extends modelCaseCustomType
-  ? customMappingT[modelT['content']]
-  : modelT extends modelCaseOrType
-  ? buildOrEntryType<modelT['content'][0], customMappingT> | buildOrEntryType<modelT['content'][1], customMappingT>
-  : modelT extends modelCaseObjectType
-  ? {
-      [key in keyof modelT['content']]: buildType<modelT['content'][key], customMappingT>;
-    }
-  : modelT extends modelCaseArrayType
-  ? Array<buildType<modelT['content'], customMappingT>>
-  : never;
+    ? buildConstantType<modelT['content']>
+    : modelT extends modelCaseCustomType
+      ? customMappingT[modelT['content']]
+      : modelT extends modelCaseOrType
+        ?
+            | buildOrEntryType<modelT['content'][0], customMappingT>
+            | buildOrEntryType<modelT['content'][1], customMappingT>
+        : modelT extends modelCaseObjectType
+          ? {
+              [key in keyof modelT['content']]: buildType<modelT['content'][key], customMappingT>;
+            }
+          : modelT extends modelCaseArrayType
+            ? Array<buildType<modelT['content'], customMappingT>>
+            : never;
 
 type buildPrimitiveType<modelPrimitiveT extends modelPrimitiveType> = modelPrimitiveT extends 'boolean'
   ? boolean
   : modelPrimitiveT extends 'date'
-  ? Date
-  : modelPrimitiveT extends 'number'
-  ? number
-  : modelPrimitiveT extends 'string'
-  ? string
-  : modelPrimitiveT extends 'undefined'
-  ? undefined
-  : modelPrimitiveT extends 'void'
-  ? void
-  : never;
+    ? Date
+    : modelPrimitiveT extends 'number'
+      ? number
+      : modelPrimitiveT extends 'string'
+        ? string
+        : modelPrimitiveT extends 'undefined'
+          ? undefined
+          : modelPrimitiveT extends 'void'
+            ? void
+            : never;
 
 type buildConstantType<modelConstantT extends modelConstantType> = modelConstantT[number];
 
 type buildOrEntryType<
   modelOrEntryT extends modelOrEntryType,
-  customMappingT extends customMappingType = {}
+  customMappingT extends customMappingType = {},
 > = modelOrEntryT extends modelCasePrimitiveType
   ? buildPrimitiveType<modelOrEntryT['content']>
   : modelOrEntryT extends modelCaseConstantType
-  ? buildConstantType<modelOrEntryT['content']>
-  : modelOrEntryT extends modelCaseArrayType
-  ? Array<buildType<modelOrEntryT['content'], customMappingT>>
-  : modelOrEntryT extends modelCaseCustomType
-  ? customMappingT[modelOrEntryT['content']]
-  : modelOrEntryT extends modelCaseObjectType
-  ? {
-      [key in keyof modelOrEntryT['content']]: buildType<modelOrEntryT['content'][key], customMappingT>;
-    }
-  : never;
+    ? buildConstantType<modelOrEntryT['content']>
+    : modelOrEntryT extends modelCaseArrayType
+      ? Array<buildType<modelOrEntryT['content'], customMappingT>>
+      : modelOrEntryT extends modelCaseCustomType
+        ? customMappingT[modelOrEntryT['content']]
+        : modelOrEntryT extends modelCaseObjectType
+          ? {
+              [key in keyof modelOrEntryT['content']]: buildType<modelOrEntryT['content'][key], customMappingT>;
+            }
+          : never;
 
 type customMappingType = { [typeName: string]: any };
 

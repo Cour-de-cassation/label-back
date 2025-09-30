@@ -37,19 +37,11 @@ function buildPreAssignator() {
           documentId: idModule.lib.buildId(document._id),
           userId: idModule.lib.buildId(preAssignationForDocument.userId),
         });
-        await preAssignationService.deletePreAssignation(
-          preAssignationForDocument._id,
-        );
+        await preAssignationService.deletePreAssignation(preAssignationForDocument._id);
         if (document.route === 'automatic' || document.route === 'simple') {
-          await documentService.updateDocumentRoute(
-            idModule.lib.buildId(document._id),
-            'exhaustive',
-          );
+          await documentService.updateDocumentRoute(idModule.lib.buildId(document._id), 'exhaustive');
         }
-        await documentService.updateDocumentStatus(
-          idModule.lib.buildId(document._id),
-          'saved',
-        );
+        await documentService.updateDocumentStatus(idModule.lib.buildId(document._id), 'saved');
 
         logger.log({
           operationName: 'preAssignation',
@@ -69,9 +61,7 @@ function buildPreAssignator() {
         operationName: 'preAssignation',
         msg: `Document status must be loaded or nlpAnnotating before pre-assign it`,
       });
-      throw new Error(
-        'Document status must be loaded or nlpAnnotating before pre-assign it',
-      );
+      throw new Error('Document status must be loaded or nlpAnnotating before pre-assign it');
     }
   }
 }

@@ -55,7 +55,7 @@ const categoryIconNames = [
   'eyeoff',
 ] as const;
 
-type categoryIconNameType = typeof categoryIconNames[number];
+type categoryIconNameType = (typeof categoryIconNames)[number];
 
 const constantColors = ['black', 'white'] as const;
 
@@ -80,9 +80,9 @@ const shadeColors = [
   'yellow',
 ] as const;
 
-type constantColorType = typeof constantColors[number];
+type constantColorType = (typeof constantColors)[number];
 
-type shadeColorType = [typeof shadeColors[number], string];
+type shadeColorType = [(typeof shadeColors)[number], string];
 
 type colorType = constantColorType | shadeColorType;
 

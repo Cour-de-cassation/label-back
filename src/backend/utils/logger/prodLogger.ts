@@ -5,15 +5,7 @@ import { prettyLogFormatter } from './prettyLogFormatter';
 export { prodLogger };
 
 const prodLogger: loggerType = {
-  async log({
-    operationName,
-    msg,
-    data,
-  }: {
-    operationName: string;
-    msg: string;
-    data?: Record<string, unknown>;
-  }) {
+  async log({ operationName, msg, data }: { operationName: string; msg: string; data?: Record<string, unknown> }) {
     const prettyValue = prettyLogFormatter.formatLog({
       level: 'info',
       operationName,
@@ -30,15 +22,7 @@ const prodLogger: loggerType = {
     }
   },
 
-  async error({
-    operationName,
-    msg,
-    data,
-  }: {
-    operationName: string;
-    msg: string;
-    data?: Record<string, unknown>;
-  }) {
+  async error({ operationName, msg, data }: { operationName: string; msg: string; data?: Record<string, unknown> }) {
     const prettyError = prettyLogFormatter.formatLog({
       level: 'error',
       operationName,

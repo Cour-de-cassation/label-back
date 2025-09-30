@@ -15,10 +15,7 @@ import { buildStatisticRepository } from '../repository';
 
 export { fetchFilteredStatistics };
 
-async function fetchFilteredStatistics(
-  filter: ressourceFilterType,
-  settings: settingsType,
-) {
+async function fetchFilteredStatistics(filter: ressourceFilterType, settings: settingsType) {
   const statisticRepository = buildStatisticRepository();
 
   const statistics = await statisticRepository.findAllByRessourceFilter(filter);
@@ -29,24 +26,16 @@ async function fetchFilteredStatistics(
     const doneDocuments = await documentService.fetchDoneDocuments();
     const documentIds = doneDocuments.map(({ _id }) => _id);
 
-    const assignationsByDocumentId: Record<
-      string,
-      assignationType[] | undefined
-    > = await assignationService.fetchAssignationsByDocumentIds(documentIds, {
-      assertEveryDocumentIsAssigned: false,
-    });
-    const treatmentsByDocumentId = await treatmentService.fetchTreatmentsByDocumentIds(
-      documentIds,
-    );
+    const assignationsByDocumentId: Record<string, assignationType[] | undefined> =
+      await assignationService.fetchAssignationsByDocumentIds(documentIds, {
+        assertEveryDocumentIsAssigned: false,
+      });
+    const treatmentsByDocumentId = await treatmentService.fetchTreatmentsByDocumentIds(documentIds);
 
     const treatedDocuments = doneDocuments.map((document) => {
-      const assignations =
-        assignationsByDocumentId[idModule.lib.convertToString(document._id)];
-      const treatments =
-        treatmentsByDocumentId[idModule.lib.convertToString(document._id)];
-      const humanTreatments = assignations
-        ? treatmentModule.lib.extractHumanTreatments(treatments, assignations)
-        : [];
+      const assignations = assignationsByDocumentId[idModule.lib.convertToString(document._id)];
+      const treatments = treatmentsByDocumentId[idModule.lib.convertToString(document._id)];
+      const humanTreatments = assignations ? treatmentModule.lib.extractHumanTreatments(treatments, assignations) : [];
 
       return {
         document,
@@ -55,22 +44,19 @@ async function fetchFilteredStatistics(
       };
     });
 
-    const filteredTreatedDocuments = ressourceFilterModule.lib.filterTreatedDocuments(
-      {
-        ressourceFilter: filter,
-        treatedDocuments,
-      },
-    );
+    const filteredTreatedDocuments = ressourceFilterModule.lib.filterTreatedDocuments({
+      ressourceFilter: filter,
+      treatedDocuments,
+    });
 
     return flatten(
-      filteredTreatedDocuments.map(
-        ({ document, treatments, humanTreatments }) =>
-          statisticsCreator.buildFromDocument({
-            humanTreatments,
-            document,
-            treatments,
-            settings,
-          }),
+      filteredTreatedDocuments.map(({ document, treatments, humanTreatments }) =>
+        statisticsCreator.buildFromDocument({
+          humanTreatments,
+          document,
+          treatments,
+          settings,
+        }),
       ),
     );
   }

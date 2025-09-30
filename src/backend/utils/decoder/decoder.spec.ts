@@ -16,13 +16,7 @@ describe('decoder', () => {
 
       const latinBuffer = decoder.convertUtfToLatin(utfString);
 
-      expect([...((latinBuffer as unknown) as Array<number>)]).toEqual([
-        0xb0,
-        0xe7,
-        0xe8,
-        0xe9,
-        0xf9,
-      ]);
+      expect([...(latinBuffer as unknown as Array<number>)]).toEqual([0xb0, 0xe7, 0xe8, 0xe9, 0xf9]);
     });
   });
 });

@@ -35,10 +35,7 @@ describe('updateDocumentChecklist', () => {
     const document = documentModule.generator.generate();
     await documentRepository.insert(document);
 
-    const updatedDocument = await updateDocumentChecklist(
-      document._id,
-      checklist,
-    );
+    const updatedDocument = await updateDocumentChecklist(document._id, checklist);
 
     expect(updatedDocument.checklist).toEqual(checklist);
   });

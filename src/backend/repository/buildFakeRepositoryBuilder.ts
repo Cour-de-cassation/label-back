@@ -4,9 +4,6 @@ import { projectedType, repositoryType } from './repositoryType';
 
 export { buildFakeRepositoryBuilder, projectFakeObjects, updateFakeCollection };
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
   buildCustomFakeRepository,
   collectionName,
@@ -17,25 +14,26 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
   const collection: T[] = [];
   const customRepository = buildCustomFakeRepository(collection);
 
-  return () => ({
-    clear,
-    deleteById,
-    deleteManyByIds,
-    distinct,
-    distinctNested,
-    findAll,
-    findAllProjection,
-    findAllByIds,
-    findById,
-    deletePropertiesForMany,
-    insert,
-    insertMany,
-    setIndexes,
-    updateOne,
-    updateMany,
-    upsert,
-    ...customRepository,
-  } as unknown as  repositoryType<T> & U);
+  return () =>
+    ({
+      clear,
+      deleteById,
+      deleteManyByIds,
+      distinct,
+      distinctNested,
+      findAll,
+      findAllProjection,
+      findAllByIds,
+      findById,
+      deletePropertiesForMany,
+      insert,
+      insertMany,
+      setIndexes,
+      updateOne,
+      updateMany,
+      upsert,
+      ...customRepository,
+    }) as unknown as repositoryType<T> & U;
   // Warning: Types are overrided without any safety due it's a fake usage.
   // Should be rethink to be simpler
 
@@ -46,13 +44,9 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
   }
 
   async function deleteById(_id: idType) {
-    const itemToDelete = collection.find(
-      (item) => !idModule.lib.equalId(item._id, _id),
-    );
+    const itemToDelete = collection.find((item) => !idModule.lib.equalId(item._id, _id));
     if (!itemToDelete) {
-      throw new Error(
-        `No ${collectionName} with _id ${idModule.lib.convertToString(_id)}`,
-      );
+      throw new Error(`No ${collectionName} with _id ${idModule.lib.convertToString(_id)}`);
     }
     updateFakeCollection(
       collection,
@@ -63,9 +57,7 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
   async function deleteManyByIds(ids: idType[]) {
     updateFakeCollection(
       collection,
-      collection.filter(
-        (item) => !ids.some((id) => idModule.lib.equalId(id, item._id)),
-      ),
+      collection.filter((item) => !ids.some((id) => idModule.lib.equalId(id, item._id))),
     );
     return {
       success: true,
@@ -73,16 +65,11 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
     };
   }
 
-  async function deletePropertiesForMany(
-    filter: Partial<T>,
-    fieldNames: Array<string>,
-  ) {
+  async function deletePropertiesForMany(filter: Partial<T>, fieldNames: Array<string>) {
     updateFakeCollection(
       collection,
       collection.map((item) => {
-        const mustBeUpdated = keysOf<keyof T>(
-          filter as Record<keyof T, any>,
-        ).every((key) => filter[key] === item[key]);
+        const mustBeUpdated = keysOf<keyof T>(filter as Record<keyof T, any>).every((key) => filter[key] === item[key]);
         if (mustBeUpdated) {
           return omit(item, fieldNames);
         } else {
@@ -96,12 +83,7 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
     const distinctValues = [] as Array<T[fieldNameT]>;
 
     collection.forEach((item) => {
-      if (
-        distinctValues.every(
-          (anotherValue) =>
-            JSON.stringify(anotherValue) !== JSON.stringify(item[fieldName]),
-        )
-      ) {
+      if (distinctValues.every((anotherValue) => JSON.stringify(anotherValue) !== JSON.stringify(item[fieldName]))) {
         distinctValues.push(item[fieldName]);
       }
     });
@@ -114,10 +96,7 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
 
     collection.forEach((item) => {
       const nestedValue = extractNestedField(item);
-      if (
-        !!nestedValue &&
-        distinctValues.every((anotherValue) => anotherValue !== nestedValue)
-      ) {
+      if (!!nestedValue && distinctValues.every((anotherValue) => anotherValue !== nestedValue)) {
         distinctValues.push(nestedValue);
       }
     });
@@ -143,30 +122,22 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
   async function findAllProjection<projectionT extends keyof T>(
     projections: Array<projectionT>,
   ): Promise<Array<projectedType<T, projectionT>>> {
-    return collection.map((document) =>
-      projectFakeObjects(document, projections),
-    );
+    return collection.map((document) => projectFakeObjects(document, projections));
   }
 
   async function findAllByIds(idsToSearchIn?: idType[]) {
     let items = [] as T[];
     if (idsToSearchIn) {
-      items = collection.filter((item) =>
-        idsToSearchIn.some((id) => idModule.lib.equalId(id, item._id)),
-      );
+      items = collection.filter((item) => idsToSearchIn.some((id) => idModule.lib.equalId(id, item._id)));
     } else {
       items = collection;
     }
 
-    return indexer.indexBy(items, (item) =>
-      idModule.lib.convertToString(item._id),
-    );
+    return indexer.indexBy(items, (item) => idModule.lib.convertToString(item._id));
   }
 
   async function findById(id: idType) {
-    const result = collection.find((item) =>
-      idModule.lib.equalId(item._id, id),
-    );
+    const result = collection.find((item) => idModule.lib.equalId(item._id, id));
 
     if (!result) {
       throw new Error(`No matching object for _id ${id}`);
@@ -189,16 +160,10 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
   async function updateOne(id: idType, objectFields: Partial<T>) {
     updateFakeCollection(
       collection,
-      collection.map((item) =>
-        idModule.lib.equalId(id, item._id)
-          ? { ...item, ...objectFields }
-          : item,
-      ),
+      collection.map((item) => (idModule.lib.equalId(id, item._id) ? { ...item, ...objectFields } : item)),
     );
 
-    const updatedItem = collection.find((item) =>
-      idModule.lib.equalId(id, item._id),
-    );
+    const updatedItem = collection.find((item) => idModule.lib.equalId(id, item._id));
 
     return updatedItem;
   }
@@ -207,9 +172,7 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
     updateFakeCollection(
       collection,
       collection.map((item) => {
-        const mustBeUpdated = keysOf<keyof T>(
-          filter as Record<keyof T, any>,
-        ).every((key) => filter[key] === item[key]);
+        const mustBeUpdated = keysOf<keyof T>(filter as Record<keyof T, any>).every((key) => filter[key] === item[key]);
         if (mustBeUpdated) {
           return { ...item, ...objectFields };
         } else {
@@ -220,11 +183,7 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
   }
 
   async function upsert(newObject: T) {
-    if (
-      collection.some((object) =>
-        idModule.lib.equalId(object._id, newObject._id),
-      )
-    ) {
+    if (collection.some((object) => idModule.lib.equalId(object._id, newObject._id))) {
       await updateOne(newObject._id, newObject);
     } else {
       await insert(newObject);
@@ -248,10 +207,7 @@ function projectFakeObjects<T, projectionT extends keyof T>(
 ): projectedType<T, projectionT> {
   const projectedObject = {} as projectedType<T, projectionT>;
 
-  projections.forEach(
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-    (projection) => ((projectedObject as any)[projection] = object[projection]),
-  );
+  projections.forEach((projection) => ((projectedObject as any)[projection] = object[projection]));
 
   return projectedObject;
 }

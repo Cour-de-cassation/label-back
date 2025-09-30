@@ -1,11 +1,6 @@
 import { createCache } from './createCache';
 import { deleteCache } from './deleteCache';
-import {
-  fetchCache,
-  fetchAllById,
-  fetchAllByKey,
-  fetchAllOlderThan,
-} from './fetch';
+import { fetchCache, fetchAllById, fetchAllByKey, fetchAllOlderThan } from './fetch';
 
 export { cacheService };
 

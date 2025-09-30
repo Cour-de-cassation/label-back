@@ -12,7 +12,12 @@ function buildAdditionalAnnotationCategoryHandler() {
     darkMode: ['red', '700'] as colorType,
   };
 
-  return { getCategoryName, getCategoryColor, getCategoryIconName, addCategoryToSettings };
+  return {
+    getCategoryName,
+    getCategoryColor,
+    getCategoryIconName,
+    addCategoryToSettings,
+  };
 
   function getCategoryName() {
     return ADDITIONAL_ANNOTATION_CATEGORY_NAME;

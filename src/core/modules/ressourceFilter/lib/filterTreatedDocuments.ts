@@ -14,7 +14,10 @@ function filterTreatedDocuments({
   treatedDocuments: Array<{
     document: documentType;
     treatments: treatmentType[];
-    humanTreatments: Array<{ treatment: treatmentType; userId: userType['_id'] }>;
+    humanTreatments: Array<{
+      treatment: treatmentType;
+      userId: userType['_id'];
+    }>;
   }>;
 }) {
   return treatedDocuments.filter(({ document, humanTreatments }) => {
