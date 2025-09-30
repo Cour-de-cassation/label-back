@@ -14,7 +14,11 @@ function assertAnnotationsDiffAreConsistent(
     previousAnnotations,
     settings,
     treatmentSource,
-  }: { previousAnnotations: annotationType[]; settings: settingsType; treatmentSource: treatmentType['source'] },
+  }: {
+    previousAnnotations: annotationType[];
+    settings: settingsType;
+    treatmentSource: treatmentType['source'];
+  },
   actionToPerform: string,
 ) {
   assertAnnotationsDiffCompatibleWithPreviousAnnotations(previousAnnotations, annotationsDiff, actionToPerform);

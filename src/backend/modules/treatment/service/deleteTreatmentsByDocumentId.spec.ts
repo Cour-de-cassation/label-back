@@ -7,11 +7,9 @@ describe('deleteTreatmentsByDocumentId', () => {
 
   it('should remove all the treatments from the database with the given document id', async () => {
     const documentId = idModule.lib.buildId();
-    const treatments = ([
-      { documentId },
-      { documentId },
-      { documentId: idModule.lib.buildId() },
-    ] as const).map(treatmentModule.generator.generate);
+    const treatments = ([{ documentId }, { documentId }, { documentId: idModule.lib.buildId() }] as const).map(
+      treatmentModule.generator.generate,
+    );
     await Promise.all(treatments.map(treatmentRepository.insert));
 
     await deleteTreatmentsByDocumentId(documentId);

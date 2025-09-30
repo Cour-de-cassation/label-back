@@ -6,15 +6,12 @@ import { logger } from '../../utils';
 
 export { extractRouteForCivilJurisdiction };
 
-async function extractRouteForCivilJurisdiction(
-  document: documentType,
-): Promise<documentType['route']> {
+async function extractRouteForCivilJurisdiction(document: documentType): Promise<documentType['route']> {
   const selection = document.decisionMetadata.selection;
   // const sommaire = document.decisionMetadata.sommaire;
   const NACCode = document.decisionMetadata.NACCode;
   const source = document.source;
-  const additionalTermsToAnnotate =
-    document.decisionMetadata.additionalTermsToAnnotate;
+  const additionalTermsToAnnotate = document.decisionMetadata.additionalTermsToAnnotate;
   const checklist = document.checklist;
 
   // En attente de stabilisation du flux avant d'implémenter les règles spécifiques
@@ -48,36 +45,28 @@ async function extractRouteForCivilJurisdiction(
     const nonSensibleMinimumRatio = 0.01;
     const sensibleMinimumRatio = 0.1;
 
-    const ratio = Math.max(
-      0,
-      (targetFreeDocuments - freeDocuments) / targetFreeDocuments,
-    );
+    const ratio = Math.max(0, (targetFreeDocuments - freeDocuments) / targetFreeDocuments);
 
     // nonSensibleRatio est toujours supérieur a sa limite minimum
-    const nonSensibleRatio =
-      ratio < nonSensibleMinimumRatio ? nonSensibleMinimumRatio : ratio;
+    const nonSensibleRatio = ratio < nonSensibleMinimumRatio ? nonSensibleMinimumRatio : ratio;
 
     // sensibleRatio est 10 fois plus élevé que nonSensibleRatio, toujours supérieur a sa limite minimale, dans la limite logique de 100%
     const sensibleRatio = Math.min(
       1,
-      nonSensibleRatio * 10 < sensibleMinimumRatio
-        ? sensibleMinimumRatio
-        : nonSensibleRatio * 10,
+      nonSensibleRatio * 10 < sensibleMinimumRatio ? sensibleMinimumRatio : nonSensibleRatio * 10,
     );
 
     switch (routeFromDb) {
       case 'systematique': {
         logger.log({
           operationName: 'computeRouteFromNac',
-          msg:
-            'Route systematique trouvée en base, relecture exhaustive appliquée',
+          msg: 'Route systematique trouvée en base, relecture exhaustive appliquée',
           data: { routeFromDb, routeRelecture: 'exhaustive' },
         });
         return 'exhaustive';
       }
       case 'aleatoireSensible': {
-        const routeRelecture =
-          Math.random() < sensibleRatio ? 'exhaustive' : 'automatic';
+        const routeRelecture = Math.random() < sensibleRatio ? 'exhaustive' : 'automatic';
         logger.log({
           operationName: 'computeRouteFromNac',
           msg: `Route aleatoireSensible trouvée en base, relecture ${routeRelecture} appliquée`,
@@ -86,8 +75,7 @@ async function extractRouteForCivilJurisdiction(
         return routeRelecture;
       }
       case 'aleatoireNonSensible': {
-        const routeRelecture =
-          Math.random() < nonSensibleRatio ? 'exhaustive' : 'automatic';
+        const routeRelecture = Math.random() < nonSensibleRatio ? 'exhaustive' : 'automatic';
         logger.log({
           operationName: 'computeRouteFromNac',
           msg: `Route aleatoireNonSensible trouvée en base, relecture ${routeRelecture} appliquée`,

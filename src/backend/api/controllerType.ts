@@ -1,10 +1,4 @@
-import {
-  apiSchemaType,
-  apiSchemaMethodNameType,
-  apiRouteInType,
-  apiRouteOutType,
-  networkType,
-} from '@src/core';
+import { apiSchemaType, apiSchemaMethodNameType, apiRouteInType, apiRouteOutType, networkType } from '@src/core';
 
 export type { controllersFromSchemaType };
 

@@ -17,10 +17,7 @@ async function cleanLoadedDocuments() {
     operationName: 'cleanLoadedDocuments',
     msg: 'Fetching "loaded" documents',
   });
-  const loadedDocuments = await documentRepository.findAllByStatusProjection(
-    ['loaded'],
-    ['_id'],
-  );
+  const loadedDocuments = await documentRepository.findAllByStatusProjection(['loaded'], ['_id']);
 
   logger.log({
     operationName: 'cleanLoadedDocuments',
@@ -40,18 +37,13 @@ async function cleanLoadedDocuments() {
   const notTreatedDocuments = await documentService.fetchDocumentsWithoutAnnotations();
   logger.log({
     operationName: 'cleanLoadedDocuments',
-    msg: `${
-      notTreatedDocuments.length
-    } not treated documents found. Status are [${uniq(
+    msg: `${notTreatedDocuments.length} not treated documents found. Status are [${uniq(
       notTreatedDocuments.map(({ status }) => status),
     ).join(', ')}]. Setting status to loaded...`,
   });
 
   for (let i = 0, length = notTreatedDocuments.length; i < length; i++) {
-    await documentService.updateDocumentStatus(
-      notTreatedDocuments[i]._id,
-      'loaded',
-    );
+    await documentService.updateDocumentStatus(notTreatedDocuments[i]._id, 'loaded');
   }
 
   logger.log({ operationName: 'cleanLoadedDocuments', msg: 'DONE' });

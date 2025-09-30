@@ -16,18 +16,10 @@ async function displayMultipleAssignatedDocuments() {
 
   let documentCount = 0;
   for (const document of documents) {
-    const assignations = await assignationService.fetchAssignationsOfDocumentId(
-      document._id,
-    );
-    const usersByAssignationId = await userService.fetchUsersByAssignations(
-      assignations,
-    );
+    const assignations = await assignationService.fetchAssignationsOfDocumentId(document._id);
+    const usersByAssignationId = await userService.fetchUsersByAssignations(assignations);
     const userNames = assignations
-      ? assignations.map(
-          (assignation) =>
-            usersByAssignationId[idModule.lib.convertToString(assignation._id)]
-              .name,
-        )
+      ? assignations.map((assignation) => usersByAssignationId[idModule.lib.convertToString(assignation._id)].name)
       : [];
     if (userNames.length > 1) {
       documentCount++;

@@ -13,13 +13,8 @@ describe('updateDocumentAdditionalTermsParsingFailed', () => {
     });
     await documentRepository.insert(document);
 
-    const updatedDocument = await updateDocumentAdditionalTermsParsingFailed(
-      document._id,
-      true,
-    );
+    const updatedDocument = await updateDocumentAdditionalTermsParsingFailed(document._id, true);
 
-    expect(
-      updatedDocument.decisionMetadata.additionalTermsParsingFailed,
-    ).toEqual(true);
+    expect(updatedDocument.decisionMetadata.additionalTermsParsingFailed).toEqual(true);
   });
 });

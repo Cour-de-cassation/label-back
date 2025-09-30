@@ -8,7 +8,6 @@ import { statisticsCreator } from './statisticsCreator';
 
 const TREATMENT_DATE = new Date(2021, 3, 30, 0, 0, 0);
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 describe('statisticsCreator', () => {
   const documentExternalId = 'DOCUMENT_EXTERNAL_ID';
   const documentPublicationCategory = ['P'];
@@ -80,7 +79,11 @@ describe('statisticsCreator', () => {
             ].map(annotationModule.generator.generate),
             [
               { start: 0, text: 'Spirou', category: 'personnePhysiqueNom' },
-              { start: 20, text: 'Editions Dupuis', category: 'personneMorale' },
+              {
+                start: 20,
+                text: 'Editions Dupuis',
+                category: 'personneMorale',
+              },
               { start: 90, text: 'Gaston', category: 'personnePhysiquePrenom' },
             ].map(annotationModule.generator.generate),
           ),

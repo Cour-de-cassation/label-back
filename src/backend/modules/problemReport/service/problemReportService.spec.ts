@@ -60,9 +60,7 @@ describe('problemReportService', () => {
 
       await problemReportService.updateHasBeenRead(problemReport._id, false);
 
-      const updatedProblemReport = await problemReportRepository.findById(
-        problemReport._id,
-      );
+      const updatedProblemReport = await problemReportRepository.findById(problemReport._id);
       expect(updatedProblemReport.hasBeenRead).toBe(false);
     });
   });

@@ -5,10 +5,7 @@ import { customDocumentRepositoryType } from './customDocumentRepositoryType';
 
 export { buildDocumentRepository };
 
-const buildDocumentRepository = buildRepositoryBuilder<
-  documentType,
-  customDocumentRepositoryType
->({
+const buildDocumentRepository = buildRepositoryBuilder<documentType, customDocumentRepositoryType>({
   collectionName: 'documents',
   indexes: [
     {
@@ -56,10 +53,7 @@ const buildDocumentRepository = buildRepositoryBuilder<
     },
 
     async findAllPublicationCategories() {
-      const publicationCategories = await collection.distinct(
-        'publicationCategory',
-        {},
-      );
+      const publicationCategories = await collection.distinct('publicationCategory', {});
 
       return uniq(publicationCategories);
     },
@@ -74,10 +68,7 @@ const buildDocumentRepository = buildRepositoryBuilder<
       return document || undefined;
     },
 
-    async findOneByStatusAndPriorityAmong(
-      { status, priority },
-      idsToSearchInFirst,
-    ) {
+    async findOneByStatusAndPriorityAmong({ status, priority }, idsToSearchInFirst) {
       const freeDocuments = await collection
         .find({
           priority,
@@ -90,10 +81,7 @@ const buildDocumentRepository = buildRepositoryBuilder<
       return freeDocuments[0];
     },
 
-    async findOneRandomByStatusAndPriorityAmong(
-      { status, priority },
-      idsToSearchInFirst,
-    ) {
+    async findOneRandomByStatusAndPriorityAmong({ status, priority }, idsToSearchInFirst) {
       const mostRecentDocuments = await collection
         .find({
           priority,
@@ -115,25 +103,17 @@ const buildDocumentRepository = buildRepositoryBuilder<
         .toArray();
 
       // Combine the two lists to treat a mix of recent and old documents
-      const combinedDocuments = mostRecentDocuments.concat(
-        leastRecentDocuments,
-      );
+      const combinedDocuments = mostRecentDocuments.concat(leastRecentDocuments);
 
       if (combinedDocuments.length === 0) {
         return undefined;
       }
 
       // Select a random document from the combined list
-      return combinedDocuments[
-        Math.floor(Math.random() * combinedDocuments.length)
-      ];
+      return combinedDocuments[Math.floor(Math.random() * combinedDocuments.length)];
     },
 
-    async findByStatusAndPriorityLimitAmong(
-      { status, priority },
-      limit,
-      idsToSearchInFirst,
-    ) {
+    async findByStatusAndPriorityLimitAmong({ status, priority }, limit, idsToSearchInFirst) {
       const documents = await collection
         .find({
           priority,
@@ -146,10 +126,7 @@ const buildDocumentRepository = buildRepositoryBuilder<
       return documents;
     },
 
-    async findOneByStatusAndPriorityNotIn(
-      { status, priority },
-      idsNotToSearchIn,
-    ) {
+    async findOneByStatusAndPriorityNotIn({ status, priority }, idsNotToSearchIn) {
       const document = await collection.findOne({
         priority,
         status,
@@ -171,30 +148,16 @@ const buildDocumentRepository = buildRepositoryBuilder<
       NACCodes: documentType['decisionMetadata']['NACCode'][],
       statuses: documentType['status'][],
     ) {
+      return collection.find(buildFindAllByNACCodesAndStatusRequest(NACCodes, statuses)).toArray();
+    },
+
+    async findAllByPublicationCategoryLettersAndStatus(publicationCategoryLetters, statuses) {
       return collection
-        .find(buildFindAllByNACCodesAndStatusRequest(NACCodes, statuses))
+        .find(buildFindByPublicationCategoryLettersAndStatusRequest(publicationCategoryLetters, statuses))
         .toArray();
     },
 
-    async findAllByPublicationCategoryLettersAndStatus(
-      publicationCategoryLetters,
-      statuses,
-    ) {
-      return collection
-        .find(
-          buildFindByPublicationCategoryLettersAndStatusRequest(
-            publicationCategoryLetters,
-            statuses,
-          ),
-        )
-        .toArray();
-    },
-
-    async findAllByRoutesOrPublicationCategoryLettersProjection(
-      routes,
-      publicationCategories,
-      projections,
-    ) {
+    async findAllByRoutesOrPublicationCategoryLettersProjection(routes, publicationCategories, projections) {
       return collection
         .find({
           $or: [
@@ -204,21 +167,14 @@ const buildDocumentRepository = buildRepositoryBuilder<
             })),
           ],
         })
-        .project<projectedType<documentType, typeof projections[number]>>(buildProjection(projections))
+        .project<projectedType<documentType, (typeof projections)[number]>>(buildProjection(projections))
         .toArray();
     },
 
-    async findAllByPublicationCategoryLettersProjection(
-      publicationCategoryLetters,
-      projections,
-    ) {
+    async findAllByPublicationCategoryLettersProjection(publicationCategoryLetters, projections) {
       return collection
-        .find(
-          buildFindByPublicationCategoryLettersRequest(
-            publicationCategoryLetters,
-          ),
-        )
-        .project<projectedType<documentType, typeof projections[number]>>(buildProjection(projections))
+        .find(buildFindByPublicationCategoryLettersRequest(publicationCategoryLetters))
+        .project<projectedType<documentType, (typeof projections)[number]>>(buildProjection(projections))
         .toArray();
     },
 
@@ -229,7 +185,7 @@ const buildDocumentRepository = buildRepositoryBuilder<
     async findAllByStatusProjection(status, projections) {
       return collection
         .find({ status: { $in: status } })
-        .project<projectedType<documentType, typeof projections[number]>>(buildProjection(projections))
+        .project<projectedType<documentType, (typeof projections)[number]>>(buildProjection(projections))
         .toArray();
     },
 
@@ -251,10 +207,7 @@ const buildDocumentRepository = buildRepositoryBuilder<
       return updatedDocument || undefined;
     },
 
-    async updateAdditionalTermsParsingFailed(
-      _id,
-      additionalTermsParsingFailed,
-    ) {
+    async updateAdditionalTermsParsingFailed(_id, additionalTermsParsingFailed) {
       await collection.updateOne(
         { _id },
         {
@@ -268,10 +221,7 @@ const buildDocumentRepository = buildRepositoryBuilder<
     },
 
     async updateCategoriesToOmitById(_id, categoriesToOmit) {
-      await collection.updateOne(
-        { _id },
-        { $set: { 'decisionMetadata.categoriesToOmit': categoriesToOmit } },
-      );
+      await collection.updateOne({ _id }, { $set: { 'decisionMetadata.categoriesToOmit': categoriesToOmit } });
       const updatedDocument = await collection.findOne({ _id });
       return updatedDocument || undefined;
     },
@@ -296,10 +246,7 @@ const buildDocumentRepository = buildRepositoryBuilder<
     },
 
     async updateStatusById(_id, status) {
-      await collection.updateOne(
-        { _id },
-        { $set: buildUpdateStatusQuery(status) },
-      );
+      await collection.updateOne({ _id }, { $set: buildUpdateStatusQuery(status) });
       const updatedDocument = await collection.findOne({ _id });
       return updatedDocument || undefined;
     },
@@ -319,9 +266,7 @@ function buildUpdateStatusQuery(status: documentType['status']) {
   return { status, updateDate: new Date().getTime() };
 }
 
-function buildFindByPublicationCategoryLettersRequest(
-  publicationCategoryLetters: string[],
-) {
+function buildFindByPublicationCategoryLettersRequest(publicationCategoryLetters: string[]) {
   return {
     $or: publicationCategoryLetters.map((publicationCategoryLetter) => ({
       publicationCategory: { $in: [publicationCategoryLetter] },
@@ -329,10 +274,7 @@ function buildFindByPublicationCategoryLettersRequest(
   };
 }
 
-function buildFindAllByNACCodesAndStatusRequest(
-  NACCodes: string[],
-  statuses: documentType['status'][],
-) {
+function buildFindAllByNACCodesAndStatusRequest(NACCodes: string[], statuses: documentType['status'][]) {
   return {
     status: { $in: statuses },
     $or: NACCodes.map((NACCode) => ({

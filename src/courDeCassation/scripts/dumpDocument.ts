@@ -1,18 +1,14 @@
 import yargs from 'yargs';
 import { buildBackend } from '@src/backend';
 import { parametersHandler } from '../lib/parametersHandler';
-
 (async () => {
   const { settings } = await parametersHandler.getParameters();
   const { documentNumber, source } = parseArgv();
   const backend = buildBackend(settings);
 
-  backend.runScript(
-    () => backend.scripts.dumpDocument.run(documentNumber, source),
-    {
-      shouldLoadDb: true,
-    },
-  );
+  backend.runScript(() => backend.scripts.dumpDocument.run(documentNumber, source), {
+    shouldLoadDb: true,
+  });
 })();
 
 function parseArgv() {
@@ -25,13 +21,13 @@ function parseArgv() {
       },
       source: {
         demandOption: true,
-        description:
-          'source (jurinet or jurica) of the document you want to dump',
+        description: 'source (jurinet or jurica) of the document you want to dump',
         type: 'string',
       },
     })
     .help()
-    .alias('help', 'h').parseSync();
+    .alias('help', 'h')
+    .parseSync();
 
   return {
     documentNumber: argv.documentNumber as number,

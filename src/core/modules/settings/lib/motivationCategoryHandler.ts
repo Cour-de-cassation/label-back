@@ -12,7 +12,12 @@ function buildMotivationCategoryHandler() {
     darkMode: ['yellow', '900'] as colorType,
   };
 
-  return { getCategoryName, getCategoryColor, getCategoryIconName, addCategoryToSettings };
+  return {
+    getCategoryName,
+    getCategoryColor,
+    getCategoryIconName,
+    addCategoryToSettings,
+  };
 
   function getCategoryName() {
     return MOTIVATION_CATEGORY_NAME;

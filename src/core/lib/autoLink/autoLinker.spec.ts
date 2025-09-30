@@ -72,7 +72,9 @@ describe('autoLinker', () => {
 
     describe('do not link category if subword not included', () => {
       const settings = settingsModule.lib.buildSettings({
-        CATEGORY: { autoLinkSensitivity: [{ kind: 'caseInsensitive' }, { kind: 'levenshteinDistance', threshold: 2 }] },
+        CATEGORY: {
+          autoLinkSensitivity: [{ kind: 'caseInsensitive' }, { kind: 'levenshteinDistance', threshold: 2 }],
+        },
       });
       it('should not link the unrelated annotations', () => {
         const annotations = ['Jean', 'Jean Henri', 'Jean Marie'].map((text, index) =>

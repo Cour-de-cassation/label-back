@@ -7,17 +7,13 @@ export { renewCache };
 
 async function renewCache({ minutes }: { minutes: number }) {
   logger.log({ operationName: 'renewCache', msg: 'START' });
-  const cachesToRenew: cacheType[] = await cacheService.fetchAllOlderThan(
-    minutes,
-  );
+  const cachesToRenew: cacheType[] = await cacheService.fetchAllOlderThan(minutes);
   logger.log({
     operationName: 'renewCache',
     msg: `${cachesToRenew.length} caches to renew`,
   });
 
-  const availableStatisticFiltersCaches = await cacheService.fetchAllByKey(
-    'availableStatisticFilters',
-  );
+  const availableStatisticFiltersCaches = await cacheService.fetchAllByKey('availableStatisticFilters');
   if (
     !availableStatisticFiltersCaches.length ||
     cachesToRenew.some((cache) => cache.key == 'availableStatisticFilters')

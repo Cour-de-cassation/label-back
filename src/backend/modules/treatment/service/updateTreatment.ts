@@ -30,12 +30,8 @@ async function updateTreatment({
       hasBeenAmended: true,
     });
   }
-  const treatments = await treatmentRepository.findAllByDocumentId(
-    assignation.documentId,
-  );
-  const sortedTreatments = treatmentModule.lib.sortInConsistentOrder(
-    treatments,
-  );
+  const treatments = await treatmentRepository.findAllByDocumentId(assignation.documentId);
+  const sortedTreatments = treatmentModule.lib.sortInConsistentOrder(treatments);
 
   const document = await documentService.fetchDocument(assignation.documentId);
   const settingsForDocument = settingsModule.lib.computeFilteredSettings(
@@ -47,12 +43,8 @@ async function updateTreatment({
     document.decisionMetadata.motivationOccultation,
   );
 
-  const actionToPerform = `update treatment for documentId ${idModule.lib.convertToString(
-    assignation.documentId,
-  )}`;
-  const previousAnnotations = treatmentModule.lib.computeAnnotations(
-    sortedTreatments,
-  );
+  const actionToPerform = `update treatment for documentId ${idModule.lib.convertToString(assignation.documentId)}`;
+  const previousAnnotations = treatmentModule.lib.computeAnnotations(sortedTreatments);
   const treatment = await treatmentRepository.findById(assignation.treatmentId);
   annotationsDiffModule.lib.assertAnnotationsDiffAreConsistent(
     annotationsDiff,
@@ -67,25 +59,18 @@ async function updateTreatment({
   const now = new Date();
 
   const duration =
-    now.getTime() - treatment.lastUpdateDate >
-    treatmentModule.lib.getTimeThresholdToUpdateDuration()
+    now.getTime() - treatment.lastUpdateDate > treatmentModule.lib.getTimeThresholdToUpdateDuration()
       ? treatment.duration
       : now.getTime() - treatment.lastUpdateDate + treatment.duration;
 
   const updatedTreatment = treatmentModule.lib.update(
     treatment,
     {
-      annotationsDiff: annotationsDiffModule.lib.squash([
-        treatment.annotationsDiff,
-        annotationsDiff,
-      ]),
+      annotationsDiff: annotationsDiffModule.lib.squash([treatment.annotationsDiff, annotationsDiff]),
       duration,
     },
     settingsForDocument,
   );
 
-  await treatmentRepository.updateOne(
-    assignation.treatmentId,
-    updatedTreatment,
-  );
+  await treatmentRepository.updateOne(assignation.treatmentId, updatedTreatment);
 }

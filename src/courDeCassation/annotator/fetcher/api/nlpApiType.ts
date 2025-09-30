@@ -4,14 +4,8 @@ import { Deprecated } from '@src/core';
 export type { nlpApiType, nlpResponseType, nlpLossType, nlpVersion };
 
 type nlpApiType = {
-  fetchNlpAnnotations: (
-    settings: settingsType,
-    document: documentType,
-  ) => Promise<nlpResponseType>;
-  fetchNlpLoss: (
-    document: documentType,
-    treatments: Deprecated.LabelTreatment[],
-  ) => Promise<nlpLossType>;
+  fetchNlpAnnotations: (settings: settingsType, document: documentType) => Promise<nlpResponseType>;
+  fetchNlpLoss: (document: documentType, treatments: Deprecated.LabelTreatment[]) => Promise<nlpLossType>;
 };
 
 type nlpVersionDetails = {

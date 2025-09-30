@@ -1,16 +1,12 @@
 import yargs from 'yargs';
 import { buildBackend } from '@src/backend';
 import { parametersHandler } from '../lib/parametersHandler';
-
 (async () => {
   const { settings } = await parametersHandler.getParameters();
   const { beforeMonths } = parseArgv();
   const backend = buildBackend(settings);
 
-  await backend.runScript(
-    () => backend.scripts.purgeDb.run({ months: beforeMonths }),
-    backend.scripts.purgeDb.option,
-  );
+  await backend.runScript(() => backend.scripts.purgeDb.run({ months: beforeMonths }), backend.scripts.purgeDb.option);
 })();
 
 function parseArgv() {
@@ -23,7 +19,8 @@ function parseArgv() {
       },
     })
     .help()
-    .alias('help', 'h').parseSync();
+    .alias('help', 'h')
+    .parseSync();
 
   return { beforeMonths: argv.beforeMonths as number };
 }

@@ -12,54 +12,31 @@ async function fetchToBeConfirmedDocuments() {
 
   const toBeConfirmedDocuments = await documentRepository.findAllByStatusProjection(
     ['toBeConfirmed'],
-    [
-      '_id',
-      'decisionMetadata',
-      'documentNumber',
-      'publicationCategory',
-      'reviewStatus',
-      'route',
-    ],
+    ['_id', 'decisionMetadata', 'documentNumber', 'publicationCategory', 'reviewStatus', 'route'],
   );
 
   const documentIds = toBeConfirmedDocuments.map(({ _id }) => _id);
-  const assignationsByDocumentId: Record<
-    string,
-    assignationType[] | undefined
-  > = await assignationService.fetchAssignationsByDocumentIds(documentIds, {
-    assertEveryDocumentIsAssigned: false,
-  });
+  const assignationsByDocumentId: Record<string, assignationType[] | undefined> =
+    await assignationService.fetchAssignationsByDocumentIds(documentIds, {
+      assertEveryDocumentIsAssigned: false,
+    });
 
   const usersByIds = await userService.fetchUsers();
-  const treatmentsByDocumentId = await treatmentService.fetchTreatmentsByDocumentIds(
-    documentIds,
-  );
+  const treatmentsByDocumentId = await treatmentService.fetchTreatmentsByDocumentIds(documentIds);
 
   return toBeConfirmedDocuments.map((toBeConfirmedDocument) => {
-    const documentIdString = idModule.lib.convertToString(
-      toBeConfirmedDocument._id,
-    );
+    const documentIdString = idModule.lib.convertToString(toBeConfirmedDocument._id);
     const assignations = assignationsByDocumentId[documentIdString];
-    let totalTreatmentDuration: number | undefined,
-      lastTreatmentDate: number | undefined;
+    let totalTreatmentDuration: number | undefined, lastTreatmentDate: number | undefined;
     let userNames: string[] = [];
     if (assignations !== undefined) {
       const treatments = treatmentsByDocumentId[documentIdString];
-      const humanTreatments = treatmentModule.lib.extractHumanTreatments(
-        treatments,
-        assignations,
-      );
+      const humanTreatments = treatmentModule.lib.extractHumanTreatments(treatments, assignations);
 
-      userNames = humanTreatments.map(
-        ({ userId }) => usersByIds[idModule.lib.convertToString(userId)].name,
-      );
-      totalTreatmentDuration = sumBy(
-        humanTreatments,
-        ({ treatment }) => treatment.duration,
-      );
+      userNames = humanTreatments.map(({ userId }) => usersByIds[idModule.lib.convertToString(userId)].name);
+      totalTreatmentDuration = sumBy(humanTreatments, ({ treatment }) => treatment.duration);
 
-      lastTreatmentDate =
-        humanTreatments[humanTreatments.length - 1].treatment.lastUpdateDate;
+      lastTreatmentDate = humanTreatments[humanTreatments.length - 1].treatment.lastUpdateDate;
     }
 
     return {
@@ -67,8 +44,7 @@ async function fetchToBeConfirmedDocuments() {
         _id: toBeConfirmedDocument._id,
         documentNumber: toBeConfirmedDocument.documentNumber,
         jurisdiction: toBeConfirmedDocument.decisionMetadata.jurisdiction,
-        occultationBlock:
-          toBeConfirmedDocument.decisionMetadata.occultationBlock,
+        occultationBlock: toBeConfirmedDocument.decisionMetadata.occultationBlock,
         publicationCategory: toBeConfirmedDocument.publicationCategory,
         route: toBeConfirmedDocument.route,
         reviewStatus: toBeConfirmedDocument.reviewStatus,

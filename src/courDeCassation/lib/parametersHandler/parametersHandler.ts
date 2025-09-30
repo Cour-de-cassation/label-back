@@ -19,9 +19,7 @@ async function getParameters() {
 
   const parsedSettings = settingsModule.lib.parseFromJson(settings);
   const enhancedSettings = settingsModule.lib.motivationCategoryHandler.addCategoryToSettings(
-    settingsModule.lib.additionalAnnotationCategoryHandler.addCategoryToSettings(
-      parsedSettings,
-    ),
+    settingsModule.lib.additionalAnnotationCategoryHandler.addCategoryToSettings(parsedSettings),
   );
 
   return {
@@ -40,7 +38,8 @@ function getCommandParameters() {
       },
     })
     .help()
-    .alias('help', 'h').parseSync();
+    .alias('help', 'h')
+    .parseSync();
 
   return {
     settingsFile: argv.settings as string,

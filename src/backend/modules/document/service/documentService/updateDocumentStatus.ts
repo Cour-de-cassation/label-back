@@ -6,21 +6,11 @@ import { logger } from '../../../../utils';
 
 export { updateDocumentStatus };
 
-async function updateDocumentStatus(
-  _id: documentType['_id'],
-  status: documentType['status'],
-) {
+async function updateDocumentStatus(_id: documentType['_id'], status: documentType['status']) {
   const documentRepository = buildDocumentRepository();
-  const updatedDocument = await documentRepository.updateStatusById(
-    _id,
-    status,
-  );
+  const updatedDocument = await documentRepository.updateStatusById(_id, status);
   if (!updatedDocument) {
-    throw new Error(
-      `The document ${idModule.lib.convertToString(
-        _id,
-      )} was not found in the document collection`,
-    );
+    throw new Error(`The document ${idModule.lib.convertToString(_id)} was not found in the document collection`);
   }
   if (status === 'free') {
     await assignationService.deleteAssignationsByDocumentId(_id);

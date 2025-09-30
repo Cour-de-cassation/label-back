@@ -21,10 +21,6 @@ export interface ParseResponseResult {
   };
 }
 
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable-next-line @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 function ssoSamlService() {
   return new SamlService();
 }
@@ -44,9 +40,7 @@ export async function logout(user: { nameID: string; sessionIndex: string }) {
 }
 
 export async function acs(req: any) {
-  const response = (await samlService.parseResponse(
-    req,
-  )) as ParseResponseResult;
+  const response = (await samlService.parseResponse(req)) as ParseResponseResult;
   const { extract } = response;
 
   const userSSO = getUserFromSSO(extract);
@@ -71,11 +65,7 @@ export async function acs(req: any) {
         msg: `Successfully created user ${createdUser.email}`,
       });
 
-      return setUserSessionAndReturnRedirectUrl(
-        req,
-        createdUser,
-        extract?.sessionIndex,
-      );
+      return setUserSessionAndReturnRedirectUrl(req, createdUser, extract?.sessionIndex);
     }
     const hasDiff = compareUser(userSSO, userDB);
     let currentUser = userDB;
@@ -94,11 +84,7 @@ export async function acs(req: any) {
       });
     }
 
-    return setUserSessionAndReturnRedirectUrl(
-      req,
-      currentUser,
-      extract?.sessionIndex,
-    );
+    return setUserSessionAndReturnRedirectUrl(req, currentUser, extract?.sessionIndex);
   } catch (err: unknown) {
     throw new Error(`Error in acsSso: ${err}`);
   }
@@ -109,11 +95,7 @@ export async function getUserByEmail(email: string) {
   return (await userRepository.findByEmail(email)) as userType;
 }
 
-export function setUserSessionAndReturnRedirectUrl(
-  req: Request | any,
-  user: userType,
-  sessionIndex: string,
-) {
+export function setUserSessionAndReturnRedirectUrl(req: Request | any, user: userType, sessionIndex: string) {
   if (req.session) {
     req.session.user = {
       _id: idModule.lib.convertToString(user._id),
@@ -126,12 +108,9 @@ export function setUserSessionAndReturnRedirectUrl(
 
   const roleToUrlMap: Record<string, string> = {
     annotator: process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL as string,
-    admin: process.env
-      .SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL as string,
-    scrutator: process.env
-      .SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL as string,
-    publicator: process.env
-      .SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL as string,
+    admin: process.env.SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL as string,
+    scrutator: process.env.SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL as string,
+    publicator: process.env.SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL as string,
   };
 
   if (!roleToUrlMap[user.role]) {
@@ -141,20 +120,14 @@ export function setUserSessionAndReturnRedirectUrl(
   return roleToUrlMap[user.role];
 }
 
-export function getUserFromSSO(
-  extract: ParseResponseResult['extract'],
-): userType {
+export function getUserFromSSO(extract: ParseResponseResult['extract']): userType {
   const { attributes } = extract;
-  const roles = (attributes[
-    `${process.env.SSO_ATTRIBUTE_ROLE}`
-  ] as string[]).map((item: string) => item.toLowerCase()) as string[];
+  const roles = (attributes[`${process.env.SSO_ATTRIBUTE_ROLE}`] as string[]).map((item: string) =>
+    item.toLowerCase(),
+  ) as string[];
 
-  const appRoles = (process.env.SSO_APP_ROLES as string)
-    .toLowerCase()
-    .split(',');
-  const userRolesInAppRoles = every(roles, (element) =>
-    includes(appRoles, element),
-  );
+  const appRoles = (process.env.SSO_APP_ROLES as string).toLowerCase().split(',');
+  const userRolesInAppRoles = every(roles, (element) => includes(appRoles, element));
 
   if (!roles.length || !userRolesInAppRoles) {
     const errorMsg = `User ${extract.nameID}, role ${roles} doesn't exist in application ${process.env.SSO_APP_NAME}`;
@@ -172,10 +145,7 @@ export function getUserFromSSO(
   };
 }
 
-export function compareUser(
-  userSSO: userType | undefined,
-  userDB: userType | undefined,
-): boolean {
+export function compareUser(userSSO: userType | undefined, userDB: userType | undefined): boolean {
   if (!userSSO || !userDB) {
     const errorMsg = `Both objects must be defined.`;
     logger.error({ operationName: 'compareUser', msg: errorMsg });

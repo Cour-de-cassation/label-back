@@ -8,9 +8,7 @@ describe('fetchAvailableStatisticFilters', () => {
   const statisticRepository = buildStatisticRepository();
 
   it('should fetch all the publication categories available', async () => {
-    const documents = [{ publicationCategory: ['A'] }].map(
-      documentModule.generator.generate,
-    );
+    const documents = [{ publicationCategory: ['A'] }].map(documentModule.generator.generate);
     const statistics = [
       {
         publicationCategory: ['P', 'W'],
@@ -22,17 +20,11 @@ describe('fetchAvailableStatisticFilters', () => {
 
     const availableStatisticFilters = await fetchAvailableStatisticFilters();
 
-    expect(availableStatisticFilters.publicationCategories).toEqual([
-      'A',
-      'P',
-      'W',
-    ]);
+    expect(availableStatisticFilters.publicationCategories).toEqual(['A', 'P', 'W']);
   });
 
   it('should fetch all the routes available', async () => {
-    const documents = [{ route: 'automatic' as documentType['route'] }].map(
-      documentModule.generator.generate,
-    );
+    const documents = [{ route: 'automatic' as documentType['route'] }].map(documentModule.generator.generate);
     const statistics = [
       {
         route: 'exhaustive' as documentType['route'],
@@ -44,17 +36,11 @@ describe('fetchAvailableStatisticFilters', () => {
 
     const availableStatisticFilters = await fetchAvailableStatisticFilters();
 
-    expect(availableStatisticFilters.routes).toEqual([
-      'automatic',
-      'exhaustive',
-      'simple',
-    ]);
+    expect(availableStatisticFilters.routes).toEqual(['automatic', 'exhaustive', 'simple']);
   });
 
   it('should fetch all the sources available', async () => {
-    const documents = [{ source: 'DOC_SOURCE_1' }].map(
-      documentModule.generator.generate,
-    );
+    const documents = [{ source: 'DOC_SOURCE_1' }].map(documentModule.generator.generate);
     const statistics = [
       {
         source: 'STAT_SOURCE_1',
@@ -66,10 +52,6 @@ describe('fetchAvailableStatisticFilters', () => {
 
     const availableStatisticFilters = await fetchAvailableStatisticFilters();
 
-    expect(availableStatisticFilters.sources).toEqual([
-      'DOC_SOURCE_1',
-      'STAT_SOURCE_1',
-      'STAT_SOURCE_2',
-    ]);
+    expect(availableStatisticFilters.sources).toEqual(['DOC_SOURCE_1', 'STAT_SOURCE_1', 'STAT_SOURCE_2']);
   });
 });

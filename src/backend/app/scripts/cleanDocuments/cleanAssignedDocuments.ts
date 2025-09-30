@@ -1,9 +1,6 @@
 import { idModule } from '@src/core';
 import { buildAssignationRepository } from '../../../modules/assignation';
-import {
-  documentService,
-  buildDocumentRepository,
-} from '../../../modules/document';
+import { documentService, buildDocumentRepository } from '../../../modules/document';
 import { logger } from '../../../utils';
 
 export { cleanAssignedDocuments };
@@ -15,16 +12,10 @@ export { cleanAssignedDocuments };
 async function cleanAssignedDocuments() {
   logger.log({ operationName: 'cleanAssignedDocuments', msg: 'START' });
   const documentRepository = buildDocumentRepository();
-  const assignedDocuments = await documentRepository.findAllByStatusProjection(
-    ['pending', 'saved'],
-    ['_id', 'status'],
-  );
+  const assignedDocuments = await documentRepository.findAllByStatusProjection(['pending', 'saved'], ['_id', 'status']);
 
   const assignationRepository = buildAssignationRepository();
-  const assignations = await assignationRepository.findAllProjection([
-    '_id',
-    'documentId',
-  ]);
+  const assignations = await assignationRepository.findAllProjection(['_id', 'documentId']);
 
   logger.log({
     operationName: 'cleanAssignedDocuments',

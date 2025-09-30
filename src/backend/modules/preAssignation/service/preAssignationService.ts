@@ -1,7 +1,4 @@
-import {
-  fetchAllPreAssignation,
-  fetchPreAssignationBySourceAndNumber,
-} from './fetch';
+import { fetchAllPreAssignation, fetchPreAssignationBySourceAndNumber } from './fetch';
 import { createPreAssignation } from './createPreAssignation';
 import { deletePreAssignation } from './deletePreAssignation';
 

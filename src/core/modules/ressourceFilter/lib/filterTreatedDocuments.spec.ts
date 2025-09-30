@@ -4,13 +4,16 @@ import { treatmentModule } from '../../treatment';
 import { ressourceFilterGenerator } from '../generator';
 import { filterTreatedDocuments } from './filterTreatedDocuments';
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 describe('filterTreatedDocuments', () => {
   it('should filter all the given treated documents with added annotations', () => {
     const documents = [{}, {}].map(documentModule.generator.generate);
     const userId = idModule.lib.buildId();
     const treatments = [
-      { subAnnotationsSensitiveCount: 5, documentId: documents[1]._id, order: 2 },
+      {
+        subAnnotationsSensitiveCount: 5,
+        documentId: documents[1]._id,
+        order: 2,
+      },
       { documentId: documents[1]._id, order: 0 },
       { documentId: documents[1]._id, order: 1 },
     ].map(treatmentModule.generator.generate);
@@ -32,7 +35,11 @@ describe('filterTreatedDocuments', () => {
     });
 
     expect(filteredTreatedDocuments).toEqual([
-      { document: documents[1], treatments: treatments, humanTreatments: [{ userId, treatment: treatments[0] }] },
+      {
+        document: documents[1],
+        treatments: treatments,
+        humanTreatments: [{ userId, treatment: treatments[0] }],
+      },
     ]);
   });
 
@@ -62,7 +69,11 @@ describe('filterTreatedDocuments', () => {
     });
 
     expect(filteredTreatedDocuments).toEqual([
-      { document: documents[1], treatments, humanTreatments: [{ userId, treatment: treatments[0] }] },
+      {
+        document: documents[1],
+        treatments,
+        humanTreatments: [{ userId, treatment: treatments[0] }],
+      },
     ]);
   });
 

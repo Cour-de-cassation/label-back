@@ -22,13 +22,7 @@ function buildMongo() {
     await client.close();
   }
 
-  async function initialize({
-    dbName: newDbName,
-    url,
-  }: {
-    dbName: string;
-    url: string;
-  }) {
+  async function initialize({ dbName: newDbName, url }: { dbName: string; url: string }) {
     dbName = newDbName;
     client = await new MongoClient(url, { directConnection: true }).connect();
 

@@ -14,9 +14,7 @@ async function assertDocumentStatus({
 
   const document = await documentRepository.findById(documentId);
   if (document.status !== status) {
-    throw new Error(
-      `The document status "${document.status}" does not match the following: "${status}"`,
-    );
+    throw new Error(`The document status "${document.status}" does not match the following: "${status}"`);
   }
 
   return true;

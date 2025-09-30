@@ -1,50 +1,30 @@
 import { uniq } from 'lodash';
 import { documentType, idModule } from '@src/core';
-import {
-  buildFakeRepositoryBuilder,
-  projectFakeObjects,
-  updateFakeCollection,
-} from '../../../repository';
+import { buildFakeRepositoryBuilder, projectFakeObjects, updateFakeCollection } from '../../../repository';
 import { customDocumentRepositoryType } from './customDocumentRepositoryType';
 
 export { buildFakeDocumentRepository };
 
-const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
-  documentType,
-  customDocumentRepositoryType
->({
+const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, customDocumentRepositoryType>({
   collectionName: 'documents',
   buildCustomFakeRepository: (collection) => ({
     async countByStatus(status) {
-      return collection.filter((document) => status.includes(document.status))
-        .length;
+      return collection.filter((document) => status.includes(document.status)).length;
     },
 
     async countNotIn(idsNotToSearchIn) {
-      return collection.filter(
-        (document) =>
-          !idsNotToSearchIn.some((id) =>
-            idModule.lib.equalId(document._id, id),
-          ),
-      ).length;
+      return collection.filter((document) => !idsNotToSearchIn.some((id) => idModule.lib.equalId(document._id, id)))
+        .length;
     },
 
     async findNotIn(idsNotToSearchIn) {
-      return collection.filter(
-        (document) =>
-          !idsNotToSearchIn.some((id) =>
-            idModule.lib.equalId(document._id, id),
-          ),
-      );
+      return collection.filter((document) => !idsNotToSearchIn.some((id) => idModule.lib.equalId(document._id, id)));
     },
 
     async findAllPublicationCategories() {
       let publicationCategories: string[] = [];
       collection.forEach(
-        (document) =>
-          (publicationCategories = uniq(
-            publicationCategories.concat(document.publicationCategory),
-          )),
+        (document) => (publicationCategories = uniq(publicationCategories.concat(document.publicationCategory))),
       );
 
       return publicationCategories;
@@ -56,16 +36,12 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
     ) {
       return collection.filter(
         (document) =>
-          NACCodes.some((NACCode) =>
-            document.publicationCategory.includes(NACCode),
-          ) && statuses.includes(document.status),
+          NACCodes.some((NACCode) => document.publicationCategory.includes(NACCode)) &&
+          statuses.includes(document.status),
       );
     },
 
-    async findAllByPublicationCategoryLettersAndStatus(
-      publicationCategoryLetters,
-      statuses,
-    ) {
+    async findAllByPublicationCategoryLettersAndStatus(publicationCategoryLetters, statuses) {
       return collection.filter(
         (document) =>
           publicationCategoryLetters.some((publicationCategoryLetter) =>
@@ -74,10 +50,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
       );
     },
 
-    async findAllByPublicationCategoryLettersProjection(
-      publicationCategoryLetters,
-      projections,
-    ) {
+    async findAllByPublicationCategoryLettersProjection(publicationCategoryLetters, projections) {
       return collection
         .filter((document) =>
           publicationCategoryLetters.some((publicationCategoryLetter) =>
@@ -87,11 +60,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
         .map((document) => projectFakeObjects(document, projections));
     },
 
-    async findAllByRoutesOrPublicationCategoryLettersProjection(
-      routes,
-      publicationCategoryLetters,
-      projections,
-    ) {
+    async findAllByRoutesOrPublicationCategoryLettersProjection(routes, publicationCategoryLetters, projections) {
       return collection
         .filter(
           (document) =>
@@ -112,17 +81,12 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
         .map((document) => projectFakeObjects(document, projections));
     },
 
-    async findOneByStatusAndPriorityNotIn(
-      { status, priority },
-      idsNotToSearchIn,
-    ) {
+    async findOneByStatusAndPriorityNotIn({ status, priority }, idsNotToSearchIn) {
       const document = await collection.find(
         (document) =>
           document.status === status &&
           document.priority === priority &&
-          !idsNotToSearchIn.some((id) =>
-            idModule.lib.equalId(document._id, id),
-          ),
+          !idsNotToSearchIn.some((id) => idModule.lib.equalId(document._id, id)),
       );
       return document || undefined;
     },
@@ -130,114 +94,72 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
     async findOneByStatusWithoutLossNotIn(statuses, idsNotToSearchIn) {
       const document = await collection.find(
         (document) =>
-          statuses.some(
-            (status: documentType['status']) => document.status === status,
-          ) &&
+          statuses.some((status: documentType['status']) => document.status === status) &&
           document.loss === undefined &&
-          !idsNotToSearchIn.some((id) =>
-            idModule.lib.equalId(document._id, id),
-          ),
+          !idsNotToSearchIn.some((id) => idModule.lib.equalId(document._id, id)),
       );
       return document || undefined;
     },
 
     async findOneByDocumentNumberAndSource({ documentNumber, source }) {
-      return collection.find(
-        (document) =>
-          document.source === source &&
-          document.documentNumber === documentNumber,
-      );
+      return collection.find((document) => document.source === source && document.documentNumber === documentNumber);
     },
 
     async findOneByExternalId(externalId) {
-      const document = collection.find(
-        (document) => document.externalId === externalId,
-      );
+      const document = collection.find((document) => document.externalId === externalId);
       return document || undefined;
     },
 
-    async findOneByStatusAndPriorityAmong(
-      { status, priority },
-      idsToSearchInFirst,
-    ) {
+    async findOneByStatusAndPriorityAmong({ status, priority }, idsToSearchInFirst) {
       const freeDocuments = collection
         .filter(
           (document) =>
             document.priority === priority &&
             document.status === status &&
-            idsToSearchInFirst.some((id) =>
-              idModule.lib.equalId(document._id, id),
-            ),
+            idsToSearchInFirst.some((id) => idModule.lib.equalId(document._id, id)),
         )
-        .sort(
-          (documentA, documentB) =>
-            documentB.decisionMetadata.date ||
-            0 - (documentA.decisionMetadata.date || 0),
-        );
+        .sort((documentA, documentB) => documentB.decisionMetadata.date || 0 - (documentA.decisionMetadata.date || 0));
       return freeDocuments[0];
     },
 
-    async findOneRandomByStatusAndPriorityAmong(
-      { status, priority },
-      idsToSearchInFirst,
-    ) {
+    async findOneRandomByStatusAndPriorityAmong({ status, priority }, idsToSearchInFirst) {
       const freeDocuments = collection.filter(
         (document) =>
           document.priority === priority &&
           document.status === status &&
-          idsToSearchInFirst.some((id) =>
-            idModule.lib.equalId(document._id, id),
-          ),
+          idsToSearchInFirst.some((id) => idModule.lib.equalId(document._id, id)),
       );
 
       const sortedByMostRecent = freeDocuments.sort(
-        (documentA, documentB) =>
-          (documentB.decisionMetadata.date || 0) -
-          (documentA.decisionMetadata.date || 0),
+        (documentA, documentB) => (documentB.decisionMetadata.date || 0) - (documentA.decisionMetadata.date || 0),
       );
 
       const mostRecentDocuments = sortedByMostRecent.slice(0, 50);
 
       const sortedByLeastRecent = freeDocuments.sort(
-        (documentA, documentB) =>
-          (documentA.decisionMetadata.date || 0) -
-          (documentB.decisionMetadata.date || 0),
+        (documentA, documentB) => (documentA.decisionMetadata.date || 0) - (documentB.decisionMetadata.date || 0),
       );
 
       const leastRecentDocuments = sortedByLeastRecent.slice(0, 50);
 
-      const combinedDocuments = mostRecentDocuments.concat(
-        leastRecentDocuments,
-      );
+      const combinedDocuments = mostRecentDocuments.concat(leastRecentDocuments);
 
       if (combinedDocuments.length === 0) {
         return undefined;
       }
 
-      return combinedDocuments[
-        Math.floor(Math.random() * combinedDocuments.length)
-      ];
+      return combinedDocuments[Math.floor(Math.random() * combinedDocuments.length)];
     },
 
-    async findByStatusAndPriorityLimitAmong(
-      { status, priority },
-      limit,
-      idsToSearchInFirst,
-    ) {
+    async findByStatusAndPriorityLimitAmong({ status, priority }, limit, idsToSearchInFirst) {
       const documents = collection
         .filter(
           (document) =>
             document.priority === priority &&
             document.status === status &&
-            idsToSearchInFirst.some((id) =>
-              idModule.lib.equalId(document._id, id),
-            ),
+            idsToSearchInFirst.some((id) => idModule.lib.equalId(document._id, id)),
         )
-        .sort(
-          (documentA, documentB) =>
-            (documentB.decisionMetadata.date || 0) -
-            (documentA.decisionMetadata.date || 0),
-        )
+        .sort((documentA, documentB) => (documentB.decisionMetadata.date || 0) - (documentA.decisionMetadata.date || 0))
         .slice(0, limit);
       return documents;
     },
@@ -254,9 +176,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
             : document,
         ),
       );
-      const updatedDocument = collection.find((document) =>
-        idModule.lib.equalId(_id, document._id),
-      );
+      const updatedDocument = collection.find((document) => idModule.lib.equalId(_id, document._id));
 
       return updatedDocument;
     },
@@ -273,9 +193,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
             : document,
         ),
       );
-      const updatedDocument = collection.find((document) =>
-        idModule.lib.equalId(_id, document._id),
-      );
+      const updatedDocument = collection.find((document) => idModule.lib.equalId(_id, document._id));
 
       return updatedDocument;
     },
@@ -293,17 +211,12 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
         ),
       );
 
-      const updatedDocument = collection.find((document) =>
-        idModule.lib.equalId(_id, document._id),
-      );
+      const updatedDocument = collection.find((document) => idModule.lib.equalId(_id, document._id));
 
       return updatedDocument;
     },
 
-    async updateAdditionalTermsParsingFailed(
-      _id,
-      additionalTermsParsingFailed,
-    ) {
+    async updateAdditionalTermsParsingFailed(_id, additionalTermsParsingFailed) {
       updateFakeCollection(
         collection,
         collection.map((document) =>
@@ -319,9 +232,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
         ),
       );
 
-      const updatedDocument = collection.find((document) =>
-        idModule.lib.equalId(_id, document._id),
-      );
+      const updatedDocument = collection.find((document) => idModule.lib.equalId(_id, document._id));
 
       return updatedDocument;
     },
@@ -342,9 +253,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
         ),
       );
 
-      const updatedDocument = collection.find((document) =>
-        idModule.lib.equalId(_id, document._id),
-      );
+      const updatedDocument = collection.find((document) => idModule.lib.equalId(_id, document._id));
 
       return updatedDocument;
     },
@@ -365,9 +274,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
         ),
       );
 
-      const updatedDocument = collection.find((document) =>
-        idModule.lib.equalId(_id, document._id),
-      );
+      const updatedDocument = collection.find((document) => idModule.lib.equalId(_id, document._id));
 
       return updatedDocument;
     },
@@ -384,9 +291,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
             : document,
         ),
       );
-      const updatedDocument = collection.find((document) =>
-        idModule.lib.equalId(_id, document._id),
-      );
+      const updatedDocument = collection.find((document) => idModule.lib.equalId(_id, document._id));
 
       return updatedDocument;
     },
@@ -404,9 +309,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
             : document,
         ),
       );
-      const updatedDocument = collection.find((document) =>
-        idModule.lib.equalId(_id, document._id),
-      );
+      const updatedDocument = collection.find((document) => idModule.lib.equalId(_id, document._id));
 
       return updatedDocument;
     },
@@ -414,8 +317,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
       updateFakeCollection(
         collection,
         collection.map((document) =>
-          idModule.lib.equalId(filter._id, document._id) &&
-          document.status === filter.status
+          idModule.lib.equalId(filter._id, document._id) && document.status === filter.status
             ? {
                 ...document,
                 status: update.status,
@@ -425,9 +327,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<
         ),
       );
 
-      const updatedDocument = collection.find((document) =>
-        idModule.lib.equalId(filter._id, document._id),
-      );
+      const updatedDocument = collection.find((document) => idModule.lib.equalId(filter._id, document._id));
 
       return updatedDocument;
     },

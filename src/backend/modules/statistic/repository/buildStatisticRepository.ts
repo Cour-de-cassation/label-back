@@ -5,10 +5,7 @@ import { customStatisticRepositoryType } from './customStatisticRepositoryType';
 
 export { buildStatisticRepository };
 
-const buildStatisticRepository = buildRepositoryBuilder<
-  statisticType,
-  customStatisticRepositoryType
->({
+const buildStatisticRepository = buildRepositoryBuilder<statisticType, customStatisticRepositoryType>({
   collectionName: 'statistics',
   indexes: [
     { index: { source: 1 } },
@@ -19,19 +16,13 @@ const buildStatisticRepository = buildRepositoryBuilder<
     { index: { jurisdiction: 1 } },
   ],
   buildCustomRepository: (collection) => ({
-    async findAllStatisticsByDocumentNumber(
-      documentNumber: documentType['documentNumber'],
-    ) {
-      const statisticDocument = await collection
-        .find({ documentNumber: { $eq: documentNumber } })
-        .toArray();
+    async findAllStatisticsByDocumentNumber(documentNumber: documentType['documentNumber']) {
+      const statisticDocument = await collection.find({ documentNumber: { $eq: documentNumber } }).toArray();
       return statisticDocument;
     },
 
     async findAllByRessourceFilter(ressourceFilter) {
-      const ressourceFilterRequest = buildRessourceFilterRequest(
-        ressourceFilter,
-      );
+      const ressourceFilterRequest = buildRessourceFilterRequest(ressourceFilter);
 
       return collection.find(ressourceFilterRequest).toArray();
     },
@@ -80,7 +71,7 @@ const buildStatisticRepository = buildRepositoryBuilder<
       const sixMonthsAgo = Date.now() - 6 * 30 * 24 * 60 * 60 * 1000; // 6 months in milliseconds
       return await collection
         .find({ treatmentDate: { $gte: sixMonthsAgo } })
-        .project<projectedType<statisticType, typeof projections[number]>>(projections)
+        .project<projectedType<statisticType, (typeof projections)[number]>>(projections)
         .toArray();
     },
   }),

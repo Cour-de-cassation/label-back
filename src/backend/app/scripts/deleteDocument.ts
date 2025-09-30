@@ -1,8 +1,5 @@
 import { logger } from '../../utils';
-import {
-  buildDocumentRepository,
-  documentService,
-} from '../../modules/document';
+import { buildDocumentRepository, documentService } from '../../modules/document';
 import { documentType, settingsType } from '@src/core';
 import { statisticService } from '../../modules/statistic';
 
@@ -22,11 +19,7 @@ async function deleteDocument(
 
   if (document) {
     if (document.status != 'loaded' && document.status != 'nlpAnnotating') {
-      await statisticService.saveStatisticsOfDocument(
-        document,
-        settings,
-        'deleted with script',
-      );
+      await statisticService.saveStatisticsOfDocument(document, settings, 'deleted with script');
     }
     await documentService.deleteDocument(document._id);
   } else {

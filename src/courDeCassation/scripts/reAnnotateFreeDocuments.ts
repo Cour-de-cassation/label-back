@@ -2,7 +2,6 @@ import { buildBackend } from '@src/backend';
 import { settingsType } from '@src/core';
 import { buildNlpAnnotator } from '../annotator';
 import { parametersHandler } from '../lib/parametersHandler';
-
 (async () => {
   const { settings } = await parametersHandler.getParameters();
   const backend = buildBackend(settings);

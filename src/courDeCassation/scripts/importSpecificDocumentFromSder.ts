@@ -2,15 +2,9 @@ import yargs from 'yargs';
 import { buildBackend } from '@src/backend';
 import { sderConnector } from '../connector';
 import { parametersHandler } from '../lib/parametersHandler';
-
 (async () => {
   const { settings } = await parametersHandler.getParameters();
-  const {
-    documentNumber,
-    source,
-    lowPriority,
-    keepLabelTreatments,
-  } = parseArgv();
+  const { documentNumber, source, lowPriority, keepLabelTreatments } = parseArgv();
   const backend = buildBackend(settings);
 
   backend.runScript(
@@ -43,8 +37,7 @@ function parseArgv() {
       },
       source: {
         demandOption: true,
-        description:
-          'source (jurinet, jurica or juritj) of the document you want to import',
+        description: 'source (jurinet, jurica or juritj) of the document you want to import',
         type: 'string',
       },
       keepLabelTreatments: {
@@ -54,7 +47,8 @@ function parseArgv() {
       },
     })
     .help()
-    .alias('help', 'h').parseSync();
+    .alias('help', 'h')
+    .parseSync();
 
   return {
     documentNumber: argv.documentNumber as number,

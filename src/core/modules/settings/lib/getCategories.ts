@@ -4,7 +4,10 @@ export { getCategories };
 
 function getCategories(
   settings: settingsType,
-  filter: { status: categorySettingType['status'][]; canBeAnnotatedBy: 'human' | 'NLP' },
+  filter: {
+    status: categorySettingType['status'][];
+    canBeAnnotatedBy: 'human' | 'NLP';
+  },
 ) {
   return Object.keys(settings)
     .filter((category) => {

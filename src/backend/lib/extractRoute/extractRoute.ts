@@ -6,9 +6,7 @@ import { Deprecated } from '@src/core';
 
 export { extractRoute };
 
-async function extractRoute(
-  document: documentType,
-): Promise<documentType['route']> {
+async function extractRoute(document: documentType): Promise<documentType['route']> {
   let route: documentType['route'] = 'default';
 
   const extractRouteFunctions = {
@@ -20,9 +18,7 @@ async function extractRoute(
 
   try {
     if (document.source in extractRouteFunctions) {
-      route = await extractRouteFunctions[
-        document.source as Deprecated.Sources
-      ](document);
+      route = await extractRouteFunctions[document.source as Deprecated.Sources](document);
     } else {
       throw new Error('Source non prise en charge');
     }

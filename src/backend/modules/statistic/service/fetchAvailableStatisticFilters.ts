@@ -9,22 +9,22 @@ export { fetchAvailableStatisticFilters };
 async function fetchAvailableStatisticFilters() {
   const statisticRepository = buildStatisticRepository();
 
-  const statisticFields = await statisticRepository.findRecentStatisticsProjection(
-    ['publicationCategory', 'route', 'importer', 'source', 'jurisdiction'],
-  );
+  const statisticFields = await statisticRepository.findRecentStatisticsProjection([
+    'publicationCategory',
+    'route',
+    'importer',
+    'source',
+    'jurisdiction',
+  ]);
 
   const availableDocumentSources = await documentService.fetchAllSources();
-  const { minDate, maxDate } = await fetchExtremumDates(
-    availableDocumentSources,
-  );
+  const { minDate, maxDate } = await fetchExtremumDates(availableDocumentSources);
 
   return {
     minDate,
     maxDate,
     jurisdictions: await fetchAvailableJurisdictionFilters(statisticFields),
-    publicationCategories: await fetchAvailablePublicationCategoryFilters(
-      statisticFields,
-    ),
+    publicationCategories: await fetchAvailablePublicationCategoryFilters(statisticFields),
     routes: await fetchAvailableRouteFilters(statisticFields),
     importers: await fetchAvailableImporterFilters(statisticFields),
     sources: await fetchAvailableSourceFilters(statisticFields),
@@ -39,16 +39,12 @@ async function fetchAvailablePublicationCategoryFilters(
   let statisticPublicationCategories: string[] = [];
   statisticFields.forEach(
     ({ publicationCategory }) =>
-      (statisticPublicationCategories = uniq(
-        statisticPublicationCategories.concat(publicationCategory),
-      )),
+      (statisticPublicationCategories = uniq(statisticPublicationCategories.concat(publicationCategory))),
   );
 
   const documentPublicationCategories = await documentService.fetchAllPublicationCategories();
 
-  return uniq(
-    statisticPublicationCategories.concat(documentPublicationCategories),
-  ).sort();
+  return uniq(statisticPublicationCategories.concat(documentPublicationCategories)).sort();
 }
 
 async function fetchAvailableRouteFilters(
@@ -90,8 +86,7 @@ async function fetchAvailableJurisdictionFilters(
   }>,
 ) {
   const statisticJurisdictions = statisticFields.reduce(
-    (accumulator, { jurisdiction }) =>
-      jurisdiction ? [...accumulator, jurisdiction] : accumulator,
+    (accumulator, { jurisdiction }) => (jurisdiction ? [...accumulator, jurisdiction] : accumulator),
     [] as string[],
   );
   const documentJurisdictions = await documentService.fetchAllJurisdictions();

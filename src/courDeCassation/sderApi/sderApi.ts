@@ -34,9 +34,7 @@ async function fetchApi<T = Record<string, unknown>>({
     })
     .catch((error: AxiosError) => {
       if (error.response) {
-        throw new Error(
-          `${error.response.status} ${error.response.statusText}`,
-        );
+        throw new Error(`${error.response.status} ${error.response.statusText}`);
       }
       throw new Error(`${error.code ?? 'Unknown'} on /${path}`);
     });
@@ -63,9 +61,7 @@ const sderApi = {
       labelStatus: 'toBeTreated',
       sourceName,
     });
-    response.decisions = response.decisions.filter(
-      ({ originalText }) => !!originalText,
-    );
+    response.decisions = response.decisions.filter(({ originalText }) => !!originalText);
     let index = 0;
 
     return {
@@ -81,9 +77,7 @@ const sderApi = {
             sourceName,
             nextCursor: response.nextCursor,
           });
-          response.decisions = response.decisions.filter(
-            ({ originalText }) => !!originalText,
-          );
+          response.decisions = response.decisions.filter(({ originalText }) => !!originalText);
           index = 1;
           return response.decisions[0];
         }

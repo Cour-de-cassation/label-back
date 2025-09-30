@@ -1,9 +1,4 @@
-import {
-  assignationModule,
-  idModule,
-  problemReportModule,
-  treatmentModule,
-} from '@src/core';
+import { assignationModule, idModule, problemReportModule, treatmentModule } from '@src/core';
 import { buildProblemReportRepository } from '../../problemReport';
 import { buildTreatmentRepository } from '../../treatment';
 import { buildAssignationRepository } from '../repository';

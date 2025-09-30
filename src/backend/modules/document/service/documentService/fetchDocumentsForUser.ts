@@ -1,11 +1,4 @@
-import {
-  assignationType,
-  documentModule,
-  documentType,
-  idModule,
-  idType,
-  userType,
-} from '@src/core';
+import { assignationType, documentModule, documentType, idModule, idType, userType } from '@src/core';
 import { logger } from '../../../../utils';
 import { assignationService } from '../../../assignation';
 import { treatmentService } from '../../../treatment';
@@ -13,15 +6,10 @@ import { buildDocumentRepository } from '../../repository';
 
 export { buildFetchDocumentsForUser };
 
-function buildFetchDocumentsForUser(
-  checkCallAttempts: (identifier: string) => void,
-) {
+function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => void) {
   return fetchDocumentsForUser;
 
-  async function fetchDocumentsForUser(
-    userId: idType,
-    documentsMaxCount: number,
-  ) {
+  async function fetchDocumentsForUser(userId: idType, documentsMaxCount: number) {
     const documents: Array<{
       document: documentType;
       assignationId: assignationType['_id'];
@@ -31,14 +19,8 @@ function buildFetchDocumentsForUser(
     const documentIdsWithAnnotations = await treatmentService.fetchTreatedDocumentIds();
 
     // Documents already assignated to the user are fetched
-    const alreadyAssignatedDocuments = await fetchAlreadyAssignatedDocuments(
-      idModule.lib.buildId(userId),
-    );
-    for (
-      let i = 0;
-      i < alreadyAssignatedDocuments.length && i < documentsMaxCount;
-      i++
-    ) {
+    const alreadyAssignatedDocuments = await fetchAlreadyAssignatedDocuments(idModule.lib.buildId(userId));
+    for (let i = 0; i < alreadyAssignatedDocuments.length && i < documentsMaxCount; i++) {
       checkCallAttempts(idModule.lib.convertToString(userId));
       const alreadyAssignatedDocument = alreadyAssignatedDocuments[i];
       documents.push(alreadyAssignatedDocument);
@@ -52,10 +34,7 @@ function buildFetchDocumentsForUser(
     // We fill the pool of assignated documents with new ones
     for (let i = documents.length; i < documentsMaxCount; i++) {
       try {
-        const assignatedDocument = await fetchDocumentForUser(
-          idModule.lib.buildId(userId),
-          documentIdsWithAnnotations,
-        );
+        const assignatedDocument = await fetchDocumentForUser(idModule.lib.buildId(userId), documentIdsWithAnnotations);
         documents.push(assignatedDocument);
       } catch (error) {
         logger.log({
@@ -79,9 +58,7 @@ function buildFetchDocumentsForUser(
 
     return assignNewDocument(documentIdsToSearchIn);
 
-    async function assignNewDocument(
-      documentIdsToSearchIn: documentType['_id'][],
-    ): Promise<{
+    async function assignNewDocument(documentIdsToSearchIn: documentType['_id'][]): Promise<{
       document: documentType;
       assignationId: assignationType['_id'];
     }> {
@@ -89,10 +66,7 @@ function buildFetchDocumentsForUser(
 
       // Get document by priority
       for (let priority = 4; priority >= 0; priority--) {
-        document = await assignDocumentByPriority(
-          priority,
-          documentIdsToSearchIn,
-        );
+        document = await assignDocumentByPriority(priority, documentIdsToSearchIn);
         if (document) {
           break;
         }
@@ -116,9 +90,7 @@ function buildFetchDocumentsForUser(
   ): Promise<documentType | undefined> {
     const documentRepository = buildDocumentRepository();
 
-    const document:
-      | documentType
-      | undefined = await documentRepository.findOneRandomByStatusAndPriorityAmong(
+    const document: documentType | undefined = await documentRepository.findOneRandomByStatusAndPriorityAmong(
       { priority, status: 'free' },
       documentIdsToSearchIn,
     );
@@ -126,14 +98,9 @@ function buildFetchDocumentsForUser(
     if (!document) {
       return undefined;
     }
-    if (
-      (await assignationService.fetchAssignationsOfDocumentId(document?._id))
-        .length != 0
-    ) {
+    if ((await assignationService.fetchAssignationsOfDocumentId(document?._id)).length != 0) {
       // If the document is assignated, remove the document from the list
-      documentIdsToSearchIn = documentIdsToSearchIn.filter(
-        (documentId) => !documentId.equals(document?._id),
-      );
+      documentIdsToSearchIn = documentIdsToSearchIn.filter((documentId) => !documentId.equals(document?._id));
       return assignDocumentByPriority(priority, documentIdsToSearchIn);
     }
 
@@ -155,18 +122,14 @@ function buildFetchDocumentsForUser(
     return updatedDocument;
   }
 
-  async function fetchAlreadyAssignatedDocuments(
-    userId: userType['_id'],
-  ): Promise<
+  async function fetchAlreadyAssignatedDocuments(userId: userType['_id']): Promise<
     Array<{
       document: documentType;
       assignationId: assignationType['_id'];
     }>
   > {
     const documentRepository = buildDocumentRepository();
-    const documentIdsAssignated = await assignationService.fetchDocumentIdsAssignatedToUserId(
-      userId,
-    );
+    const documentIdsAssignated = await assignationService.fetchDocumentIdsAssignatedToUserId(userId);
 
     const documentsById = await documentRepository.findAllByIds(
       documentIdsAssignated.map(({ documentId }) => documentId),
@@ -176,16 +139,9 @@ function buildFetchDocumentsForUser(
         document: documentsById[idModule.lib.convertToString(documentId)],
         assignationId,
       }))
-      .filter(
-        ({ document }) =>
-          document.status === 'pending' || document.status === 'saved',
-      )
+      .filter(({ document }) => document.status === 'pending' || document.status === 'saved')
       .sort(({ document: document1 }, { document: document2 }) =>
-        document1.status === 'saved'
-          ? -1
-          : document2.status === 'saved'
-          ? 1
-          : 0,
+        document1.status === 'saved' ? -1 : document2.status === 'saved' ? 1 : 0,
       );
   }
 }

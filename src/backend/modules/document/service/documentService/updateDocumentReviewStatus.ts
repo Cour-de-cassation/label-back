@@ -11,25 +11,18 @@ async function updateDocumentReviewStatus(
   const document = await documentRepository.findById(_id);
 
   const viewerNames =
-    !!update.viewerNameToAdd &&
-    !document.reviewStatus.viewerNames.includes(update.viewerNameToAdd)
+    !!update.viewerNameToAdd && !document.reviewStatus.viewerNames.includes(update.viewerNameToAdd)
       ? [...document.reviewStatus.viewerNames, update.viewerNameToAdd]
       : document.reviewStatus.viewerNames;
   const hasBeenAmended =
-    update.hasBeenAmended !== undefined
-      ? update.hasBeenAmended
-      : document.reviewStatus.hasBeenAmended;
+    update.hasBeenAmended !== undefined ? update.hasBeenAmended : document.reviewStatus.hasBeenAmended;
 
   const updatedDocument = await documentRepository.updateOne(_id, {
     reviewStatus: { viewerNames, hasBeenAmended },
   });
 
   if (!updatedDocument) {
-    throw new Error(
-      `The document ${idModule.lib.convertToString(
-        _id,
-      )} was not found in the document collection`,
-    );
+    throw new Error(`The document ${idModule.lib.convertToString(_id)} was not found in the document collection`);
   }
 
   return updatedDocument;

@@ -4,10 +4,7 @@ import { customAssignationRepositoryType } from './customAssignationRepositoryTy
 
 export { buildAssignationRepository };
 
-const buildAssignationRepository = buildRepositoryBuilder<
-  assignationType,
-  customAssignationRepositoryType
->({
+const buildAssignationRepository = buildRepositoryBuilder<assignationType, customAssignationRepositoryType>({
   collectionName: 'assignations',
   indexes: [
     {
@@ -27,13 +24,9 @@ const buildAssignationRepository = buildRepositoryBuilder<
     },
 
     async findAllByDocumentIds(documentIdsToSearchIn) {
-      const assignations = await collection
-        .find({ documentId: { $in: documentIdsToSearchIn } })
-        .toArray();
+      const assignations = await collection.find({ documentId: { $in: documentIdsToSearchIn } }).toArray();
 
-      return indexer.indexManyBy(assignations, (assignation) =>
-        idModule.lib.convertToString(assignation.documentId),
-      );
+      return indexer.indexManyBy(assignations, (assignation) => idModule.lib.convertToString(assignation.documentId));
     },
 
     async findByDocumentIdAndUserId({ documentId, userId }) {

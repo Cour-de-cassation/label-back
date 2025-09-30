@@ -14,26 +14,14 @@ function extractAppealRegisterRoleGeneralNumber(
     return registerNumber?.split(' ')[0];
   } else if (source === Deprecated.Sources.CC) {
     const verifappeal = /^[A-Za-z]\d+$/;
-    if (
-      jurisdictionName?.includes('cassation') &&
-      appeal != undefined &&
-      verifappeal.test(appeal)
-    ) {
+    if (jurisdictionName?.includes('cassation') && appeal != undefined && verifappeal.test(appeal)) {
       appeal = appeal?.replace(/[A-Za-z]/g, '');
-      const formattedappeal =
-        appeal.substring(0, 2) +
-        '-' +
-        appeal.substring(2, 4) +
-        '.' +
-        appeal.substring(4);
+      const formattedappeal = appeal.substring(0, 2) + '-' + appeal.substring(2, 4) + '.' + appeal.substring(4);
       return formattedappeal;
     } else {
       return appeal;
     }
-  } else if (
-    source === Deprecated.Sources.TJ &&
-    numeroRoleGeneral != undefined
-  ) {
+  } else if (source === Deprecated.Sources.TJ && numeroRoleGeneral != undefined) {
     return numeroRoleGeneral;
   } else if (source === Deprecated.Sources.TCOM && registerNumber) {
     return registerNumber;

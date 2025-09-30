@@ -7,16 +7,8 @@ function buildAuthenticatedController<inT, outT>({
   controllerWithUser,
 }: {
   permissions: Array<userType['role']>;
-  controllerWithUser: (
-    user: userType,
-    req: { args: inT; headers: any; session?: any; path?: string },
-  ) => Promise<outT>;
-}): (req: {
-  args: inT;
-  headers: any;
-  session?: any;
-  path?: string;
-}) => Promise<outT> {
+  controllerWithUser: (user: userType, req: { args: inT; headers: any; session?: any; path?: string }) => Promise<outT>;
+}): (req: { args: inT; headers: any; session?: any; path?: string }) => Promise<outT> {
   return async (req: {
     args: inT;
     headers: any;
@@ -39,11 +31,7 @@ function buildAuthenticatedController<inT, outT>({
     const resolvedUser = {
       _id: idModule.lib.buildId(currentUser._id) as userType['_id'],
       name: currentUser.name,
-      role: currentUser.role as
-        | 'admin'
-        | 'annotator'
-        | 'publicator'
-        | 'scrutator',
+      role: currentUser.role as 'admin' | 'annotator' | 'publicator' | 'scrutator',
       email: currentUser.email,
     };
 

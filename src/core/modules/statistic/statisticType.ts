@@ -37,7 +37,10 @@ const statisticModel = buildModel({
       ],
     },
     linkedEntitiesCount: { kind: 'primitive', content: 'number' },
-    publicationCategory: { kind: 'array', content: { kind: 'primitive', content: 'string' } },
+    publicationCategory: {
+      kind: 'array',
+      content: { kind: 'primitive', content: 'string' },
+    },
     session: {
       kind: 'or',
       content: [

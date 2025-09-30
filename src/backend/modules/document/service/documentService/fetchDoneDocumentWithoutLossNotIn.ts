@@ -8,8 +8,5 @@ async function fetchDoneDocumentWithoutLossNotIn(
 ): Promise<documentType | undefined> {
   const documentRepository = buildDocumentRepository();
 
-  return await documentRepository.findOneByStatusWithoutLossNotIn(
-    ['done', 'toBePublished'],
-    documentIdsToExclude,
-  );
+  return await documentRepository.findOneByStatusWithoutLossNotIn(['done', 'toBePublished'], documentIdsToExclude);
 }

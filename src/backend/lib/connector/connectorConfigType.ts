@@ -9,9 +9,7 @@ type connectorConfigType = {
     sourceId: number,
     sourceName: string,
   ): Promise<Deprecated.DecisionDTO | undefined>;
-  fetchDecisionsToPseudonymise(
-    sourceName: string,
-  ): Promise<{
+  fetchDecisionsToPseudonymise(sourceName: string): Promise<{
     next: () => Promise<Deprecated.DecisionDTO | undefined>;
     length: number;
   }>;

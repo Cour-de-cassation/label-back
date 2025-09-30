@@ -1,11 +1,5 @@
 import { range } from 'lodash';
-import {
-  assignationModule,
-  documentModule,
-  idModule,
-  treatmentModule,
-  userModule,
-} from '@src/core';
+import { assignationModule, documentModule, idModule, treatmentModule, userModule } from '@src/core';
 import { buildAssignationRepository } from '../../../assignation/repository';
 import { buildTreatmentRepository } from '../../../treatment/repository';
 import { buildUserRepository } from '../../../user/repository';
@@ -34,10 +28,7 @@ describe('fetchDocumentsForUser', () => {
     await assignationRepository.insert(assignation);
     await userRepository.insert(user);
 
-    const documentsForUser = await documentService.fetchDocumentsForUser(
-      userId,
-      1,
-    );
+    const documentsForUser = await documentService.fetchDocumentsForUser(userId, 1);
 
     expect(documentsForUser[0]).toEqual({
       document,
@@ -74,38 +65,33 @@ describe('fetchDocumentsForUser', () => {
     await treatmentRepository.insert(treatment1);
     await treatmentRepository.insert(treatment2);
 
-    const documentsForUser = await documentService.fetchDocumentsForUser(
-      user1._id,
-      1,
-    );
-    const updatedDocument = await documentRepository.findById(
-      documentofUser1._id,
-    );
+    const documentsForUser = await documentService.fetchDocumentsForUser(user1._id, 1);
+    const updatedDocument = await documentRepository.findById(documentofUser1._id);
     expect(documentsForUser[0].document).toEqual(updatedDocument);
   });
 
   it('should fetch a document with the highest priority assignated to nobody if there are no assignation for this user', async () => {
     const user1 = userModule.generator.generate();
     const user2 = userModule.generator.generate();
-    const documents = ([
-      {
-        text: 'lolo',
-        priority: 0,
-        status: 'free',
-      },
-      {
-        text: 'lala',
-        priority: 2,
-        status: 'free',
-      },
-      {
-        text: 'lala',
-        status: 'pending',
-      },
-    ] as const).map(documentModule.generator.generate);
-    const treatments = documents.map((document) =>
-      treatmentModule.generator.generate({ documentId: document._id }),
-    );
+    const documents = (
+      [
+        {
+          text: 'lolo',
+          priority: 0,
+          status: 'free',
+        },
+        {
+          text: 'lala',
+          priority: 2,
+          status: 'free',
+        },
+        {
+          text: 'lala',
+          status: 'pending',
+        },
+      ] as const
+    ).map(documentModule.generator.generate);
+    const treatments = documents.map((document) => treatmentModule.generator.generate({ documentId: document._id }));
     await Promise.all(documents.map(documentRepository.insert));
     await Promise.all(treatments.map(treatmentRepository.insert));
     await assignationRepository.insert(
@@ -117,10 +103,7 @@ describe('fetchDocumentsForUser', () => {
     await userRepository.insert(user1);
     await userRepository.insert(user2);
 
-    const documentsForUser = await documentService.fetchDocumentsForUser(
-      user1._id,
-      1,
-    );
+    const documentsForUser = await documentService.fetchDocumentsForUser(user1._id, 1);
 
     const updatedDocument = await documentRepository.findById(documents[1]._id);
     expect(documentsForUser[0].document).toEqual(updatedDocument);
@@ -129,25 +112,25 @@ describe('fetchDocumentsForUser', () => {
   it('should not fetch any document because they are already assignated', async () => {
     const user1 = userModule.generator.generate();
     const user2 = userModule.generator.generate();
-    const documents = ([
-      {
-        text: 'lolo',
-        priority: 0,
-        status: 'free',
-      },
-      {
-        text: 'lala',
-        priority: 2,
-        status: 'free',
-      },
-      {
-        text: 'lala',
-        status: 'pending',
-      },
-    ] as const).map(documentModule.generator.generate);
-    const treatments = documents.map((document) =>
-      treatmentModule.generator.generate({ documentId: document._id }),
-    );
+    const documents = (
+      [
+        {
+          text: 'lolo',
+          priority: 0,
+          status: 'free',
+        },
+        {
+          text: 'lala',
+          priority: 2,
+          status: 'free',
+        },
+        {
+          text: 'lala',
+          status: 'pending',
+        },
+      ] as const
+    ).map(documentModule.generator.generate);
+    const treatments = documents.map((document) => treatmentModule.generator.generate({ documentId: document._id }));
     await Promise.all(documents.map(documentRepository.insert));
     await Promise.all(treatments.map(treatmentRepository.insert));
     await assignationRepository.insertMany([
@@ -167,10 +150,7 @@ describe('fetchDocumentsForUser', () => {
     await userRepository.insert(user1);
     await userRepository.insert(user2);
 
-    const documentsForUser = await documentService.fetchDocumentsForUser(
-      user1._id,
-      3,
-    );
+    const documentsForUser = await documentService.fetchDocumentsForUser(user1._id, 3);
 
     expect(documentsForUser.length).toEqual(0);
   });
@@ -189,10 +169,7 @@ describe('fetchDocumentsForUser', () => {
     await treatmentRepository.insert(treatment);
     await userRepository.insert(user);
 
-    const documentsForUser = await documentService.fetchDocumentsForUser(
-      user._id,
-      1,
-    );
+    const documentsForUser = await documentService.fetchDocumentsForUser(user._id, 1);
 
     const updatedDocument = await documentRepository.findById(documents[1]._id);
     expect(documentsForUser[0].document).toEqual(updatedDocument);
@@ -222,14 +199,9 @@ describe('fetchDocumentsForUser', () => {
     ];
     await Promise.all(assignations.map(assignationRepository.insert));
     await Promise.all(documents.map(documentRepository.insert));
-    await Promise.all(
-      treatments.map((treatment) => treatmentRepository.insert(treatment)),
-    );
+    await Promise.all(treatments.map((treatment) => treatmentRepository.insert(treatment)));
 
-    const documentsForUser = await documentService.fetchDocumentsForUser(
-      user._id,
-      3,
-    );
+    const documentsForUser = await documentService.fetchDocumentsForUser(user._id, 3);
 
     expect(documentsForUser.sort()).toEqual(
       [
@@ -243,9 +215,7 @@ describe('fetchDocumentsForUser', () => {
     const documentService = buildDocumentService();
     const user = userModule.generator.generate();
     const documents = range(301).map(() => documentModule.generator.generate());
-    const treatments = documents.map((document) =>
-      treatmentModule.generator.generate({ documentId: document._id }),
-    );
+    const treatments = documents.map((document) => treatmentModule.generator.generate({ documentId: document._id }));
     await Promise.all(treatments.map(treatmentRepository.insert));
     await Promise.all(documents.map(documentRepository.insert));
     await userRepository.insert(user);
@@ -254,9 +224,7 @@ describe('fetchDocumentsForUser', () => {
     const promise = () => documentService.fetchDocumentsForUser(user._id, 1);
 
     await expect(promise()).rejects.toThrow(
-      `Too many call attempts for identifier ${idModule.lib.convertToString(
-        user._id,
-      )}`,
+      `Too many call attempts for identifier ${idModule.lib.convertToString(user._id)}`,
     );
   });
 });

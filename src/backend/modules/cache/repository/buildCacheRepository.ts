@@ -4,10 +4,7 @@ import { customCacheRepositoryType } from './customCacheRepositoryType';
 
 export { buildCacheRepository };
 
-const buildCacheRepository = buildRepositoryBuilder<
-  cacheType,
-  customCacheRepositoryType
->({
+const buildCacheRepository = buildRepositoryBuilder<cacheType, customCacheRepositoryType>({
   collectionName: 'caches',
   indexes: [
     {
@@ -18,14 +15,8 @@ const buildCacheRepository = buildRepositoryBuilder<
     async findAllByKey(key: cacheType['key']) {
       return collection.find({ key }).sort({ updateDate: -1 }).toArray();
     },
-    async updateContentById(
-      _id: cacheType['_id'],
-      content: cacheType['content'],
-    ) {
-      await collection.updateOne(
-        { _id },
-        { $set: buildUpdateContentQuery(content) },
-      );
+    async updateContentById(_id: cacheType['_id'], content: cacheType['content']) {
+      await collection.updateOne({ _id }, { $set: buildUpdateContentQuery(content) });
       const updatedCache = await collection.findOne({ _id });
       return updatedCache || undefined;
     },

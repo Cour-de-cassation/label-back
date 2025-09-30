@@ -1,10 +1,4 @@
-import {
-  documentType,
-  idModule,
-  idType,
-  problemReportModule,
-  problemReportType,
-} from '@src/core';
+import { documentType, idModule, idType, problemReportModule, problemReportType } from '@src/core';
 import { documentService } from '../../document';
 import { userService } from '../../user';
 import { buildProblemReportRepository } from '../repository';
@@ -27,9 +21,7 @@ const problemReportService = {
     try {
       const problemReportRepository = buildProblemReportRepository();
 
-      const documents = await documentService.fetchAllDocumentsByIds([
-        documentId,
-      ]);
+      const documents = await documentService.fetchAllDocumentsByIds([documentId]);
       const users = await userService.fetchUsersByIds([userId]);
 
       await problemReportRepository.insert(
@@ -83,17 +75,14 @@ const problemReportService = {
       problemReports.map(({ documentId }) => documentId),
     );
 
-    const usersByIds = await userService.fetchUsersByIds(
-      problemReports.map(({ userId }) => userId),
-    );
+    const usersByIds = await userService.fetchUsersByIds(problemReports.map(({ userId }) => userId));
 
     return problemReports.map((problemReport) => {
       const userIdString = idModule.lib.convertToString(problemReport.userId);
       const { email, name } = usersByIds[userIdString];
       let documentToReturn = undefined;
       try {
-        const document =
-          documentsById[idModule.lib.convertToString(problemReport.documentId)];
+        const document = documentsById[idModule.lib.convertToString(problemReport.documentId)];
         documentToReturn = {
           _id: document._id,
           documentNumber: document.documentNumber,
@@ -117,10 +106,7 @@ const problemReportService = {
     });
   },
 
-  async updateHasBeenRead(
-    problemReportId: problemReportType['_id'],
-    hasBeenRead: problemReportType['hasBeenRead'],
-  ) {
+  async updateHasBeenRead(problemReportId: problemReportType['_id'], hasBeenRead: problemReportType['hasBeenRead']) {
     const problemReportRepository = buildProblemReportRepository();
     return problemReportRepository.updateOne(problemReportId, { hasBeenRead });
   },

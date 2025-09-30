@@ -33,27 +33,16 @@ describe('fetchDocumentWithoutAnnotationsNotIn', () => {
     documentRepository.insert(documentPriority3);
     documentRepository.insert(documentPriority4);
 
-    expect(await fetchDocumentWithoutAnnotationsNotIn([])).toEqual(
-      documentPriority4,
+    expect(await fetchDocumentWithoutAnnotationsNotIn([])).toEqual(documentPriority4);
+
+    expect(await fetchDocumentWithoutAnnotationsNotIn([documentPriority4._id])).toEqual(documentPriority3);
+
+    expect(await fetchDocumentWithoutAnnotationsNotIn([documentPriority4._id, documentPriority3._id])).toEqual(
+      documentPriority2,
     );
 
     expect(
-      await fetchDocumentWithoutAnnotationsNotIn([documentPriority4._id]),
-    ).toEqual(documentPriority3);
-
-    expect(
-      await fetchDocumentWithoutAnnotationsNotIn([
-        documentPriority4._id,
-        documentPriority3._id,
-      ]),
-    ).toEqual(documentPriority2);
-
-    expect(
-      await fetchDocumentWithoutAnnotationsNotIn([
-        documentPriority4._id,
-        documentPriority3._id,
-        documentPriority2._id,
-      ]),
+      await fetchDocumentWithoutAnnotationsNotIn([documentPriority4._id, documentPriority3._id, documentPriority2._id]),
     ).toEqual(documentPriority1);
 
     expect(

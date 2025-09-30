@@ -1,15 +1,5 @@
-import {
-  annotationModule,
-  annotationType,
-  assignationType,
-  documentType,
-  idModule,
-  settingsType,
-} from '@src/core';
-import {
-  buildDocumentRepository,
-  documentService,
-} from '../../modules/document';
+import { annotationModule, annotationType, assignationType, documentType, idModule, settingsType } from '@src/core';
+import { buildDocumentRepository, documentService } from '../../modules/document';
 import { logger } from '../../utils';
 import { connectorConfigType } from './connectorConfigType';
 import { treatmentService } from '../../modules/treatment';
@@ -46,16 +36,12 @@ function buildConnector(connectorConfig: connectorConfigType) {
     });
 
     try {
-      const courtDecision = await connectorConfig.fetchCourtDecisionBySourceIdAndSourceName(
-        documentNumber,
-        source,
-      );
+      const courtDecision = await connectorConfig.fetchCourtDecisionBySourceIdAndSourceName(documentNumber, source);
 
       if (!courtDecision) {
         logger.log({
           operationName: 'importSpecificDocument',
-          msg:
-            'No court decision found for specified documentNumber and source',
+          msg: 'No court decision found for specified documentNumber and source',
         });
         return;
       }
@@ -66,10 +52,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
           courtDecision.labelStatus
         }, ${!!courtDecision.pseudoText ? 'already' : 'never'} pseudonymised`,
       });
-      const document = await connectorConfig.mapCourtDecisionToDocument(
-        courtDecision,
-        'manual',
-      );
+      const document = await connectorConfig.mapCourtDecisionToDocument(courtDecision, 'manual');
       logger.log({
         operationName: 'importSpecificDocument',
         msg: 'Court decision converted. Inserting document into database...',
@@ -78,10 +61,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
       if (lowPriority) {
         await insertDocument({ ...document, route: 'exhaustive' }, settings);
       } else {
-        await insertDocument(
-          { ...document, route: 'request', priority: 4 },
-          settings,
-        );
+        await insertDocument({ ...document, route: 'request', priority: 4 }, settings);
       }
       logger.log({
         operationName: 'importSpecificDocument',
@@ -92,8 +72,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
         if (courtDecision.labelTreatments?.length == 0) {
           logger.error({
             operationName: 'importSpecificDocument',
-            msg:
-              'LabelTreatments not found in court decision, skiping labelTreatments reimport.',
+            msg: 'LabelTreatments not found in court decision, skiping labelTreatments reimport.',
           });
         } else {
           logger.log({
@@ -104,18 +83,18 @@ function buildConnector(connectorConfig: connectorConfigType) {
           const annotations: annotationType[] =
             courtDecision.labelTreatments == undefined
               ? []
-              : courtDecision.labelTreatments[
-                  courtDecision.labelTreatments.length - 1
-                ].annotations.map((annotation) => {
-                  return annotationModule.lib.buildAnnotation({
-                    category: annotation.category,
-                    start: annotation.start,
-                    text: annotation.text,
-                    score: annotation.score,
-                    entityId: annotation.entityId,
-                    source: annotation.source,
-                  });
-                });
+              : courtDecision.labelTreatments[courtDecision.labelTreatments.length - 1].annotations.map(
+                  (annotation) => {
+                    return annotationModule.lib.buildAnnotation({
+                      category: annotation.category,
+                      start: annotation.start,
+                      text: annotation.text,
+                      score: annotation.score,
+                      entityId: annotation.entityId,
+                      source: annotation.source,
+                    });
+                  },
+                );
 
           await treatmentService.createTreatment(
             {
@@ -133,10 +112,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
             .sort((a, b) => b.order - a.order)[0].checklist;
 
           if (reimportedChecklist) {
-            await documentService.updateDocumentChecklist(
-              document._id,
-              reimportedChecklist,
-            );
+            await documentService.updateDocumentChecklist(document._id, reimportedChecklist);
             logger.log({
               operationName: 'importSpecificDocument',
               msg: 'Checklist reimported',
@@ -148,25 +124,16 @@ function buildConnector(connectorConfig: connectorConfigType) {
             msg: 'LabelTreatments reimported, checking for pre-assignation.',
           });
           const preAssignator = buildPreAssignator();
-          const isPreassignated = await preAssignator.preAssignDocument(
-            document,
-          );
+          const isPreassignated = await preAssignator.preAssignDocument(document);
           if (!isPreassignated) {
             logger.log({
               operationName: 'importSpecificDocument',
-              msg:
-                'No preAssignation found, setting documentStatus to next status.',
+              msg: 'No preAssignation found, setting documentStatus to next status.',
             });
             if (lowPriority) {
-              await documentService.updateDocumentStatus(
-                idModule.lib.buildId(document._id),
-                'free',
-              );
+              await documentService.updateDocumentStatus(idModule.lib.buildId(document._id), 'free');
             } else {
-              await documentService.updateDocumentStatus(
-                idModule.lib.buildId(document._id),
-                'toBeConfirmed',
-              );
+              await documentService.updateDocumentStatus(idModule.lib.buildId(document._id), 'toBeConfirmed');
             }
           }
         }
@@ -176,9 +143,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
         operationName: 'importSpecificDocument',
         msg: 'Selected document has been inserted in label database.',
       });
-      await connectorConfig.updateDocumentLabelStatusToLoaded(
-        document.externalId,
-      );
+      await connectorConfig.updateDocumentLabelStatusToLoaded(document.externalId);
       logger.log({ operationName: 'importSpecificDocument', msg: 'DONE' });
     } catch (error) {
       logger.error({
@@ -196,17 +161,13 @@ function buildConnector(connectorConfig: connectorConfigType) {
     });
 
     // on bloque les decisions Deprecated.Sources.TCOM pour l'instant car la normalisation n'est pas encore propre
-    const sources = Object.values(Deprecated.Sources).filter(
-      (src) => src !== Deprecated.Sources.TCOM,
-    );
+    const sources = Object.values(Deprecated.Sources).filter((src) => src !== Deprecated.Sources.TCOM);
     for (const source of sources) {
       logger.log({
         operationName: 'importNewDocuments',
         msg: `Fetching ${source} decisions...`,
       });
-      const newDecisionForSource = await connectorConfig.fetchDecisionsToPseudonymise(
-        source,
-      );
+      const newDecisionForSource = await connectorConfig.fetchDecisionsToPseudonymise(source);
       logger.log({
         operationName: 'importNewDocuments',
         msg: `${newDecisionForSource.length} ${source} decisions to pseudonymise found.`,
@@ -218,14 +179,9 @@ function buildConnector(connectorConfig: connectorConfigType) {
         decision = await newDecisionForSource.next()
       ) {
         try {
-          const converted = await connectorConfig.mapCourtDecisionToDocument(
-            decision,
-            'recent',
-          );
+          const converted = await connectorConfig.mapCourtDecisionToDocument(decision, 'recent');
           await insertDocument(converted, settings);
-          await connectorConfig.updateDocumentLabelStatusToLoaded(
-            converted.externalId,
-          );
+          await connectorConfig.updateDocumentLabelStatusToLoaded(converted.externalId);
         } catch (err) {
           logger.error({
             operationName: 'importNewDocuments',
@@ -241,30 +197,19 @@ async function insertDocument(document: documentType, settings: settingsType) {
   const documentRepository = buildDocumentRepository();
   let assignations: assignationType[] = [];
 
-  const sameDocument = await documentRepository.findOneByExternalId(
-    document.externalId,
-  );
+  const sameDocument = await documentRepository.findOneByExternalId(document.externalId);
   if (sameDocument) {
     logger.log({
       operationName: 'documentInsertion',
       msg: `Document ${document.source}:${document.documentNumber} is already in label database, deleting old one.`,
     });
 
-    if (
-      sameDocument.status != 'loaded' &&
-      sameDocument.status != 'nlpAnnotating'
-    ) {
-      await statisticService.saveStatisticsOfDocument(
-        sameDocument,
-        settings,
-        'deleted because new reception',
-      );
+    if (sameDocument.status != 'loaded' && sameDocument.status != 'nlpAnnotating') {
+      await statisticService.saveStatisticsOfDocument(sameDocument, settings, 'deleted because new reception');
     }
 
     if (sameDocument.source === 'jurinet') {
-      assignations = await assignationService.fetchAssignationsOfDocumentId(
-        sameDocument._id,
-      );
+      assignations = await assignationService.fetchAssignationsOfDocumentId(sameDocument._id);
     }
     await documentService.deleteDocument(sameDocument._id);
   }

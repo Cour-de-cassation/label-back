@@ -63,12 +63,9 @@ describe('countNlpAnnotatingDocuments', () => {
       ].map(documentRepository.insert),
     );
     await Promise.all(
-      [
-        pendingDocumentAssignation,
-        savedDocumentAssignation,
-        doneDocumentAssignation,
-        lockedDocumentAssignation,
-      ].map(assignationRepository.insert),
+      [pendingDocumentAssignation, savedDocumentAssignation, doneDocumentAssignation, lockedDocumentAssignation].map(
+        assignationRepository.insert,
+      ),
     );
     await userRepository.insert(user);
 

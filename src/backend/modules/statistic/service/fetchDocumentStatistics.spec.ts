@@ -68,16 +68,18 @@ describe('fetchDocumentStatistic', () => {
       ].map(statisticModule.generator.generate);
       await Promise.all(statistics.map(statisticRepository.insert));
 
-      const documents = ([
-        {
-          source: 'SOURCE1',
-          status: 'done',
-          text: 'Some text with five words',
-          route: 'exhaustive',
-        },
-        { status: 'done', route: 'simple' },
-        { status: 'saved' },
-      ] as const).map(documentModule.generator.generate);
+      const documents = (
+        [
+          {
+            source: 'SOURCE1',
+            status: 'done',
+            text: 'Some text with five words',
+            route: 'exhaustive',
+          },
+          { status: 'done', route: 'simple' },
+          { status: 'saved' },
+        ] as const
+      ).map(documentModule.generator.generate);
 
       const treatments = [
         {

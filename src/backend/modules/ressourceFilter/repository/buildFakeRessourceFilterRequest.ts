@@ -17,56 +17,43 @@ function buildFakeRessourceFilterRequest(ressourceFilter: ressourceFilterType) {
     let isValidAccordingToFilter = true;
 
     if (ressourceFilter.mustHaveSubAnnotations) {
-      isValidAccordingToFilter =
-        isValidAccordingToFilter && item.subAnnotationsSensitiveCount > 0;
+      isValidAccordingToFilter = isValidAccordingToFilter && item.subAnnotationsSensitiveCount > 0;
     }
 
     if (ressourceFilter.mustHaveSurAnnotations) {
-      isValidAccordingToFilter =
-        isValidAccordingToFilter && item.surAnnotationsCount > 0;
+      isValidAccordingToFilter = isValidAccordingToFilter && item.surAnnotationsCount > 0;
     }
 
     if (ressourceFilter.publicationCategory) {
       isValidAccordingToFilter =
-        isValidAccordingToFilter &&
-        item.publicationCategory.includes(ressourceFilter.publicationCategory);
+        isValidAccordingToFilter && item.publicationCategory.includes(ressourceFilter.publicationCategory);
     }
 
     if (ressourceFilter.startDate) {
-      isValidAccordingToFilter =
-        isValidAccordingToFilter &&
-        item.treatmentDate > ressourceFilter.startDate;
+      isValidAccordingToFilter = isValidAccordingToFilter && item.treatmentDate > ressourceFilter.startDate;
     }
 
     if (ressourceFilter.endDate) {
-      isValidAccordingToFilter =
-        isValidAccordingToFilter &&
-        item.treatmentDate < ressourceFilter.endDate;
+      isValidAccordingToFilter = isValidAccordingToFilter && item.treatmentDate < ressourceFilter.endDate;
     }
 
     if (ressourceFilter.route) {
-      isValidAccordingToFilter =
-        isValidAccordingToFilter && item.route === ressourceFilter.route;
+      isValidAccordingToFilter = isValidAccordingToFilter && item.route === ressourceFilter.route;
     }
 
     if (ressourceFilter.source) {
-      isValidAccordingToFilter =
-        isValidAccordingToFilter && item.source === ressourceFilter.source;
+      isValidAccordingToFilter = isValidAccordingToFilter && item.source === ressourceFilter.source;
     }
 
     if (ressourceFilter.jurisdiction) {
-      isValidAccordingToFilter =
-        isValidAccordingToFilter &&
-        item.jurisdiction === ressourceFilter.jurisdiction;
+      isValidAccordingToFilter = isValidAccordingToFilter && item.jurisdiction === ressourceFilter.jurisdiction;
     }
 
     if (ressourceFilter.userId) {
       const { userId: userIdToFilter } = ressourceFilter;
       isValidAccordingToFilter =
         isValidAccordingToFilter &&
-        item.treatmentsSummary.some(({ userId }) =>
-          idModule.lib.equalId(userId, userIdToFilter),
-        );
+        item.treatmentsSummary.some(({ userId }) => idModule.lib.equalId(userId, userIdToFilter));
     }
 
     return isValidAccordingToFilter;

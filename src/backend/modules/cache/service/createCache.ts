@@ -3,10 +3,7 @@ import { buildCacheRepository } from '../repository';
 
 export { createCache };
 
-async function createCache(
-  key: cacheType['key'],
-  content: cacheType['content'],
-) {
+async function createCache(key: cacheType['key'], content: cacheType['content']) {
   const cacheRepository = buildCacheRepository();
 
   const cache = cacheModule.generator.generate({ key, content });

@@ -12,16 +12,9 @@ async function createEmptyTreatment({
 }): Promise<treatmentType['_id']> {
   const treatmentRepository = buildTreatmentRepository();
 
-  const previousTreatments = await treatmentRepository.findAllByDocumentId(
-    documentId,
-  );
-  const sortedTreatments = treatmentModule.lib.sortInConsistentOrder(
-    previousTreatments,
-  );
-  const order =
-    sortedTreatments.length > 0
-      ? sortedTreatments[sortedTreatments.length - 1].order + 1
-      : 0;
+  const previousTreatments = await treatmentRepository.findAllByDocumentId(documentId);
+  const sortedTreatments = treatmentModule.lib.sortInConsistentOrder(previousTreatments);
+  const order = sortedTreatments.length > 0 ? sortedTreatments[sortedTreatments.length - 1].order + 1 : 0;
 
   const treatment = treatmentModule.lib.buildEmpty({
     annotationsDiff: { before: [], after: [] },

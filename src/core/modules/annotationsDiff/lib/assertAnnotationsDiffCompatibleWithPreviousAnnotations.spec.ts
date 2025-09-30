@@ -37,7 +37,13 @@ describe('assertAnnotationsDiffCompatibleWithPreviousAnnotations', () => {
       { start: 20, text: 'MACHIN', category: 'nom' },
     ].map(annotationModule.generator.generate);
     const annotationsDiff = annotationsDiffGenerator.generate({
-      after: [annotationModule.generator.generate({ start: 15, text: 'BIDULE', category: 'nom' })],
+      after: [
+        annotationModule.generator.generate({
+          start: 15,
+          text: 'BIDULE',
+          category: 'nom',
+        }),
+      ],
     });
 
     const functionCall = () =>
@@ -57,8 +63,20 @@ describe('assertAnnotationsDiffCompatibleWithPreviousAnnotations', () => {
       { start: 10, text: 'BIDULE', category: 'nom' },
     ].map(annotationModule.generator.generate);
     const annotationsDiff = {
-      before: [annotationModule.generator.generate({ start: 10, text: 'BIDULE', category: 'nom' })],
-      after: [annotationModule.generator.generate({ start: 10, text: 'BIDULE CHOSE', category: 'nom' })],
+      before: [
+        annotationModule.generator.generate({
+          start: 10,
+          text: 'BIDULE',
+          category: 'nom',
+        }),
+      ],
+      after: [
+        annotationModule.generator.generate({
+          start: 10,
+          text: 'BIDULE CHOSE',
+          category: 'nom',
+        }),
+      ],
     };
     const functionCall = () =>
       assertAnnotationsDiffCompatibleWithPreviousAnnotations(previousAnnotations, annotationsDiff);

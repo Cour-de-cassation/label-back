@@ -4,10 +4,7 @@ import { customPreAssignationRepositoryType } from './customPreAssignationReposi
 
 export { buildPreAssignationRepository };
 
-const buildPreAssignationRepository = buildRepositoryBuilder<
-  preAssignationType,
-  customPreAssignationRepositoryType
->({
+const buildPreAssignationRepository = buildRepositoryBuilder<preAssignationType, customPreAssignationRepositoryType>({
   collectionName: 'preAssignations',
   indexes: [
     {

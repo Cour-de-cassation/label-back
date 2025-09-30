@@ -10,9 +10,7 @@ export { buildApi };
 const API_BASE_URL = '/label/api';
 
 function buildApi(app: Express) {
-  const methodNames = (Object.keys(
-    apiSchema,
-  ) as any) as apiSchemaMethodNameType[];
+  const methodNames = Object.keys(apiSchema) as any as apiSchemaMethodNameType[];
 
   methodNames.map((methodName) => buildMethod(app, methodName));
 
@@ -32,44 +30,25 @@ function buildMethod(app: Express, methodName: apiSchemaMethodNameType) {
 }
 
 function buildGetRoutes(app: Express) {
-  const getRoutes = (Object.keys(apiSchema.get) as any) as Array<
-    keyof typeof apiSchema['get']
-  >;
+  const getRoutes = Object.keys(apiSchema.get) as any as Array<keyof (typeof apiSchema)['get']>;
 
   getRoutes.forEach((getRoute) => {
-    app.get(
-      `${API_BASE_URL}/${getRoute}`,
-      buildController('get', controllers.get[getRoute]),
-    );
+    app.get(`${API_BASE_URL}/${getRoute}`, buildController('get', controllers.get[getRoute]));
   });
 }
 
 function buildPostRoutes(app: Express) {
-  const postRoutes = (Object.keys(apiSchema.post) as any) as Array<
-    keyof typeof apiSchema['post']
-  >;
+  const postRoutes = Object.keys(apiSchema.post) as any as Array<keyof (typeof apiSchema)['post']>;
 
   postRoutes.forEach((postRoute) => {
-    app.post(
-      `${API_BASE_URL}/${postRoute}`,
-      buildController('post', controllers.post[postRoute]),
-    );
+    app.post(`${API_BASE_URL}/${postRoute}`, buildController('post', controllers.post[postRoute]));
   });
 }
 
 function buildController(
   method: apiSchemaMethodNameType,
-  controller: (param: {
-    headers: any;
-    args: any;
-    session: any;
-    path: string;
-  }) => Promise<any>,
+  controller: (param: { headers: any; args: any; session: any; path: string }) => Promise<any>,
 ) {
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-  /* eslint-disable @typescript-eslint/no-unsafe-call */
-  /* eslint-disable @typescript-eslint/no-unsafe-return */
   return async (req: any, res: any, next: any) => {
     try {
       const { data, statusCode } = await executeController();
@@ -87,9 +66,7 @@ function buildController(
     }> {
       switch (method) {
         case 'get':
-          const sanitizedQuery = mapValues(req.query, (queryValue) =>
-            JSON.parse(queryValue),
-          );
+          const sanitizedQuery = mapValues(req.query, (queryValue) => JSON.parse(queryValue));
           return {
             data: await controller({
               headers: req.headers,
@@ -133,7 +110,10 @@ function buildApiSso(app: Express) {
         operationName: 'login SSO ',
         msg: `${err}`,
       });
-      res.status(401).json({ status: 401, message: err instanceof Error ? err.message : `${err}` });
+      res.status(401).json({
+        status: 401,
+        message: err instanceof Error ? err.message : `${err}`,
+      });
     }
   });
 
@@ -152,7 +132,10 @@ function buildApiSso(app: Express) {
           operationName: 'logoutSso',
           msg: `${err}`,
         });
-        res.status(500).json({ status: 500, message: err instanceof Error ? err.message : `${err}` });
+        res.status(500).json({
+          status: 500,
+          message: err instanceof Error ? err.message : `${err}`,
+        });
       }
     });
   });
@@ -160,9 +143,7 @@ function buildApiSso(app: Express) {
   app.get(`${API_BASE_URL}/sso/whoami`, (req, res) => {
     const user = req.session?.user ?? null;
     if (!user) {
-      return res
-        .status(401)
-        .send({ status: 401, message: `Session invalid or expired` });
+      return res.status(401).send({ status: 401, message: `Session invalid or expired` });
     }
     res.type('application/json').send(user);
   });

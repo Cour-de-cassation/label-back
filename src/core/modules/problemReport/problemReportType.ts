@@ -14,7 +14,10 @@ const problemReportModel = buildModel({
     date: { kind: 'primitive', content: 'number' },
     text: { kind: 'primitive', content: 'string' },
     hasBeenRead: { kind: 'primitive', content: 'boolean' },
-    type: { kind: 'constant', content: ['bug', 'annotationProblem', 'suggestion'] as const },
+    type: {
+      kind: 'constant',
+      content: ['bug', 'annotationProblem', 'suggestion'] as const,
+    },
   },
 } as const);
 

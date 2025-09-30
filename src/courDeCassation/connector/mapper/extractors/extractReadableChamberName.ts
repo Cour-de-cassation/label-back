@@ -1,12 +1,6 @@
 export { extractReadableChamberName };
 
-function extractReadableChamberName({
-  chamberName,
-  chamberId,
-}: {
-  chamberName?: string;
-  chamberId?: string;
-}) {
+function extractReadableChamberName({ chamberName, chamberId }: { chamberName?: string; chamberId?: string }) {
   if (!!chamberName) {
     return chamberName.trim();
   }
@@ -15,9 +9,7 @@ function extractReadableChamberName({
   }
   const civileChamberNumber = chamberId.match(/CIV\.([1-3])/);
   if (!!civileChamberNumber) {
-    return `Chambre civile ${convertToLatinCiphers(
-      civileChamberNumber[1],
-    )}`.trim();
+    return `Chambre civile ${convertToLatinCiphers(civileChamberNumber[1])}`.trim();
   } else if (chamberId === 'SOC') {
     return 'Chambre sociale';
   } else if (chamberId === 'COMM') {

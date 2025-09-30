@@ -1,11 +1,4 @@
-import {
-  documentType,
-  idModule,
-  settingsType,
-  statisticsCreator,
-  timeOperator,
-  treatmentModule,
-} from '@src/core';
+import { documentType, idModule, settingsType, statisticsCreator, timeOperator, treatmentModule } from '@src/core';
 import { assignationService } from '../../assignation';
 import { treatmentService } from '../../treatment';
 import { buildStatisticRepository } from '../repository';
@@ -14,26 +7,15 @@ import { userService } from '../../user';
 
 export { saveStatisticsOfDocument };
 
-async function saveStatisticsOfDocument(
-  document: documentType,
-  settings: settingsType,
-  comment: string,
-) {
+async function saveStatisticsOfDocument(document: documentType, settings: settingsType, comment: string) {
   const statisticRepository = buildStatisticRepository();
 
-  const treatments = await treatmentService.fetchTreatmentsByDocumentId(
-    document._id,
-  );
+  const treatments = await treatmentService.fetchTreatmentsByDocumentId(document._id);
 
-  const assignations = await assignationService.fetchAssignationsOfDocumentId(
-    document._id,
-  );
+  const assignations = await assignationService.fetchAssignationsOfDocumentId(document._id);
   let humanTreatments;
   if (assignations.length !== 0) {
-    humanTreatments = treatmentModule.lib.extractHumanTreatments(
-      treatments,
-      assignations,
-    );
+    humanTreatments = treatmentModule.lib.extractHumanTreatments(treatments, assignations);
   }
 
   const statistic = statisticsCreator.buildFromDocument({
@@ -45,9 +27,7 @@ async function saveStatisticsOfDocument(
   });
 
   if (humanTreatments && humanTreatments.length > 0) {
-    const userIds = humanTreatments.map((humanTreatment) =>
-      idModule.lib.buildId(humanTreatment.userId),
-    );
+    const userIds = humanTreatments.map((humanTreatment) => idModule.lib.buildId(humanTreatment.userId));
     const users = await userService.fetchUsersByIds(userIds);
 
     for (const humanTreatment of humanTreatments) {
@@ -56,25 +36,18 @@ async function saveStatisticsOfDocument(
       if (user) {
         logger.log({
           operationName: 'documentStatistics',
-          msg: `Human treatment for document ${document.source}:${
-            document.documentNumber
-          } : ${
+          msg: `Human treatment for document ${document.source}:${document.documentNumber} : ${
             user.name
           } treat the document in ${timeOperator.convertDurationToReadableDuration(
             humanTreatment.treatment.duration,
-          )} on ${timeOperator.convertTimestampToReadableDate(
-            humanTreatment.treatment.lastUpdateDate,
-            true,
-          )}`,
+          )} on ${timeOperator.convertTimestampToReadableDate(humanTreatment.treatment.lastUpdateDate, true)}`,
           data: {
             decision: {
               sourceId: document.documentNumber,
               sourceName: document.source,
             },
             treatmentDuration: humanTreatment.treatment.duration,
-            treatmentLastUpdateDate: new Date(
-              humanTreatment.treatment.lastUpdateDate,
-            ).toISOString(),
+            treatmentLastUpdateDate: new Date(humanTreatment.treatment.lastUpdateDate).toISOString(),
             userName: user.name,
           },
         });
@@ -95,8 +68,7 @@ async function saveStatisticsOfDocument(
         wordsCount: statistic.wordsCount,
         surAnnotationsCount: statistic.surAnnotationsCount,
         subAnnotationsSensitiveCount: statistic.subAnnotationsSensitiveCount,
-        subAnnotationsNonSensitiveCount:
-          statistic.subAnnotationsNonSensitiveCount,
+        subAnnotationsNonSensitiveCount: statistic.subAnnotationsNonSensitiveCount,
         linkedEntitiesCount: statistic.linkedEntitiesCount,
       },
     },

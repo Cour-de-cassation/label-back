@@ -11,14 +11,11 @@ async function fetchUsersByAssignations(assignations: assignationType[]) {
   const usersByAssignationId = indexer.mapIndexBy(
     assignations,
     (assignation) => idModule.lib.convertToString(assignation._id),
-    (assignation) =>
-      usersById[idModule.lib.convertToString(assignation.userId)],
+    (assignation) => usersById[idModule.lib.convertToString(assignation.userId)],
   );
 
   indexer.assertEveryIdIsDefined(
-    assignations.map((assignation) =>
-      idModule.lib.convertToString(assignation._id),
-    ),
+    assignations.map((assignation) => idModule.lib.convertToString(assignation._id)),
     usersByAssignationId,
     (_id) => `The assignation ${_id} has no matching user`,
   );

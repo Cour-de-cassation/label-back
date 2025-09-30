@@ -1,6 +1,11 @@
 export { buildDependencyManager };
 
-type injectionValuesType<T> = { forLocal?: T; forPreProd?: T; forProd: T; forTest?: T };
+type injectionValuesType<T> = {
+  forLocal?: T;
+  forPreProd?: T;
+  forProd: T;
+  forTest?: T;
+};
 
 function buildDependencyManager(environmentValue: string | undefined) {
   const dependencyManager = {

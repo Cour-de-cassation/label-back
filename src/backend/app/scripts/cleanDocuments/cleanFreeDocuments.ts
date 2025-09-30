@@ -12,10 +12,7 @@ async function cleanFreeDocuments() {
 
   const documentRepository = buildDocumentRepository();
 
-  const freeDocuments = await documentRepository.findAllByStatusProjection(
-    ['free'],
-    ['_id'],
-  );
+  const freeDocuments = await documentRepository.findAllByStatusProjection(['free'], ['_id']);
   logger.log({
     operationName: 'countFreeDocuments',
     msg: `${freeDocuments.length} free documents found.`,

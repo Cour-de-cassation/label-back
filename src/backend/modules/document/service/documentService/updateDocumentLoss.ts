@@ -3,18 +3,11 @@ import { buildDocumentRepository } from '../../repository';
 
 export { updateDocumentLoss };
 
-async function updateDocumentLoss(
-  _id: documentType['_id'],
-  loss: documentType['loss'],
-) {
+async function updateDocumentLoss(_id: documentType['_id'], loss: documentType['loss']) {
   const documentRepository = buildDocumentRepository();
   const updatedDocument = await documentRepository.updateLossById(_id, loss);
   if (!updatedDocument) {
-    throw new Error(
-      `The document ${idModule.lib.convertToString(
-        _id,
-      )} was not found in the document collection`,
-    );
+    throw new Error(`The document ${idModule.lib.convertToString(_id)} was not found in the document collection`);
   }
   return updatedDocument;
 }

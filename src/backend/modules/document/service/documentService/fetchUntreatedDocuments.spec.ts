@@ -1,9 +1,4 @@
-import {
-  assignationModule,
-  documentModule,
-  documentType,
-  userModule,
-} from '@src/core';
+import { assignationModule, documentModule, documentType, userModule } from '@src/core';
 import { projectFakeObjects } from '../../../../repository';
 import { buildAssignationRepository } from '../../../assignation/repository';
 import { buildUserRepository } from '../../../user/repository';
@@ -52,21 +47,12 @@ describe('fetchUntreatedDocuments', () => {
       userId: user._id,
     });
     await Promise.all(
-      [
-        freeDocument,
-        pendingDocument,
-        savedDocument,
-        doneDocument,
-        lockedDocument,
-      ].map(documentRepository.insert),
+      [freeDocument, pendingDocument, savedDocument, doneDocument, lockedDocument].map(documentRepository.insert),
     );
     await Promise.all(
-      [
-        pendingDocumentAssignation,
-        savedDocumentAssignation,
-        doneDocumentAssignation,
-        lockedDocumentAssignation,
-      ].map(assignationRepository.insert),
+      [pendingDocumentAssignation, savedDocumentAssignation, doneDocumentAssignation, lockedDocumentAssignation].map(
+        assignationRepository.insert,
+      ),
     );
     await userRepository.insert(user);
 

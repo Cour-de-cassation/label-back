@@ -1,9 +1,4 @@
-import {
-  dateBuilder,
-  settingsType,
-  statisticModule,
-  userType,
-} from '@src/core';
+import { dateBuilder, settingsType, statisticModule, userType } from '@src/core';
 import { fetchFilteredStatistics } from './fetchFilteredStatistics';
 
 export { fetchPersonalStatistics };

@@ -48,12 +48,9 @@ jest.mock('../../user', () => ({
   },
 }));
 
-process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL =
-  'http://localhost:55432/label/annotation';
-process.env.SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL =
-  'http://localhost:55432/label/admin/main/summary';
-process.env.SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL =
-  'http://localhost:55432/label/publishable-documents';
+process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL = 'http://localhost:55432/label/annotation';
+process.env.SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL = 'http://localhost:55432/label/admin/main/summary';
+process.env.SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL = 'http://localhost:55432/label/publishable-documents';
 process.env.SSO_ATTRIBUTE_ROLE = 'role';
 process.env.SSO_APP_ROLES = 'admin,annotator,publicator,scrutator';
 process.env.SSO_APP_NAME = 'LABEL';
@@ -74,53 +71,49 @@ describe('SSO CNX functions', () => {
       };
       const result = await acs(mockReq);
 
-      expect(result).toContain(
-        process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL,
-      );
+      expect(result).toContain(process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL);
     });
   });
 
   describe('compareUser', () => {
     it('should return true if name or role is different', () => {
-      const userSSO = ({
+      const userSSO = {
         name: 'New Name',
         role: 'annotator',
         email: 'test@example.com',
         _id: '63e7d8764f1a0a2f6c123457',
-      } as unknown) as userType;
-      const userDB = ({
+      } as unknown as userType;
+      const userDB = {
         name: 'Old Name',
         role: 'admin',
         email: 'test@example.com',
         _id: '63e7d8764f1a0a2f6c123457',
-      } as unknown) as userType;
+      } as unknown as userType;
 
       const result = compareUser(userSSO, userDB);
       expect(result).toBe(true);
     });
 
     it('should return false if name and role are the same', () => {
-      const userSSO = ({
+      const userSSO = {
         name: 'Test User',
         role: 'annotator',
         email: 'test@example.com',
         _id: '63e7d8764f1a0a2f6c123457',
-      } as unknown) as userType;
-      const userDB = ({
+      } as unknown as userType;
+      const userDB = {
         name: 'Test User',
         role: 'annotator',
         email: 'test@example.com',
         _id: '63e7d8764f1a0a2f6c123457',
-      } as unknown) as userType;
+      } as unknown as userType;
 
       const result = compareUser(userSSO, userDB);
       expect(result).toBe(false);
     });
 
     it('should throw error', () => {
-      expect(() => compareUser(undefined, undefined)).toThrow(
-        `Both objects must be defined.`,
-      );
+      expect(() => compareUser(undefined, undefined)).toThrow(`Both objects must be defined.`);
     });
   });
 
@@ -152,13 +145,11 @@ describe('SSO CNX functions', () => {
           name: 'Fake User',
         },
       });
-    }).toThrow(
-      "User fake@example.com, role annot doesn't exist in application LABEL",
-    );
+    }).toThrow("User fake@example.com, role annot doesn't exist in application LABEL");
   });
 
   describe('setUserSessionAndReturnRedirectUrl', () => {
-    const mockRequest = ({
+    const mockRequest = {
       session: {
         user: {},
       },
@@ -168,22 +159,18 @@ describe('SSO CNX functions', () => {
       params: {
         id: '123456789',
       },
-    } as unknown) as Partial<Request>;
+    } as unknown as Partial<Request>;
 
     it('should throw an error for an invalid role', () => {
-      const user = ({
+      const user = {
         _id: '63e7d8764f1a0a2f6c123489',
         name: 'InvalidRole',
         role: 'invalidRole',
         email: 'invalid@test.com',
-      } as unknown) as userType;
+      } as unknown as userType;
 
       expect(() => {
-        setUserSessionAndReturnRedirectUrl(
-          mockRequest,
-          user,
-          '63e7d8764f1a0a2f6c123456',
-        );
+        setUserSessionAndReturnRedirectUrl(mockRequest, user, '63e7d8764f1a0a2f6c123456');
       }).toThrow("Role doesn't exist in label");
     });
   });

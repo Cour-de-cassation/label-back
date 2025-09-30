@@ -13,8 +13,7 @@ async function updateTreatmentDuration(treatmentId: treatmentType['_id']) {
   const elapsedTimeSinceLastUpdate = now.getTime() - treatment.lastUpdateDate;
 
   const duration =
-    elapsedTimeSinceLastUpdate <
-    treatmentModule.lib.getTimeThresholdToUpdateDuration()
+    elapsedTimeSinceLastUpdate < treatmentModule.lib.getTimeThresholdToUpdateDuration()
       ? elapsedTimeSinceLastUpdate + treatment.duration
       : treatment.duration;
 

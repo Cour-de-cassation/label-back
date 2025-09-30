@@ -1,18 +1,14 @@
 import yargs from 'yargs';
 import { buildBackend } from '@src/backend';
 import { parametersHandler } from '../lib/parametersHandler';
-
 (async () => {
   const { settings } = await parametersHandler.getParameters();
   const { documentNumber, source } = parseArgv();
   const backend = buildBackend(settings);
 
-  backend.runScript(
-    () => backend.scripts.deleteDocument.run(documentNumber, source, settings),
-    {
-      shouldLoadDb: true,
-    },
-  );
+  backend.runScript(() => backend.scripts.deleteDocument.run(documentNumber, source, settings), {
+    shouldLoadDb: true,
+  });
 })();
 
 function parseArgv() {
@@ -25,13 +21,13 @@ function parseArgv() {
       },
       source: {
         demandOption: true,
-        description:
-          'source (jurinet or jurica) of the document you want to delete',
+        description: 'source (jurinet or jurica) of the document you want to delete',
         type: 'string',
       },
     })
     .help()
-    .alias('help', 'h').parseSync();
+    .alias('help', 'h')
+    .parseSync();
 
   return {
     documentNumber: argv.documentNumber as number,

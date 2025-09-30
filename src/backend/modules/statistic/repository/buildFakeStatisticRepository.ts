@@ -1,35 +1,22 @@
 import { statisticType } from '@src/core';
-import {
-  buildFakeRepositoryBuilder,
-  projectFakeObjects,
-  updateFakeCollection,
-} from '../../../repository';
+import { buildFakeRepositoryBuilder, projectFakeObjects, updateFakeCollection } from '../../../repository';
 import { buildFakeRessourceFilterRequest } from '../../ressourceFilter';
 import { customStatisticRepositoryType } from './customStatisticRepositoryType';
 
 export { buildFakeStatisticRepository };
 
-const buildFakeStatisticRepository = buildFakeRepositoryBuilder<
-  statisticType,
-  customStatisticRepositoryType
->({
+const buildFakeStatisticRepository = buildFakeRepositoryBuilder<statisticType, customStatisticRepositoryType>({
   collectionName: 'statistics',
   buildCustomFakeRepository: (collection) => ({
     async findAllStatisticsByDocumentNumber(documentNumber: number) {
-      return collection.filter(
-        (statistics) => statistics.documentNumber == documentNumber,
-      );
+      return collection.filter((statistics) => statistics.documentNumber == documentNumber);
     },
     async findAllByRessourceFilter(ressourceFilter) {
-      return collection.filter(
-        buildFakeRessourceFilterRequest(ressourceFilter),
-      );
+      return collection.filter(buildFakeRessourceFilterRequest(ressourceFilter));
     },
 
     async findAllIdsBefore(date) {
-      const statistics = collection.filter(
-        (statistic) => statistic.treatmentDate <= date,
-      );
+      const statistics = collection.filter((statistic) => statistic.treatmentDate <= date);
 
       return statistics.map((statistic) => statistic._id);
     },
@@ -64,9 +51,7 @@ const buildFakeStatisticRepository = buildFakeRepositoryBuilder<
     },
 
     async findRecentStatisticsProjection(projections) {
-      return collection.map((statistic) =>
-        projectFakeObjects(statistic, projections),
-      );
+      return collection.map((statistic) => projectFakeObjects(statistic, projections));
     },
   }),
 });

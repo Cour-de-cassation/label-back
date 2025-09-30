@@ -5,7 +5,6 @@ import { buildStatistic } from './buildStatistic';
 const TREATMENT_DATE = new Date(2021, 3, 30, 0, 0, 0);
 const checklistMock = documentModule.checklistGenerator.generate(3);
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 describe('buildStatistic', () => {
   it('should build a new statistic', () => {
     const annotationsCount = 10;

@@ -31,7 +31,10 @@ function detectAnnotationTextsAndIndices({
       ) &&
       !isAnnotationTextInsideLargerWord(documentText, annotationText, currentIndex)
     ) {
-      textsAndIndices.push({ index: currentIndex, text: annotationDetection.text });
+      textsAndIndices.push({
+        index: currentIndex,
+        text: annotationDetection.text,
+      });
     }
   } while (currentIndex !== -1);
   return textsAndIndices;

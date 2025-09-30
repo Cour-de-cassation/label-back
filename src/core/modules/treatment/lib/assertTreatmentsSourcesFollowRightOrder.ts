@@ -3,7 +3,10 @@ import { sortInConsistentOrder } from './sortInConsistentOrder';
 
 export { assertTreatmentsSourcesFollowRightOrder };
 
-type documentStepType = { treatmentSource: treatmentType['source'][]; quantity: '0|1' | '1' | '1+' };
+type documentStepType = {
+  treatmentSource: treatmentType['source'][];
+  quantity: '0|1' | '1' | '1+';
+};
 
 const DOCUMENT_STEPS: documentStepType[] = [
   { treatmentSource: ['NLP', 'reimportedTreatment'], quantity: '1' },

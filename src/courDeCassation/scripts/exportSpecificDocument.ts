@@ -2,7 +2,6 @@ import yargs from 'yargs';
 import { buildBackend } from '@src/backend';
 import { buildSderExporter } from '../exporter';
 import { parametersHandler } from '../lib/parametersHandler';
-
 (async () => {
   const { settings } = await parametersHandler.getParameters();
   const { documentNumber, source } = parseArgv();
@@ -31,13 +30,13 @@ function parseArgv() {
       },
       source: {
         demandOption: true,
-        description:
-          'source (jurinet or jurica) of the document you want to export',
+        description: 'source (jurinet or jurica) of the document you want to export',
         type: 'string',
       },
     })
     .help()
-    .alias('help', 'h').parseSync();
+    .alias('help', 'h')
+    .parseSync();
 
   return {
     documentNumber: argv.documentNumber as number,

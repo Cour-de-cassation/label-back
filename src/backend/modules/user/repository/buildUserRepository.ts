@@ -4,10 +4,7 @@ import { customUserRepositoryType } from './customUserRepositoryType';
 
 export { buildUserRepository };
 
-const buildUserRepository = buildRepositoryBuilder<
-  userType,
-  customUserRepositoryType
->({
+const buildUserRepository = buildRepositoryBuilder<userType, customUserRepositoryType>({
   collectionName: 'users',
   indexes: [
     {
@@ -24,10 +21,7 @@ const buildUserRepository = buildRepositoryBuilder<
       return result;
     },
     async updateNameAndRoleById(userId, name, role) {
-      const { acknowledged } = await collection.updateOne(
-        { _id: userId },
-        { $set: { name, role } },
-      );
+      const { acknowledged } = await collection.updateOne({ _id: userId }, { $set: { name, role } });
       return {
         success: acknowledged,
       };

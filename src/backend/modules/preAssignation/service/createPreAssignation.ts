@@ -3,15 +3,7 @@ import { buildPreAssignationRepository } from '..';
 
 export { createPreAssignation };
 
-async function createPreAssignation({
-  userId,
-  source,
-  number,
-}: {
-  userId: idType;
-  source: string;
-  number: string;
-}) {
+async function createPreAssignation({ userId, source, number }: { userId: idType; source: string; number: string }) {
   const preAssignationRepository = buildPreAssignationRepository();
 
   const preAssignation = preAssignationModule.lib.buildPreAssignation({

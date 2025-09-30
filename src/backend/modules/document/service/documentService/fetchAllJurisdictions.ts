@@ -6,7 +6,7 @@ export { fetchAllJurisdictions };
 async function fetchAllJurisdictions() {
   const documentRepository = buildDocumentRepository();
 
-  return documentRepository.distinctNested<
-    documentType['decisionMetadata']['jurisdiction']
-  >('decisionMetadata.jurisdiction');
+  return documentRepository.distinctNested<documentType['decisionMetadata']['jurisdiction']>(
+    'decisionMetadata.jurisdiction',
+  );
 }
