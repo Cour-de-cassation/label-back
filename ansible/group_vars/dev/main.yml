@@ -3,8 +3,10 @@ git_branch: dev
 label_mongodb_url: "{{ vault_label_mongodb_url }}" 
 dbsder_api_key: "{{ vault_dbsder_api_key }}" 
 cookie_private_key: "{{ vault_cookie_private_key }}" 
+
 sso_sp_assertion_consumer_service_location: "{{ vault_sso_sp_assertion_consumer_service_location }}" 
 sso_sp_entity_id: "{{ vault_sso_sp_entity_id }}" 
+
 sso_idp_single_sign_on_service_location: "{{ vault_sso_idp_single_sign_on_service_location }}"
 sso_idp_single_logout_service_location: "{{ vault_sso_idp_single_logout_service_location }}"
 sso_front_success_connexion_annotator_url: "{{ vault_sso_front_success_connexion_annotator_url }}" 
@@ -17,7 +19,7 @@ sso_sp_private_key: "sso-files/keycloak-private.key"
 
 # On ajoutera cette parti dans le all quand on aura les mêmes attributs partout (keyclaock et ldapMJ)
 sso_attribute_name: "lastName" 
-sso_attribute_firstname: "firstname"
+sso_attribute_firstname: "firstName"
 sso_attribute_mail: "email"
 sso_attribute_role: "Role"
 
