@@ -19,7 +19,7 @@ sso_sp_private_key: "sso-files/keycloak-private.key"
 
 # On ajoutera cette parti dans le all quand on aura les mêmes attributs partout (keyclaock et ldapMJ)
 sso_attribute_name: "lastName" 
-sso_attribute_firstname: "firstName"
+sso_attribute_firstname: "firstname"
 sso_attribute_mail: "email"
 sso_attribute_role: "Role"
 
