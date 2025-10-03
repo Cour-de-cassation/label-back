@@ -153,10 +153,14 @@ function buildFakeExporterConfig(): exporterConfigType & {
   return {
     name: 'FAKE_EXPORTER',
 
-    async sendDocumentPseudonymisationAndTreatments({ externalId, pseudoText, labelTreatments }) {
+    async updateDecisionPseudonymisation({ externalId, pseudoText, labelTreatments }) {
       exportedExternalIds.push(externalId);
       exportedpseudonymizationTexts.push(pseudoText);
       exportedlabelTreatments.push(...labelTreatments);
+    },
+
+    async fetchDecisionByExternalId(externalId) {
+      return undefined;
     },
 
     getExportedExternalIds() {

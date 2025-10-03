@@ -1,5 +1,6 @@
 import {
   buildAnonymizer,
+  Deprecated,
   documentModule,
   documentType,
   settingsModule,
@@ -96,10 +97,7 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
       operationName: 'exportSpecificDocument',
       msg: `START: documentNumber ${documentNumber} - source ${source}`,
     });
-    const document = await documentService.fetchDocumentBySourceAndDocumentNumber({
-      documentNumber,
-      source,
-    });
+    const document = await documentService.fetchDocumentBySourceAndDocumentNumber({ documentNumber, source });
 
     if (!document) {
       logger.error({
@@ -175,10 +173,30 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
     const anonymizer = buildAnonymizer(settingsForDocument, annotations, seed);
 
     try {
-      await exporterConfig.sendDocumentPseudonymisationAndTreatments({
+      const currentDecision = await exporterConfig.fetchDecisionByExternalId(document.externalId);
+      const publishStatus =
+        currentDecision?.publishStatus === Deprecated.PublishStatus.BLOCKED
+          ? Deprecated.PublishStatus.BLOCKED
+          : Deprecated.PublishStatus.TOBEPUBLISHED;
+
+      const labelTreatments = treatmentModule.lib.concat(treatments, document.nlpVersions, document.checklist);
+      const currentDecisionTreatments = currentDecision?.labelTreatments ?? [];
+      const updatedLabelTreatments = labelTreatments
+        ? [
+            ...currentDecisionTreatments,
+            ...labelTreatments.map(({ order, ..._ }) => ({
+              ..._,
+              order: currentDecisionTreatments.length + order,
+            })),
+          ]
+        : currentDecisionTreatments;
+
+      await exporterConfig.updateDecisionPseudonymisation({
         externalId: document.externalId,
         pseudoText: anonymizer.anonymizeDocument(document).text,
-        labelTreatments: treatmentModule.lib.concat(treatments, document.nlpVersions, document.checklist),
+        labelTreatments: updatedLabelTreatments,
+        labelStatus: Deprecated.LabelStatus.DONE,
+        publishStatus: publishStatus,
       });
       logger.log({
         operationName: 'exportDocument',
