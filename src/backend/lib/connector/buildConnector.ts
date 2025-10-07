@@ -160,9 +160,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
       msg: `Starting importNewDocuments...`,
     });
 
-    // on bloque les decisions Deprecated.Sources.TCOM pour l'instant car la normalisation n'est pas encore propre
-    const sources = Object.values(Deprecated.Sources).filter((src) => src !== Deprecated.Sources.TCOM);
-    for (const source of sources) {
+    for (const source of Object.values(Deprecated.Sources)) {
       logger.log({
         operationName: 'importNewDocuments',
         msg: `Fetching ${source} decisions...`,
