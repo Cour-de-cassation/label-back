@@ -5,9 +5,7 @@ import { countDocumentsWithoutAnnotations } from './countDocumentsWithoutAnnotat
 import { countDoneDocumentsWithoutLossNotIn } from './countDoneDocumentsWithoutLossNotIn';
 import { countDoneDocuments } from './countDoneDocuments';
 import { countFreeDocuments } from './countFreeDocuments';
-import { countLoadedDocuments } from './countLoadedDocuments';
 import { countLockedDocuments } from './countLockedDocuments';
-import { countNlpAnnotatingDocuments } from './countNlpAnnotatingDocuments';
 import { countPendingDocuments } from './countPendingDocuments';
 import { countSavedDocuments } from './countSavedDocuments';
 import { deleteDocument } from './deleteDocument';
@@ -22,7 +20,6 @@ import { fetchDocument } from './fetchDocument';
 import { buildFetchDocumentsForUser } from './fetchDocumentsForUser';
 import { fetchDocumentBySourceAndDocumentNumber } from './fetchDocumentBySourceAndDocumentNumber';
 import { fetchDocumentsReadyToExport } from './fetchDocumentsReadyToExport';
-import { fetchDocumentWithoutAnnotationsNotIn } from './fetchDocumentWithoutAnnotationsNotIn';
 import { fetchDoneDocuments } from './fetchDoneDocuments';
 import { fetchDoneDocumentWithoutLossNotIn } from './fetchDoneDocumentWithoutLossNotIn';
 import { fetchFreeDocumentsIds } from './fetchFreeDocumentsIds';
@@ -32,7 +29,6 @@ import { fetchPublishableDocumentsToExport } from './fetchPublishableDocumentsTo
 import { fetchToBeConfirmedDocuments } from './fetchToBeConfirmedDocuments';
 import { fetchTreatedDocuments } from './fetchTreatedDocuments';
 import { fetchUntreatedDocuments } from './fetchUntreatedDocuments';
-import { fetchDocumentsWithoutAnnotations } from './fetchDocumentsWithoutAnnotations';
 import { resetDocument } from './resetDocument';
 import { resetDocumentReviewStatus } from './resetDocumentReviewStatus';
 import { updateDocumentLoss } from './updateDocumentLoss';
@@ -67,9 +63,7 @@ function buildDocumentService() {
     countDoneDocumentsWithoutLossNotIn,
     countDoneDocuments,
     countFreeDocuments,
-    countLoadedDocuments,
     countLockedDocuments,
-    countNlpAnnotatingDocuments,
     countPendingDocuments,
     countSavedDocuments,
     deleteDocument,
@@ -85,7 +79,6 @@ function buildDocumentService() {
     fetchDocumentBySourceAndDocumentNumber,
     fetchDocumentsForUser: buildFetchDocumentsForUser(checkCallAttempts),
     fetchDocumentsReadyToExport,
-    fetchDocumentWithoutAnnotationsNotIn,
     fetchDoneDocuments,
     fetchDoneDocumentWithoutLossNotIn,
     fetchFreeDocumentsIds,
@@ -95,7 +88,6 @@ function buildDocumentService() {
     fetchToBeConfirmedDocuments,
     fetchTreatedDocuments,
     fetchUntreatedDocuments,
-    fetchDocumentsWithoutAnnotations,
     resetDocument,
     resetDocumentReviewStatus,
     updateDocumentLoss,

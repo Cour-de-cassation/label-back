@@ -18,9 +18,7 @@ async function deleteDocument(
   });
 
   if (document) {
-    if (document.status != 'loaded' && document.status != 'nlpAnnotating') {
-      await statisticService.saveStatisticsOfDocument(document, settings, 'deleted with script');
-    }
+    await statisticService.saveStatisticsOfDocument(document, settings, 'deleted with script');
     await documentService.deleteDocument(document._id);
   } else {
     logger.log({
