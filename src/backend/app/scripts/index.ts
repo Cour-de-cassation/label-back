@@ -10,6 +10,7 @@ import { resetUntreatedDocumentsForTest } from './resetUntreatedDocumentsForTest
 import { purgeDb } from './purgeDb';
 import { renewCache } from './renewCache';
 import { setIndexesOnAllCollections } from './setIndexesOnAllCollections';
+import { clearDb } from './clearDb';
 
 export {
   cleanDocuments,
@@ -24,4 +25,5 @@ export {
   renewCache,
   resetUntreatedDocumentsForTest,
   setIndexesOnAllCollections,
+  clearDb,
 };
