@@ -12,6 +12,8 @@ import { statisticService } from '../../modules/statistic';
 export { buildConnector };
 
 function buildConnector(connectorConfig: connectorConfigType) {
+  const preAssignator = buildPreAssignator();
+
   return {
     importSpecificDocument,
     importNewDocuments,
@@ -46,11 +48,17 @@ function buildConnector(connectorConfig: connectorConfigType) {
         return;
       }
 
+      if (!courtDecision.originalText || !courtDecision.labelTreatments || courtDecision.labelTreatments.length === 0) {
+        logger.log({
+          operationName: 'importSpecificDocument',
+          msg: 'Court decision must have an original text and labelTreatments, skipping.',
+        });
+        return;
+      }
+
       logger.log({
         operationName: 'importSpecificDocument',
-        msg: `Court decision found. labelStatus: ${
-          courtDecision.labelStatus
-        }, ${!!courtDecision.pseudoText ? 'already' : 'never'} pseudonymised`,
+        msg: `Court decision found. labelStatus: ${courtDecision.labelStatus}`,
       });
       const document = await connectorConfig.mapCourtDecisionToDocument(courtDecision, 'manual');
       logger.log({
@@ -61,83 +69,79 @@ function buildConnector(connectorConfig: connectorConfigType) {
       if (lowPriority) {
         await insertDocument({ ...document, route: 'exhaustive' }, settings);
       } else {
-        await insertDocument({ ...document, route: 'request', priority: 4 }, settings);
+        await insertDocument({ ...document, route: 'request', priority: 4, status: 'toBeConfirmed' }, settings);
       }
       logger.log({
         operationName: 'importSpecificDocument',
         msg: 'Insertion done',
       });
 
+      // If keepLabelTreatments reimport last treatment, otherwise reimport last NLP treatment
       if (keepLabelTreatments) {
-        if (courtDecision.labelTreatments?.length == 0) {
-          logger.error({
-            operationName: 'importSpecificDocument',
-            msg: 'LabelTreatments not found in court decision, skiping labelTreatments reimport.',
-          });
-        } else {
+        const annotations: annotationType[] =
+          courtDecision.labelTreatments == undefined
+            ? []
+            : courtDecision.labelTreatments[courtDecision.labelTreatments.length - 1].annotations.map((annotation) => {
+                return annotationModule.lib.buildAnnotation({
+                  category: annotation.category,
+                  start: annotation.start,
+                  text: annotation.text,
+                  score: 1,
+                  entityId: annotation.entityId,
+                  source: annotation.source,
+                });
+              });
+
+        await treatmentService.createTreatment(
+          {
+            documentId: document._id,
+            previousAnnotations: [],
+            nextAnnotations: annotations,
+            source: 'reimportedTreatment',
+          },
+          settings,
+        );
+
+        logger.log({
+          operationName: 'importSpecificDocument',
+          msg: 'Last labelTreatment reimported.',
+        });
+      } else {
+        const lastNlpLabelTreatment = courtDecision.labelTreatments
+          ?.filter((treatment) => treatment.source === 'NLP')
+          .sort((a, b) => b.order - a.order)[0];
+
+        if (!lastNlpLabelTreatment) {
           logger.log({
             operationName: 'importSpecificDocument',
-            msg: 'LabelTreatments found in court decision, importing.',
+            msg: 'Court decision must have an NLP, skipping.',
           });
-
-          const annotations: annotationType[] =
-            courtDecision.labelTreatments == undefined
-              ? []
-              : courtDecision.labelTreatments[courtDecision.labelTreatments.length - 1].annotations.map(
-                  (annotation) => {
-                    return annotationModule.lib.buildAnnotation({
-                      category: annotation.category,
-                      start: annotation.start,
-                      text: annotation.text,
-                      score: annotation.score,
-                      entityId: annotation.entityId,
-                      source: annotation.source,
-                    });
-                  },
-                );
-
-          await treatmentService.createTreatment(
-            {
-              documentId: document._id,
-              previousAnnotations: [],
-              nextAnnotations: annotations,
-              source: 'reimportedTreatment',
-            },
-            settings,
-          );
-
-          // on récupère la checklist du treatment NLP le plus récent
-          const reimportedChecklist = courtDecision.labelTreatments
-            ?.filter((treatment) => treatment.source === 'NLP')
-            .sort((a, b) => b.order - a.order)[0].checklist;
-
-          if (reimportedChecklist) {
-            await documentService.updateDocumentChecklist(document._id, reimportedChecklist);
-            logger.log({
-              operationName: 'importSpecificDocument',
-              msg: 'Checklist reimported',
-            });
-          }
-
-          logger.log({
-            operationName: 'importSpecificDocument',
-            msg: 'LabelTreatments reimported, checking for pre-assignation.',
-          });
-          const preAssignator = buildPreAssignator();
-          const isPreassignated = await preAssignator.preAssignDocument(document);
-          if (!isPreassignated) {
-            logger.log({
-              operationName: 'importSpecificDocument',
-              msg: 'No preAssignation found, setting documentStatus to next status.',
-            });
-            if (lowPriority) {
-              await documentService.updateDocumentStatus(idModule.lib.buildId(document._id), 'free');
-            } else {
-              await documentService.updateDocumentStatus(idModule.lib.buildId(document._id), 'toBeConfirmed');
-            }
-          }
+          return;
         }
+
+        const annotations: annotationType[] = lastNlpLabelTreatment.annotations.map((annotation) => {
+          return annotationModule.lib.buildAnnotation({
+            category: annotation.category,
+            start: annotation.start,
+            text: annotation.text,
+            score: annotation.score,
+            entityId: annotation.entityId,
+            source: annotation.source,
+          });
+        });
+
+        await treatmentService.createTreatment(
+          {
+            documentId: document._id,
+            previousAnnotations: [],
+            nextAnnotations: annotations,
+            source: 'NLP',
+          },
+          settings,
+        );
       }
+
+      await preAssignator.preAssignDocument(document);
 
       logger.log({
         operationName: 'importSpecificDocument',
@@ -179,8 +183,43 @@ function buildConnector(connectorConfig: connectorConfigType) {
         decision = await newDecisionForSource.next()
       ) {
         try {
+          if (!decision.originalText || !decision.labelTreatments || decision.labelTreatments.length === 0) {
+            throw new Error('Court decision must have an original text and labelTreatments, can not be imported.');
+          }
           const converted = await connectorConfig.mapCourtDecisionToDocument(decision, 'recent');
           await insertDocument(converted, settings);
+
+          const lastNlpLabelTreatment = decision.labelTreatments
+            ?.filter((treatment) => treatment.source === 'NLP')
+            .sort((a, b) => b.order - a.order)[0];
+
+          if (!lastNlpLabelTreatment) {
+            throw new Error('Court decision must have an NLP treatment, can not be imported.');
+          }
+
+          const annotations: annotationType[] = lastNlpLabelTreatment.annotations.map((annotation) => {
+            return annotationModule.lib.buildAnnotation({
+              category: annotation.category,
+              start: annotation.start,
+              text: annotation.text,
+              score: annotation.score,
+              entityId: annotation.entityId,
+              source: annotation.source,
+            });
+          });
+
+          await treatmentService.createTreatment(
+            {
+              documentId: converted._id,
+              previousAnnotations: [],
+              nextAnnotations: annotations,
+              source: 'NLP',
+            },
+            settings,
+          );
+
+          await preAssignator.preAssignDocument(converted);
+
           await connectorConfig.updateDocumentLabelStatusToLoaded(converted.externalId);
         } catch (err) {
           logger.error({
@@ -204,9 +243,7 @@ async function insertDocument(document: documentType, settings: settingsType) {
       msg: `Document ${document.source}:${document.documentNumber} is already in label database, deleting old one.`,
     });
 
-    if (sameDocument.status != 'loaded' && sameDocument.status != 'nlpAnnotating') {
-      await statisticService.saveStatisticsOfDocument(sameDocument, settings, 'deleted because new reception');
-    }
+    await statisticService.saveStatisticsOfDocument(sameDocument, settings, 'deleted because new reception');
 
     if (sameDocument.source === 'jurinet') {
       assignations = await assignationService.fetchAssignationsOfDocumentId(sameDocument._id);
