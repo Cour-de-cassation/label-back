@@ -24,7 +24,9 @@ async function fetchFilteredStatistics(filter: ressourceFilterType, settings: se
 
   async function computeStatisticsFromDoneDocuments() {
     const doneDocuments = await documentService.fetchDoneDocuments();
-    const documentIds = doneDocuments.map(({ _id }) => _id);
+    const lockedDocuments = await documentService.fetchLockedDocuments();
+    const allDocuments = [...doneDocuments, ...lockedDocuments];
+    const documentIds = allDocuments.map(({ _id }) => _id);
 
     const assignationsByDocumentId: Record<string, assignationType[] | undefined> =
       await assignationService.fetchAssignationsByDocumentIds(documentIds, {
@@ -32,7 +34,7 @@ async function fetchFilteredStatistics(filter: ressourceFilterType, settings: se
       });
     const treatmentsByDocumentId = await treatmentService.fetchTreatmentsByDocumentIds(documentIds);
 
-    const treatedDocuments = doneDocuments.map((document) => {
+    const treatedDocuments = allDocuments.map((document) => {
       const assignations = assignationsByDocumentId[idModule.lib.convertToString(document._id)];
       const treatments = treatmentsByDocumentId[idModule.lib.convertToString(document._id)];
       const humanTreatments = assignations ? treatmentModule.lib.extractHumanTreatments(treatments, assignations) : [];
