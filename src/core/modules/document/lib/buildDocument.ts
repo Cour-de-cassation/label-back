@@ -10,7 +10,7 @@ function buildDocument(
     ...documentFields,
     _id: idModule.lib.buildId(),
     reviewStatus: { hasBeenAmended: false, viewerNames: [] },
-    status: 'free',
+    status: 'loaded',
     updateDate: new Date().getTime(),
   };
 }

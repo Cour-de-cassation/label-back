@@ -453,7 +453,7 @@ const documentModelCommonFields = {
   source: { kind: 'primitive', content: 'string' },
   status: {
     kind: 'constant',
-    content: ['done', 'free', 'pending', 'locked', 'saved', 'toBePublished', 'toBeConfirmed'] as const,
+    content: ['loaded', 'done', 'free', 'pending', 'locked', 'saved', 'toBePublished', 'toBeConfirmed'] as const,
   },
   title: { kind: 'primitive', content: 'string' },
   text: { kind: 'primitive', content: 'string' },

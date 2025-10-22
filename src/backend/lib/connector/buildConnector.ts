@@ -8,6 +8,10 @@ import { Deprecated } from '@src/core';
 import { assignationService } from '../../modules/assignation';
 import { preAssignationService } from '../../modules/preAssignation';
 import { statisticService } from '../../modules/statistic';
+import { extractRoute } from '../extractRoute';
+import { updateDocumentRoute } from '../../modules/document/service/documentService/updateDocumentRoute';
+import { updateDocumentStatus } from '../../modules/document/service/documentService/updateDocumentStatus';
+import { getNextStatus } from '@src/core/modules/document/lib';
 
 export { buildConnector };
 
@@ -61,6 +65,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
         msg: `Court decision found. labelStatus: ${courtDecision.labelStatus}`,
       });
       const document = await connectorConfig.mapCourtDecisionToDocument(courtDecision, 'manual');
+
       logger.log({
         operationName: 'importSpecificDocument',
         msg: 'Court decision converted. Inserting document into database...',
@@ -112,11 +117,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
           .sort((a, b) => b.order - a.order)[0];
 
         if (!lastNlpLabelTreatment) {
-          logger.log({
-            operationName: 'importSpecificDocument',
-            msg: 'Court decision must have an NLP, skipping.',
-          });
-          return;
+          throw new Error('Court decision must have an NLP treatment, can not be imported.');
         }
 
         const annotations: annotationType[] = lastNlpLabelTreatment.annotations.map((annotation) => {
@@ -141,7 +142,18 @@ function buildConnector(connectorConfig: connectorConfigType) {
         );
       }
 
-      await preAssignator.preAssignDocument(document);
+      // in case of high priority the document status is already set to toBeConfirmed and no preAssignation is possible
+      if (lowPriority) {
+        const isPreassignated = await preAssignator.preAssignDocument(document);
+        if (!isPreassignated) {
+          const nextStatus = getNextStatus({
+            publicationCategory: document.publicationCategory,
+            status: document.status,
+            route: 'exhaustive',
+          });
+          await updateDocumentStatus(document._id, nextStatus);
+        }
+      }
 
       logger.log({
         operationName: 'importSpecificDocument',
@@ -218,7 +230,19 @@ function buildConnector(connectorConfig: connectorConfigType) {
             settings,
           );
 
-          await preAssignator.preAssignDocument(converted);
+          const routeForDocument = await extractRoute(converted);
+          await updateDocumentRoute(converted._id, routeForDocument);
+
+          const isPreassignated = await preAssignator.preAssignDocument({ ...converted, route: routeForDocument });
+          // in case of preassignation lifecycle is manage by preAssignator
+          if (!isPreassignated) {
+            const nextStatus = getNextStatus({
+              publicationCategory: converted.publicationCategory,
+              status: converted.status,
+              route: routeForDocument,
+            });
+            await updateDocumentStatus(converted._id, nextStatus);
+          }
 
           await connectorConfig.updateDocumentLabelStatusToLoaded(converted.externalId);
         } catch (err) {

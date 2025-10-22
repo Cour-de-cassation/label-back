@@ -7,12 +7,12 @@ import { buildDocumentRepository } from '../../modules/document';
 describe('buildPreAssignator', () => {
   const preAssignator = buildPreAssignator();
 
-  it('must throw an error if document is not free', () => {
+  it('must throw an error if document is not loaded', () => {
     const documentNotFree = documentModule.generator.generate({
       status: 'done',
     });
     expect(preAssignator.preAssignDocument(documentNotFree)).rejects.toThrow(
-      'Document status must be free before pre-assign it',
+      'Document status must be loaded before pre-assign it',
     );
   });
 
@@ -26,7 +26,7 @@ describe('buildPreAssignator', () => {
     const documentNumber = 123456;
     const source = 'juritest';
     const documentToPreAssign = documentModule.generator.generate({
-      status: 'free',
+      status: 'loaded',
       source: source,
       documentNumber: documentNumber,
     });

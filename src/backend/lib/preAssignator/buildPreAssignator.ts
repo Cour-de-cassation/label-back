@@ -17,7 +17,7 @@ function buildPreAssignator() {
       msg: `Starting preAssignation for document ${document.source} ${document.documentNumber}`,
     });
 
-    if (document.status === 'free') {
+    if (document.status === 'loaded') {
       const preAssignationForDocument =
         (await preAssignationService.fetchPreAssignationBySourceAndNumber(
           document.documentNumber.toString(),
@@ -59,9 +59,9 @@ function buildPreAssignator() {
     } else {
       logger.error({
         operationName: 'preAssignation',
-        msg: `Document status must be free before pre-assign it`,
+        msg: `Document status must be loaded before pre-assign it`,
       });
-      throw new Error('Document status must be free before pre-assign it');
+      throw new Error('Document status must be loaded before pre-assign it');
     }
   }
 }
