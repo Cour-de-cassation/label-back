@@ -1,7 +1,6 @@
 import { documentType, idModule } from '@src/core';
 import { assignationService } from '../../../assignation';
 import { buildDocumentRepository } from '../../repository';
-import { resetDocument } from './resetDocument';
 import { logger } from '../../../../utils';
 
 export { updateDocumentStatus };
