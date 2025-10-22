@@ -170,6 +170,8 @@ export namespace Deprecated {
 
   export interface DecisionOccultation {
     additionalTerms: string;
+    additionalTermsToAnnotate?: string[];
+    additionalTermsToUnAnnotate?: string[];
     categoriesToOmit: string[];
     motivationOccultation: boolean;
   }

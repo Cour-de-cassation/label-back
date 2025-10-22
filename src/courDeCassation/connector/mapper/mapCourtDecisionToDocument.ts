@@ -134,8 +134,13 @@ async function mapCourtDecisionToDocument(
     decisionMetadata: {
       appealNumber: appealNumber || '',
       additionalTermsToAnnotate,
-      computedAdditionalTerms: undefined,
-      additionalTermsParsingFailed: undefined,
+      computedAdditionalTerms: {
+        additionalTermsToAnnotate: sderCourtDecision.occultation.additionalTermsToAnnotate ?? [],
+        additionalTermsToUnAnnotate: sderCourtDecision.occultation.additionalTermsToUnAnnotate ?? [],
+      },
+      additionalTermsParsingFailed:
+        sderCourtDecision.occultation.additionalTermsToUnAnnotate &&
+        sderCourtDecision.occultation.additionalTermsToUnAnnotate.length > 0,
       boundDecisionDocumentNumbers: sderCourtDecision.decatt || [],
       categoriesToOmit,
       civilCaseCode,

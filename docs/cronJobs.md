@@ -2,10 +2,6 @@
 
 Here are all the cron jobs of Label :
 
-## nlp-annotation
-
-Send Label documents to the nlp annotation service.
-
 ## tobetreated-document-import
 
 Import all documents that must be treat in label.

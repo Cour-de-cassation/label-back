@@ -1,7 +1,6 @@
 import { documentType, idModule } from '@src/core';
 import { assignationService } from '../../../assignation';
 import { buildDocumentRepository } from '../../repository';
-import { resetDocument } from './resetDocument';
 import { logger } from '../../../../utils';
 
 export { updateDocumentStatus };
@@ -14,8 +13,6 @@ async function updateDocumentStatus(_id: documentType['_id'], status: documentTy
   }
   if (status === 'free') {
     await assignationService.deleteAssignationsByDocumentId(_id);
-  } else if (status === 'loaded') {
-    await resetDocument(_id);
   }
   logger.log({
     operationName: 'updateDocumentStatus',
