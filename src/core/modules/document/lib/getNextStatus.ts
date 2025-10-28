@@ -14,8 +14,6 @@ function getNextStatus({
 }): documentType['status'] {
   switch (status) {
     case 'loaded':
-      return 'nlpAnnotating';
-    case 'nlpAnnotating':
       if (route === 'automatic') {
         return 'done';
       } else if (route === 'request') {
