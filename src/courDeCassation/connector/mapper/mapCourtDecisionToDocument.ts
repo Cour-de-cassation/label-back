@@ -129,6 +129,10 @@ async function mapCourtDecisionToDocument(
     };
   }
 
+  const nlpTreatment = sderCourtDecision.labelTreatments
+    ?.filter((treatment) => treatment.source === 'NLP')
+    .sort((a, b) => b.order - a.order)[0];
+
   return documentModule.lib.buildDocument({
     creationDate: creationDate?.getTime(),
     decisionMetadata: {
@@ -170,8 +174,8 @@ async function mapCourtDecisionToDocument(
     title,
     text: sderCourtDecision.originalText,
     zoning: zoning,
-    nlpVersions: {} as documentType['nlpVersions'],
-    checklist: [],
+    nlpVersions: nlpTreatment?.version,
+    checklist: nlpTreatment?.checklist ?? [],
   });
 }
 

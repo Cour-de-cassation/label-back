@@ -59,21 +59,6 @@ type customDocumentRepositoryType = {
     statuses: documentType['status'][],
     idsNotToSearchIn: documentType['_id'][],
   ) => Promise<documentType | undefined>;
-  updateLossById: (_id: idType, loss: documentType['loss']) => Promise<documentType | undefined>;
-  updateNlpVersionsById: (_id: idType, nlpVersions: documentType['nlpVersions']) => Promise<documentType | undefined>;
-  updateAdditionalTermsParsingFailed: (
-    _id: idType,
-    additionalTermsParsingFailed: documentType['decisionMetadata']['additionalTermsParsingFailed'],
-  ) => Promise<documentType | undefined>;
-  updateChecklistById: (_id: idType, checklist: documentType['checklist']) => Promise<documentType | undefined>;
-  updateCategoriesToOmitById: (
-    _id: idType,
-    loss: documentType['decisionMetadata']['categoriesToOmit'],
-  ) => Promise<documentType | undefined>;
-  updateComputedAdditionalTerms: (
-    _id: idType,
-    computedAdditionalTerms: documentType['decisionMetadata']['computedAdditionalTerms'],
-  ) => Promise<documentType | undefined>;
   updateRouteById: (_id: idType, route: documentType['route']) => Promise<documentType | undefined>;
   updateStatusById: (_id: idType, status: documentType['status']) => Promise<documentType | undefined>;
   updateOneStatusByIdAndStatus: (
