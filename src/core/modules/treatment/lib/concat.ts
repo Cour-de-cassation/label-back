@@ -14,7 +14,7 @@ function concat(treatments: treatmentType[]): Deprecated.LabelTreatment[] {
     const order = sortedTreatments.length;
     const currentTreatment = sortedTreatments[order - 1];
 
-    if (currentTreatment.source != 'reimportedTreatment' && currentTreatment.source != 'NLP') {
+    if (currentTreatment.source != 'reimportedTreatment') {
       labelTreatments.unshift({
         annotations: computeAnnotations(sortedTreatments),
         source: computeSource(currentTreatment.source),
@@ -34,6 +34,8 @@ function concat(treatments: treatmentType[]): Deprecated.LabelTreatment[] {
 
   function computeSource(source: treatmentType['source']) {
     switch (source) {
+      case 'NLP':
+        return 'NLP';
       case 'annotator':
       case 'admin':
         return 'LABEL_WORKING_USER_TREATMENT';
