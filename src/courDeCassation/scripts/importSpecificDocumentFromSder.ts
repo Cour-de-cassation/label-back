@@ -4,7 +4,7 @@ import { sderConnector } from '../connector';
 import { parametersHandler } from '../lib/parametersHandler';
 (async () => {
   const { settings } = await parametersHandler.getParameters();
-  const { documentNumber, source, lowPriority, keepLabelTreatments } = parseArgv();
+  const { documentNumber, source, lowPriority } = parseArgv();
   const backend = buildBackend(settings);
 
   backend.runScript(
@@ -13,7 +13,6 @@ import { parametersHandler } from '../lib/parametersHandler';
         documentNumber,
         source,
         lowPriority,
-        keepLabelTreatments,
         settings,
       }),
     {
@@ -40,11 +39,6 @@ function parseArgv() {
         description: 'source (jurinet, jurica or juritj) of the document you want to import',
         type: 'string',
       },
-      keepLabelTreatments: {
-        demandOption: false,
-        description: 'import labelTreatments from SDER database if exist',
-        type: 'boolean',
-      },
     })
     .help()
     .alias('help', 'h')
@@ -54,6 +48,5 @@ function parseArgv() {
     documentNumber: argv.documentNumber as number,
     lowPriority: !!argv.lowPriority as boolean,
     source: argv.source as string,
-    keepLabelTreatments: !!argv.keepLabelTreatments as boolean,
   };
 }
