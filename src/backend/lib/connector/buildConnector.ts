@@ -27,18 +27,16 @@ function buildConnector(connectorConfig: connectorConfigType) {
     documentNumber,
     source,
     lowPriority,
-    keepLabelTreatments,
     settings,
   }: {
     documentNumber: number;
     source: string;
     lowPriority: boolean;
-    keepLabelTreatments: boolean;
     settings: settingsType;
   }) {
     logger.log({
       operationName: 'importSpecificDocument',
-      msg: `START: ${documentNumber} - ${source}, lowPriority: ${lowPriority}, keepLabelTreatments: ${keepLabelTreatments}`,
+      msg: `START: ${documentNumber} - ${source}, lowPriority: ${lowPriority}`,
     });
 
     try {
@@ -81,66 +79,32 @@ function buildConnector(connectorConfig: connectorConfigType) {
         msg: 'Insertion done',
       });
 
-      // If keepLabelTreatments reimport last treatment, otherwise reimport last NLP treatment
-      if (keepLabelTreatments) {
-        const annotations: annotationType[] =
-          courtDecision.labelTreatments == undefined
-            ? []
-            : courtDecision.labelTreatments[courtDecision.labelTreatments.length - 1].annotations.map((annotation) => {
-                return annotationModule.lib.buildAnnotation({
-                  category: annotation.category,
-                  start: annotation.start,
-                  text: annotation.text,
-                  score: 1,
-                  entityId: annotation.entityId,
-                  source: annotation.source,
-                });
-              });
+      const lastLabelTreatment = courtDecision.labelTreatments.sort((a, b) => b.order - a.order)[0];
 
-        await treatmentService.createTreatment(
-          {
-            documentId: document._id,
-            previousAnnotations: [],
-            nextAnnotations: annotations,
-            source: 'reimportedTreatment',
-          },
-          settings,
-        );
-
-        logger.log({
-          operationName: 'importSpecificDocument',
-          msg: 'Last labelTreatment reimported.',
-        });
-      } else {
-        const lastNlpLabelTreatment = courtDecision.labelTreatments
-          ?.filter((treatment) => treatment.source === 'NLP')
-          .sort((a, b) => b.order - a.order)[0];
-
-        if (!lastNlpLabelTreatment) {
-          throw new Error('Court decision must have an NLP treatment, can not be imported.');
-        }
-
-        const annotations: annotationType[] = lastNlpLabelTreatment.annotations.map((annotation) => {
-          return annotationModule.lib.buildAnnotation({
-            category: annotation.category,
-            start: annotation.start,
-            text: annotation.text,
-            score: annotation.score,
-            entityId: annotation.entityId,
-            source: annotation.source,
-          });
-        });
-
-        await treatmentService.createTreatment(
-          {
-            documentId: document._id,
-            previousAnnotations: [],
-            nextAnnotations: annotations,
-            source: 'NLP',
-          },
-          settings,
-        );
+      if (!lastLabelTreatment) {
+        throw new Error('Court decision must have a treatment, can not be imported.');
       }
+
+      const annotations: annotationType[] = lastLabelTreatment.annotations.map((annotation) => {
+        return annotationModule.lib.buildAnnotation({
+          category: annotation.category,
+          start: annotation.start,
+          text: annotation.text,
+          score: annotation.score,
+          entityId: annotation.entityId,
+          source: annotation.source,
+        });
+      });
+
+      await treatmentService.createTreatment(
+        {
+          documentId: document._id,
+          previousAnnotations: [],
+          nextAnnotations: annotations,
+          source: 'reimportedTreatment',
+        },
+        settings,
+      );
 
       // in case of high priority the document status is already set to toBeConfirmed and no preAssignation is possible
       if (lowPriority) {
@@ -199,15 +163,13 @@ function buildConnector(connectorConfig: connectorConfigType) {
           const converted = await connectorConfig.mapCourtDecisionToDocument(decision, 'recent');
           await insertDocument(converted, settings);
 
-          const lastNlpLabelTreatment = decision.labelTreatments
-            ?.filter((treatment) => treatment.source === 'NLP')
-            .sort((a, b) => b.order - a.order)[0];
+          const lastLabelTreatment = decision.labelTreatments.sort((a, b) => b.order - a.order)[0];
 
-          if (!lastNlpLabelTreatment) {
-            throw new Error('Court decision must have an NLP treatment, can not be imported.');
+          if (!lastLabelTreatment) {
+            throw new Error('Court decision must have a treatment, can not be imported.');
           }
 
-          const annotations: annotationType[] = lastNlpLabelTreatment.annotations.map((annotation) => {
+          const annotations: annotationType[] = lastLabelTreatment.annotations.map((annotation) => {
             return annotationModule.lib.buildAnnotation({
               category: annotation.category,
               start: annotation.start,
@@ -223,7 +185,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
               documentId: converted._id,
               previousAnnotations: [],
               nextAnnotations: annotations,
-              source: 'NLP',
+              source: 'reimportedTreatment',
             },
             settings,
           );
