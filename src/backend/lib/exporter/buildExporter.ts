@@ -179,7 +179,7 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
           ? Deprecated.PublishStatus.BLOCKED
           : Deprecated.PublishStatus.TOBEPUBLISHED;
 
-      const labelTreatments = treatmentModule.lib.concat(treatments);
+      const labelTreatments = treatmentModule.lib.concat(treatments, document.nlpVersions, document.checklist);
       const currentDecisionTreatments = currentDecision?.labelTreatments ?? [];
       const updatedLabelTreatments = labelTreatments
         ? [

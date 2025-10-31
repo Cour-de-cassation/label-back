@@ -14,18 +14,30 @@ describe('buildExporter', () => {
   describe('exportTreatedDocumentsSince', () => {
     it('should export all the ready document since the given days fetched by the exporter', async () => {
       const days = 4;
+      const checklist = [
+        {
+          check_type: 'check',
+          message: 'message',
+          short_message: 'short message',
+          entities: [],
+          sentences: [],
+          metadata_text: [],
+        },
+      ];
       const documents = (
         [
           {
             text: 'Benoit est ingénieur',
             status: 'done',
             updateDate: dateBuilder.daysAgo(5),
+            checklist: checklist,
           },
           { status: 'pending' },
           {
             text: 'Romain est designer',
             status: 'done',
             updateDate: dateBuilder.daysAgo(7),
+            checklist: checklist,
           },
           {
             status: 'done',
@@ -59,9 +71,9 @@ describe('buildExporter', () => {
             after: [
               {
                 category: 'firstName',
-                entityId: 'firstName_designer',
-                start: 11,
-                text: 'designer',
+                entityId: 'firstName_Romain',
+                start: 0,
+                text: 'Romain',
                 score: 1,
                 source: 'NLP',
               },
@@ -71,34 +83,6 @@ describe('buildExporter', () => {
           order: 1,
           lastUpdateDate: 1720776599000,
           source: 'NLP' as treatmentType['source'],
-        },
-        {
-          annotationsDiff: {
-            before: [
-              {
-                category: 'firstName',
-                entityId: 'firstName_designer',
-                start: 11,
-                text: 'designer',
-                score: 1,
-                source: 'NLP',
-              },
-            ],
-            after: [
-              {
-                category: 'firstName',
-                entityId: 'firstName_Romain',
-                start: 0,
-                text: 'Romain',
-                score: 0.6,
-                source: 'agent',
-              },
-            ],
-          },
-          documentId: documents[2]._id,
-          order: 2,
-          lastUpdateDate: 1720776699000,
-          source: 'annotator' as treatmentType['source'],
         },
       ].map(treatmentModule.generator.generate);
       await Promise.all(documents.map(documentRepository.insert));
@@ -120,16 +104,35 @@ describe('buildExporter', () => {
           annotations: [
             {
               category: 'firstName',
-              score: 0.6,
-              entityId: 'firstName_Romain',
+              score: 1,
+              entityId: 'firstName_Benoit',
               start: 0,
-              text: 'Romain',
-              source: 'agent',
+              text: 'Benoit',
+              source: 'NLP',
             },
           ],
           order: 1,
-          source: 'LABEL_WORKING_USER_TREATMENT',
-          treatmentDate: '2024-07-12T09:31:39.000Z',
+          source: 'NLP',
+          treatmentDate: '2024-07-12T09:28:27.000Z',
+          version: undefined,
+          checklist: checklist,
+        },
+        {
+          annotations: [
+            {
+              category: 'firstName',
+              score: 1,
+              entityId: 'firstName_Romain',
+              start: 0,
+              text: 'Romain',
+              source: 'NLP',
+            },
+          ],
+          order: 1,
+          source: 'NLP',
+          treatmentDate: '2024-07-12T09:29:59.000Z',
+          version: undefined,
+          checklist: checklist,
         },
       ]);
     });
