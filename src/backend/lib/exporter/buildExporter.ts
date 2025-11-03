@@ -1,12 +1,4 @@
-import {
-  buildAnonymizer,
-  Deprecated,
-  documentModule,
-  documentType,
-  settingsModule,
-  settingsType,
-  treatmentModule,
-} from '@src/core';
+import { Deprecated, documentModule, documentType, settingsModule, settingsType, treatmentModule } from '@src/core';
 import { documentService } from '../../modules/document';
 import { statisticService } from '../../modules/statistic';
 import { treatmentService } from '../../modules/treatment';
@@ -160,17 +152,6 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
 
   async function exportDocument(document: documentType) {
     const treatments = await treatmentService.fetchTreatmentsByDocumentId(document._id);
-    const annotations = treatmentModule.lib.computeAnnotations(treatments);
-    const seed = documentModule.lib.computeCaseNumber(document);
-    const settingsForDocument = settingsModule.lib.computeFilteredSettings(
-      settings,
-      document.decisionMetadata.categoriesToOmit,
-      document.decisionMetadata.additionalTermsToAnnotate,
-      document.decisionMetadata.computedAdditionalTerms,
-      document.decisionMetadata.additionalTermsParsingFailed,
-      document.decisionMetadata.motivationOccultation,
-    );
-    const anonymizer = buildAnonymizer(settingsForDocument, annotations, seed);
 
     try {
       const currentDecision = await exporterConfig.fetchDecisionByExternalId(document.externalId);
@@ -193,7 +174,6 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
 
       await exporterConfig.updateDecisionPseudonymisation({
         externalId: document.externalId,
-        pseudoText: anonymizer.anonymizeDocument(document).text,
         labelTreatments: updatedLabelTreatments,
         labelStatus: Deprecated.LabelStatus.DONE,
         publishStatus: publishStatus,

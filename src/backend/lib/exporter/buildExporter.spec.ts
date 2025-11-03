@@ -93,12 +93,8 @@ describe('buildExporter', () => {
       await exporter.exportTreatedDocumentsSince(days);
 
       const exportedExternalIds = fakeExporterConfig.getExportedExternalIds();
-      const exportedPseudonymizationTexts = fakeExporterConfig.getExportedPseudonymizationTexts();
       const exportedLabelTreatments = fakeExporterConfig.getExportedLabelTreatments();
       expect(exportedExternalIds.sort()).toEqual([documents[0].externalId, documents[2].externalId].sort());
-      expect(exportedPseudonymizationTexts.sort()).toEqual(
-        ['[FIRST_NAME 1] est ingénieur', '[FIRST_NAME 1] est designer'].sort(),
-      );
       expect(exportedLabelTreatments.sort()).toEqual([
         {
           annotations: [
@@ -153,9 +149,8 @@ function buildFakeExporterConfig(): exporterConfigType & {
   return {
     name: 'FAKE_EXPORTER',
 
-    async updateDecisionPseudonymisation({ externalId, pseudoText, labelTreatments }) {
+    async updateDecisionPseudonymisation({ externalId, labelTreatments }) {
       exportedExternalIds.push(externalId);
-      exportedpseudonymizationTexts.push(pseudoText);
       exportedlabelTreatments.push(...labelTreatments);
     },
 

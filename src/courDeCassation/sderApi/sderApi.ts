@@ -118,13 +118,11 @@ const sderApi = {
   async updateDecisionPseudonymisation({
     externalId,
     labelTreatments,
-    pseudoText,
     labelStatus,
     publishStatus,
   }: {
     externalId: documentType['externalId'];
     labelTreatments: Deprecated.LabelTreatment[];
-    pseudoText: string;
     labelStatus: Deprecated.LabelStatus;
     publishStatus: Deprecated.PublishStatus;
   }) {
@@ -132,7 +130,6 @@ const sderApi = {
       method: 'patch',
       path: `decisions/${externalId}`,
       body: {
-        pseudoText,
         labelTreatments,
         labelStatus,
         publishStatus,

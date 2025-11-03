@@ -7,7 +7,6 @@ type exporterConfigType = {
   name: string;
   updateDecisionPseudonymisation: (param: {
     externalId: documentType['externalId'];
-    pseudoText: string;
     labelTreatments: Deprecated.LabelTreatment[];
     labelStatus: Deprecated.LabelStatus;
     publishStatus: Deprecated.PublishStatus;
