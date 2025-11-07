@@ -19,10 +19,6 @@ export { buildApi };
 const API_BASE_URL = '/label/api';
 
 function buildApi(app: Express) {
-  // =============================================================================
-  // GET ENDPOINTS
-  // =============================================================================
-
   app.get(
     `${API_BASE_URL}/aggregatedStatistics`,
     withAuth(['admin', 'scrutator'], async (user, req, res) => {
@@ -220,10 +216,6 @@ function buildApi(app: Express) {
       res.status(200).json(result);
     }),
   );
-
-  // =============================================================================
-  // POST ENDPOINTS
-  // =============================================================================
 
   app.post(
     `${API_BASE_URL}/assignDocumentToUser`,
@@ -447,9 +439,8 @@ function buildApi(app: Express) {
     }),
   );
 
-  // =============================================================================
+  // ===================================================
   // SSO ENDPOINTS
-  // =============================================================================
 
   app.get(`${API_BASE_URL}/sso/metadata`, async (req, res) => {
     try {
@@ -516,29 +507,21 @@ function buildApi(app: Express) {
       res.redirect(`${API_BASE_URL}/sso/logout`);
     }
   });
+
+  // ===================================================
 }
 
-// =============================================================================
-// HELPER FUNCTIONS
-// =============================================================================
-
-/**
- * Authentication middleware wrapper
- * Checks user session and permissions before executing the handler
- */
 function withAuth(
   permissions: Array<userType['role']>,
   handler: (user: userType, req: Request, res: Response) => Promise<void>,
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Check user session
       const currentUser = req.session?.user ?? null;
       if (!currentUser) {
         throw new Error(`user session has expired or is invalid`);
       }
 
-      // Build user object
       const resolvedUser: userType = {
         _id: idModule.lib.buildId(currentUser._id) as userType['_id'],
         name: currentUser.name,
@@ -546,7 +529,6 @@ function withAuth(
         email: currentUser.email,
       };
 
-      // Check permissions
       userModule.lib.assertPermissions(resolvedUser, permissions);
 
       // Parse query parameters for GET requests (create a new parsed query object)
@@ -560,7 +542,6 @@ function withAuth(
         });
       }
 
-      // Execute handler
       await handler(resolvedUser, req, res);
     } catch (error) {
       handleError(error, res, next);
@@ -568,9 +549,6 @@ function withAuth(
   };
 }
 
-/**
- * Parse query parameters (converts JSON strings to objects)
- */
 function parseQuery(query: any): any {
   return mapValues(query, (queryValue) => {
     try {
@@ -581,9 +559,6 @@ function parseQuery(query: any): any {
   });
 }
 
-/**
- * Centralized error handler
- */
 function handleError(error: any, res: Response, next: NextFunction) {
   logger.error({ operationName: 'apiError', msg: `${error}` });
   res.status(error.statusCode || 500);
