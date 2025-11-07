@@ -1,11 +1,11 @@
-import { idModule, omitIdType } from '../../id';
 import { assignationType } from '../assignationType';
+import { ObjectId } from 'mongodb';
 
 export { buildAssignation };
 
-function buildAssignation(assignationFields: omitIdType<assignationType>): assignationType {
+function buildAssignation(assignationFields: Omit<assignationType, '_id'>): assignationType {
   return {
     ...assignationFields,
-    _id: idModule.lib.buildId(),
+    _id: new ObjectId(),
   };
 }

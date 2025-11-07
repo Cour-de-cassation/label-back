@@ -1,5 +1,5 @@
-import { idType } from '../id';
 import { documentRouteType, documentImporterType } from '../document';
+import { ObjectId } from 'mongodb';
 
 export type ressourceFilterType = {
   mustHaveSurAnnotations: boolean;
@@ -11,5 +11,5 @@ export type ressourceFilterType = {
   importer?: documentImporterType;
   source?: string;
   jurisdiction?: string;
-  userId?: idType;
+  userId?: ObjectId;
 };

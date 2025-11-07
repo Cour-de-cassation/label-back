@@ -1,4 +1,4 @@
-import { idModule, indexer, treatmentType } from '@src/core';
+import { indexer, treatmentType } from '@src/core';
 import { buildFakeRepositoryBuilder, updateFakeCollection } from '../../../repository';
 import { customTreatmentRepositoryType } from './customTreatmentRepositoryType';
 
@@ -8,24 +8,24 @@ const buildFakeTreatmentRepository = buildFakeRepositoryBuilder<treatmentType, c
   collectionName: 'treatments',
   buildCustomFakeRepository: (collection) => ({
     async countByDocumentId(documentId) {
-      return collection.filter((treatment) => idModule.lib.equalId(documentId, treatment.documentId)).length;
+      return collection.filter((treatment) => documentId.equals(treatment.documentId)).length;
     },
     async deleteByDocumentId(documentId) {
       updateFakeCollection(
         collection,
-        collection.filter((treatment) => !idModule.lib.equalId(treatment.documentId, documentId)),
+        collection.filter((treatment) => !treatment.documentId.equals(documentId)),
       );
     },
 
     async findAllByDocumentId(documentId) {
-      return collection.filter((treatment) => idModule.lib.equalId(treatment.documentId, documentId));
+      return collection.filter((treatment) => treatment.documentId.equals(documentId));
     },
 
     async findAllByDocumentIds(documentIds) {
       const treatments = collection
-        .filter((treatment) => documentIds.some((documentId) => idModule.lib.equalId(documentId, treatment.documentId)))
+        .filter((treatment) => documentIds.some((documentId) => documentId.equals(treatment.documentId)))
         .sort((treatmentA, treatmentB) => treatmentA.order - treatmentB.order);
-      return indexer.indexManyBy(treatments, (treatment) => idModule.lib.convertToString(treatment.documentId));
+      return indexer.indexManyBy(treatments, (treatment) => treatment.documentId.toHexString());
     },
 
     async findExtremumLastUpdateDateBySources(sources) {

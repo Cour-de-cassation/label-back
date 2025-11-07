@@ -1,6 +1,7 @@
-import { idModule, ressourceFilterModule, statisticModule, settingsModule } from '@src/core';
+import { ressourceFilterModule, statisticModule, settingsModule } from '@src/core';
 import { buildStatisticRepository } from '../repository';
 import { fetchFilteredStatistics } from './fetchFilteredStatistics';
+import { ObjectId } from 'mongodb';
 
 describe('fetchFilteredStatistics', () => {
   const statisticRepository = buildStatisticRepository();
@@ -12,9 +13,9 @@ describe('fetchFilteredStatistics', () => {
 
   describe('statistics', () => {
     it('should fetch all the statistics according to filter', async () => {
-      const id1 = idModule.lib.buildId();
-      const userId1 = idModule.lib.buildId();
-      const userId2 = idModule.lib.buildId();
+      const id1 = new ObjectId();
+      const userId1 = new ObjectId();
+      const userId2 = new ObjectId();
       const ressourceFilter = ressourceFilterModule.generator.generate({
         userId: userId1,
       });

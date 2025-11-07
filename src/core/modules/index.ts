@@ -5,7 +5,6 @@ import { preAssignationModule, preAssignationType } from './preAssignation';
 import { cacheModule, cacheType } from './cache';
 import { documentModule, documentType, fetchedDocumentType } from './document';
 import { ressourceFilterModule, ressourceFilterType } from './ressourceFilter';
-import { idModule, idType } from './id';
 import { problemReportModule, problemReportType } from './problemReport';
 import {
   colorType,
@@ -27,7 +26,6 @@ export {
   cacheModule,
   documentModule,
   ressourceFilterModule,
-  idModule,
   problemReportModule,
   settingsModule,
   statisticModule,
@@ -48,7 +46,6 @@ export type {
   documentType,
   fetchedDocumentType,
   ressourceFilterType,
-  idType,
   problemReportType,
   settingsType,
   statisticType,

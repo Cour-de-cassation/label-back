@@ -1,8 +1,8 @@
 import { checklistItemType, documentImporterType, documentRouteType } from '../document';
-import { idType } from '../id';
+import { ObjectId } from 'mongodb';
 
 export type statisticType = {
-  _id: idType;
+  _id: ObjectId;
   annotationsCount: number;
   appealNumber?: string;
   documentNumber: number;
@@ -23,7 +23,7 @@ export type statisticType = {
   subAnnotationsNonSensitiveCount: number;
   treatmentDate: number;
   treatmentsSummary: Array<{
-    userId: idType;
+    userId: ObjectId;
     treatmentDuration: number;
   }>;
   wordsCount: number;

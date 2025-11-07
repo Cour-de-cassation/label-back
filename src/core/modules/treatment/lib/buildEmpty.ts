@@ -1,12 +1,12 @@
-import { idModule, omitIdType } from '../../id';
 import { treatmentGenerator } from '../generator';
 import { treatmentType } from '../treatmentType';
+import { ObjectId } from 'mongodb';
 
 export { buildEmpty };
 
 function buildEmpty(
   treatmentFields: Omit<
-    omitIdType<treatmentType>,
+    Omit<treatmentType, '_id'>,
     | 'duration'
     | 'lastUpdateDate'
     | 'subAnnotationsSensitiveCount'
@@ -18,7 +18,7 @@ function buildEmpty(
 
   return {
     ...treatment,
-    _id: idModule.lib.buildId(),
+    _id: new ObjectId(),
     subAnnotationsSensitiveCount: 0,
     surAnnotationsCount: 0,
     subAnnotationsNonSensitiveCount: 0,

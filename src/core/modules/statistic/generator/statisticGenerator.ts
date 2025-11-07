@@ -1,7 +1,7 @@
 import { checklistGenerator } from '../../document/generator';
 import { generatorType } from '../../../types';
-import { idModule } from '../../id';
 import { statisticType } from '../statisticType';
+import { ObjectId } from 'mongodb';
 
 export { statisticGenerator };
 
@@ -32,12 +32,12 @@ const statisticGenerator: generatorType<statisticType> = {
     checklist,
     comment,
   } = {}) => ({
-    _id: _id ? idModule.lib.buildId(_id) : idModule.lib.buildId(),
+    _id: _id ? _id : new ObjectId(),
     annotationsCount: annotationsCount ? annotationsCount : 0,
     appealNumber: appealNumber ? appealNumber : undefined,
     chamberName: chamberName || `SOURCE_${Math.random()}`,
     decisionDate: decisionDate,
-    documentExternalId: documentExternalId ? documentExternalId : idModule.lib.convertToString(idModule.lib.buildId()),
+    documentExternalId: documentExternalId ? documentExternalId : new ObjectId().toHexString(),
     documentNumber: documentNumber !== undefined ? documentNumber : Math.floor(Math.random() * 1000000),
     jurisdiction: jurisdiction ? jurisdiction : '',
     linkedEntitiesCount: linkedEntitiesCount ? linkedEntitiesCount : 0,

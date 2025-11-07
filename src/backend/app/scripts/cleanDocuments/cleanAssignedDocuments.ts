@@ -1,7 +1,7 @@
-import { idModule } from '@src/core';
 import { buildAssignationRepository } from '../../../modules/assignation';
 import { documentService, buildDocumentRepository } from '../../../modules/document';
 import { logger } from '../../../utils';
+import { ObjectId } from 'mongodb';
 
 export { cleanAssignedDocuments };
 
@@ -24,9 +24,7 @@ async function cleanAssignedDocuments() {
 
   await Promise.all(
     assignedDocuments.map(async (document) => {
-      const assignation = assignations.find(({ documentId }) =>
-        idModule.lib.equalId(documentId, idModule.lib.buildId(document._id)),
-      );
+      const assignation = assignations.find(({ documentId }) => documentId.equals(new ObjectId(document._id)));
       if (!assignation) {
         logger.log({
           operationName: 'cleanAssignedDocuments',

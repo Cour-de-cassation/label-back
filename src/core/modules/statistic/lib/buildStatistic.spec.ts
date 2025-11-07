@@ -1,6 +1,6 @@
 import { documentModule } from '../../document';
-import { idModule } from '../../id';
 import { buildStatistic } from './buildStatistic';
+import { ObjectId } from 'mongodb';
 
 const TREATMENT_DATE = new Date(2021, 3, 30, 0, 0, 0);
 const checklistMock = documentModule.checklistGenerator.generate(3);
@@ -16,7 +16,7 @@ describe('buildStatistic', () => {
     const documentSource = 'SOURCE';
     const linkedEntitiesCount = 2;
     const jurisdiction = 'Cour de cassation';
-    const userId = idModule.lib.buildId();
+    const userId = new ObjectId();
     const decisionDate = new Date().getTime();
     const document = documentModule.generator.generate({
       decisionMetadata: documentModule.decisionMetadataGenerator.generate({

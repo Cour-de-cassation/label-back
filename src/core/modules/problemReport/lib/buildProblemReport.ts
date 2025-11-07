@@ -1,11 +1,11 @@
-import { idModule, omitIdType } from '../../id';
 import { problemReportType } from '../problemReportType';
+import { ObjectId } from 'mongodb';
 
 export { buildProblemReport };
 
-function buildProblemReport(assignationFields: omitIdType<problemReportType>): problemReportType {
+function buildProblemReport(assignationFields: Omit<problemReportType, '_id'>): problemReportType {
   return {
     ...assignationFields,
-    _id: idModule.lib.buildId(),
+    _id: new ObjectId(),
   };
 }

@@ -1,4 +1,4 @@
-import { idType } from '../id';
+import { ObjectId } from 'mongodb';
 
 export type documentRouteType = 'automatic' | 'exhaustive' | 'simple' | 'confirmation' | 'request' | 'default';
 export type documentImporterType = 'recent' | 'manual' | 'default';
@@ -80,7 +80,7 @@ export type reviewStatusType = {
 };
 
 export type fetchedDocumentType = {
-  _id: idType;
+  _id: ObjectId;
   creationDate?: number;
   decisionMetadata: decisionMetadataType;
   documentNumber: number;

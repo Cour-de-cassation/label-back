@@ -1,4 +1,4 @@
-import { cacheType, idModule } from '@src/core';
+import { cacheType } from '@src/core';
 import { buildFakeRepositoryBuilder, updateFakeCollection } from '../../../repository';
 import { customCacheRepositoryType } from './customCacheRepositoryType';
 
@@ -14,7 +14,7 @@ const buildFakeCacheRepository = buildFakeRepositoryBuilder<cacheType, customCac
       updateFakeCollection(
         collection,
         collection.map((document) =>
-          idModule.lib.equalId(_id, document._id)
+          _id.equals(document._id)
             ? {
                 ...document,
                 content,
@@ -23,7 +23,7 @@ const buildFakeCacheRepository = buildFakeRepositoryBuilder<cacheType, customCac
             : document,
         ),
       );
-      const updatedCache = collection.find((cache) => idModule.lib.equalId(_id, cache._id));
+      const updatedCache = collection.find((cache) => _id.equals(cache._id));
 
       return updatedCache;
     },

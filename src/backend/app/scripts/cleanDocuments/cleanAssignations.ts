@@ -1,7 +1,8 @@
-import { documentType, idModule } from '@src/core';
+import { documentType } from '@src/core';
 import { assignationService, buildAssignationRepository } from '../../../modules/assignation';
 import { buildDocumentRepository } from '../../../modules/document';
 import { logger } from '../../../utils';
+import { ObjectId } from 'mongodb';
 
 export { cleanAssignations };
 
@@ -24,9 +25,7 @@ async function cleanAssignations() {
 
   await Promise.all(
     assignations.map(async (assignation) => {
-      const document = documents.find(({ _id }) =>
-        idModule.lib.equalId(_id, idModule.lib.buildId(assignation.documentId)),
-      );
+      const document = documents.find(({ _id }) => _id.equals(new ObjectId(assignation.documentId)));
       if (!document || FORBIDDEN_STATUSES_FOR_ASSIGNATED_DOCUMENT.includes(document.status)) {
         logger.log({
           operationName: 'cleanAssignations',

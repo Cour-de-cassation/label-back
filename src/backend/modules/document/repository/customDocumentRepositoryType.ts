@@ -1,5 +1,6 @@
-import { documentType, idType } from '@src/core';
+import { documentType } from '@src/core';
 import { projectedType } from '../../../repository';
+import { ObjectId } from 'mongodb';
 
 export type { customDocumentRepositoryType };
 
@@ -59,8 +60,8 @@ type customDocumentRepositoryType = {
     statuses: documentType['status'][],
     idsNotToSearchIn: documentType['_id'][],
   ) => Promise<documentType | undefined>;
-  updateRouteById: (_id: idType, route: documentType['route']) => Promise<documentType | undefined>;
-  updateStatusById: (_id: idType, status: documentType['status']) => Promise<documentType | undefined>;
+  updateRouteById: (_id: ObjectId, route: documentType['route']) => Promise<documentType | undefined>;
+  updateStatusById: (_id: ObjectId, status: documentType['status']) => Promise<documentType | undefined>;
   updateOneStatusByIdAndStatus: (
     filter: { status: documentType['status']; _id: documentType['_id'] },
     update: { status: documentType['status'] },

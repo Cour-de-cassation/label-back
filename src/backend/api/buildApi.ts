@@ -1,6 +1,6 @@
 import { Express, Request, Response, NextFunction } from 'express';
 import { mapValues } from 'lodash';
-import { idModule, userType } from '@src/core';
+import { userType } from '@src/core';
 import { logger } from '../utils';
 import { ssoService } from '../modules/sso';
 import { settingsLoader } from '../lib/settingsLoader';
@@ -13,6 +13,7 @@ import { treatmentService } from '../modules/treatment';
 import { userService } from '../modules/user';
 import { preAssignationService } from '../modules/preAssignation';
 import { userModule } from '@src/core';
+import { ObjectId } from 'mongodb';
 
 export { buildApi };
 
@@ -28,7 +29,7 @@ function buildApi(app: Express) {
       const result = await statisticService.fetchAggregatedStatisticsAccordingToFilter(
         {
           ...ressourceFilter,
-          userId: ressourceFilter.userId !== undefined ? idModule.lib.buildId(ressourceFilter.userId) : undefined,
+          userId: ressourceFilter.userId !== undefined ? new ObjectId(ressourceFilter.userId) : undefined,
         },
         settings,
       );
@@ -49,7 +50,7 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/annotationsDiffDetails`,
     withAuth(['admin', 'scrutator'], async (user, req, res) => {
       const { documentId } = req.query as any;
-      const result = await treatmentService.fetchAnnotationsDiffDetailsForDocument(idModule.lib.buildId(documentId));
+      const result = await treatmentService.fetchAnnotationsDiffDetailsForDocument(new ObjectId(documentId));
       res.status(200).json(result);
     }),
   );
@@ -58,7 +59,7 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/annotations`,
     withAuth(['admin', 'annotator', 'scrutator'], async (user, req, res) => {
       const { documentId } = req.query as any;
-      const result = await treatmentService.fetchAnnotationsOfDocument(idModule.lib.buildId(documentId));
+      const result = await treatmentService.fetchAnnotationsOfDocument(new ObjectId(documentId));
       res.status(200).json(result);
     }),
   );
@@ -66,7 +67,7 @@ function buildApi(app: Express) {
   app.get(`${API_BASE_URL}/anonymizedDocumentText`, async (req, res, next) => {
     try {
       const { documentId } = parseQuery(req.query);
-      const result = await documentService.fetchAnonymizedDocumentText(idModule.lib.buildId(documentId));
+      const result = await documentService.fetchAnonymizedDocumentText(new ObjectId(documentId));
       res.status(200).json(result);
     } catch (error) {
       handleError(error, res, next);
@@ -98,11 +99,11 @@ function buildApi(app: Express) {
     withAuth(['admin', 'scrutator'], async (user, req, res) => {
       const { documentId } = req.query as any;
       if (user.role === 'admin') {
-        await documentService.updateDocumentReviewStatus(idModule.lib.buildId(documentId), {
+        await documentService.updateDocumentReviewStatus(new ObjectId(documentId), {
           viewerNameToAdd: user.name,
         });
       }
-      const result = await documentService.fetchDocument(idModule.lib.buildId(documentId));
+      const result = await documentService.fetchDocument(new ObjectId(documentId));
       res.status(200).json(result);
     }),
   );
@@ -111,7 +112,7 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/documentStatus`,
     withAuth(['admin', 'annotator', 'publicator'], async (user, req, res) => {
       const { documentId } = req.query as any;
-      const document = await documentService.fetchDocument(idModule.lib.buildId(documentId));
+      const document = await documentService.fetchDocument(new ObjectId(documentId));
       res.status(200).json(document.status);
     }),
   );
@@ -120,7 +121,7 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/documentsForUser`,
     withAuth(['admin', 'annotator'], async (user, req, res) => {
       const { documentsMaxCount } = req.query as any;
-      const result = await documentService.fetchDocumentsForUser(idModule.lib.buildId(user._id), documentsMaxCount);
+      const result = await documentService.fetchDocumentsForUser(new ObjectId(user._id), documentsMaxCount);
       res.status(200).json(result);
     }),
   );
@@ -222,14 +223,14 @@ function buildApi(app: Express) {
     withAuth(['admin'], async (user, req, res) => {
       const { documentId, userId } = req.body;
       await documentService.assertDocumentStatus({
-        documentId: idModule.lib.buildId(documentId),
+        documentId: new ObjectId(documentId),
         status: 'free',
       });
       await assignationService.createAssignation({
-        documentId: idModule.lib.buildId(documentId),
-        userId: idModule.lib.buildId(userId),
+        documentId: new ObjectId(documentId),
+        userId: new ObjectId(userId),
       });
-      const result = await documentService.updateDocumentStatus(idModule.lib.buildId(documentId), 'saved');
+      const result = await documentService.updateDocumentStatus(new ObjectId(documentId), 'saved');
       res.status(201).json(result);
     }),
   );
@@ -247,7 +248,7 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/deleteProblemReport`,
     withAuth(['admin'], async (user, req, res) => {
       const { problemReportId } = req.body;
-      await problemReportService.deleteProblemReportById(idModule.lib.buildId(problemReportId));
+      await problemReportService.deleteProblemReportById(new ObjectId(problemReportId));
       res.status(201).send();
     }),
   );
@@ -256,7 +257,7 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/deletePreAssignation`,
     withAuth(['admin'], async (user, req, res) => {
       const { preAssignationId } = req.body;
-      await preAssignationService.deletePreAssignation(idModule.lib.buildId(preAssignationId));
+      await preAssignationService.deletePreAssignation(new ObjectId(preAssignationId));
       res.status(201).send();
     }),
   );
@@ -265,9 +266,9 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/deleteHumanTreatmentsForDocument`,
     withAuth(['admin'], async (user, req, res) => {
       const { documentId } = req.body;
-      await assignationService.deleteAssignationsByDocumentId(idModule.lib.buildId(documentId));
-      await documentService.updateDocumentStatus(idModule.lib.buildId(documentId), 'free');
-      await documentService.resetDocumentReviewStatus(idModule.lib.buildId(documentId));
+      await assignationService.deleteAssignationsByDocumentId(new ObjectId(documentId));
+      await documentService.updateDocumentStatus(new ObjectId(documentId), 'free');
+      await documentService.resetDocumentReviewStatus(new ObjectId(documentId));
       res.status(201).send();
     }),
   );
@@ -277,8 +278,8 @@ function buildApi(app: Express) {
     withAuth(['admin', 'annotator', 'scrutator'], async (user, req, res) => {
       const { documentId, problemText, problemType } = req.body;
       await problemReportService.createProblemReport({
-        userId: idModule.lib.buildId(user._id),
-        documentId: idModule.lib.buildId(documentId),
+        userId: new ObjectId(user._id),
+        documentId: new ObjectId(documentId),
         problemText,
         problemType,
       });
@@ -290,10 +291,10 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/deleteDocument`,
     withAuth(['admin'], async (user, req, res) => {
       const { documentId } = req.body;
-      const documentToDelete = await documentService.fetchDocument(idModule.lib.buildId(documentId));
+      const documentToDelete = await documentService.fetchDocument(new ObjectId(documentId));
       const settings = settingsLoader.getSettings();
       await statisticService.saveStatisticsOfDocument(documentToDelete, settings, 'deleted from the interface');
-      await documentService.deleteDocument(idModule.lib.buildId(documentId));
+      await documentService.deleteDocument(new ObjectId(documentId));
       res.status(201).send();
     }),
   );
@@ -302,11 +303,11 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/resetTreatmentLastUpdateDate`,
     withAuth(['admin', 'annotator'], async (user, req, res) => {
       const { assignationId } = req.body;
-      const assignation = await assignationService.fetchAssignation(idModule.lib.buildId(assignationId));
+      const assignation = await assignationService.fetchAssignation(new ObjectId(assignationId));
 
-      if (!idModule.lib.equalId(idModule.lib.buildId(user._id), assignation.userId)) {
+      if (!new ObjectId(user._id).equals(assignation.userId)) {
         throw new Error(
-          `User ${idModule.lib.convertToString(user._id)} is trying to update a treatment that is not assigned to him/her`,
+          `User ${user._id.toHexString()} is trying to update a treatment that is not assigned to him/her`,
         );
       }
 
@@ -319,10 +320,7 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/updateAssignationDocumentStatus`,
     withAuth(['admin'], async (user, req, res) => {
       const { assignationId, status } = req.body;
-      const result = await assignationService.updateAssignationDocumentStatus(
-        idModule.lib.buildId(assignationId),
-        status,
-      );
+      const result = await assignationService.updateAssignationDocumentStatus(new ObjectId(assignationId), status);
       res.status(201).json(result);
     }),
   );
@@ -333,11 +331,11 @@ function buildApi(app: Express) {
       const { documentId, status } = req.body;
       if (user.role !== 'admin' && user.role !== 'publicator') {
         await assignationService.assertDocumentIsAssignatedToUser({
-          documentId: idModule.lib.buildId(documentId),
-          userId: idModule.lib.buildId(user._id),
+          documentId: new ObjectId(documentId),
+          userId: new ObjectId(user._id),
         });
       }
-      const result = await documentService.updateDocumentStatus(idModule.lib.buildId(documentId), status);
+      const result = await documentService.updateDocumentStatus(new ObjectId(documentId), status);
       res.status(201).json(result);
     }),
   );
@@ -346,7 +344,7 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/updateDocumentRoute`,
     withAuth(['admin'], async (user, req, res) => {
       const { documentId, route } = req.body;
-      const result = await documentService.updateDocumentRoute(idModule.lib.buildId(documentId), route);
+      const result = await documentService.updateDocumentRoute(new ObjectId(documentId), route);
       res.status(201).json(result);
     }),
   );
@@ -355,8 +353,8 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/updatePublishableDocumentStatus`,
     withAuth(['admin', 'publicator'], async (user, req, res) => {
       const { documentId, status } = req.body;
-      await documentService.assertDocumentIsPublishable(idModule.lib.buildId(documentId));
-      const result = await documentService.updateDocumentStatus(idModule.lib.buildId(documentId), status);
+      await documentService.assertDocumentIsPublishable(new ObjectId(documentId));
+      const result = await documentService.updateDocumentStatus(new ObjectId(documentId), status);
       res.status(201).json(result);
     }),
   );
@@ -365,7 +363,7 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/updateProblemReportHasBeenRead`,
     withAuth(['admin'], async (user, req, res) => {
       const { problemReportId, hasBeenRead } = req.body;
-      await problemReportService.updateHasBeenRead(idModule.lib.buildId(problemReportId), hasBeenRead);
+      await problemReportService.updateHasBeenRead(new ObjectId(problemReportId), hasBeenRead);
       res.status(201).send();
     }),
   );
@@ -374,11 +372,11 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/updateTreatmentDuration`,
     withAuth(['admin', 'annotator'], async (user, req, res) => {
       const { assignationId } = req.body;
-      const assignation = await assignationService.fetchAssignation(idModule.lib.buildId(assignationId));
+      const assignation = await assignationService.fetchAssignation(new ObjectId(assignationId));
 
-      if (!idModule.lib.equalId(idModule.lib.buildId(user._id), assignation.userId)) {
+      if (!new ObjectId(user._id).equals(assignation.userId)) {
         throw new Error(
-          `User ${idModule.lib.convertToString(user._id)} is trying to update a treatment that is not assigned to him/her`,
+          `User ${user._id.toHexString()} is trying to update a treatment that is not assigned to him/her`,
         );
       }
 
@@ -391,11 +389,11 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/updateTreatmentForAssignationId`,
     withAuth(['admin', 'annotator'], async (user, req, res) => {
       const { annotationsDiff, assignationId } = req.body;
-      const assignation = await assignationService.fetchAssignation(idModule.lib.buildId(assignationId));
+      const assignation = await assignationService.fetchAssignation(new ObjectId(assignationId));
 
-      if (!idModule.lib.equalId(idModule.lib.buildId(user._id), assignation.userId)) {
+      if (!new ObjectId(user._id).equals(assignation.userId)) {
         throw new Error(
-          `User ${idModule.lib.convertToString(user._id)} is trying to update a treatment that is not assigned to him/her`,
+          `User ${user._id.toHexString()} is trying to update a treatment that is not assigned to him/her`,
         );
       }
 
@@ -417,8 +415,8 @@ function buildApi(app: Express) {
       const result = await treatmentService.updateTreatmentForDocumentIdAndUserId(
         {
           annotationsDiff,
-          documentId: idModule.lib.buildId(documentId),
-          userId: idModule.lib.buildId(user._id),
+          documentId: new ObjectId(documentId),
+          userId: new ObjectId(user._id),
         },
         settings,
       );
@@ -431,7 +429,7 @@ function buildApi(app: Express) {
     withAuth(['admin'], async (user, req, res) => {
       const { userId, source, number } = req.body;
       await preAssignationService.createPreAssignation({
-        userId: idModule.lib.buildId(userId),
+        userId: new ObjectId(userId),
         source,
         number,
       });
@@ -523,7 +521,7 @@ function withAuth(
       }
 
       const resolvedUser: userType = {
-        _id: idModule.lib.buildId(currentUser._id) as userType['_id'],
+        _id: new ObjectId(currentUser._id) as userType['_id'],
         name: currentUser.name,
         role: currentUser.role as 'admin' | 'annotator' | 'publicator' | 'scrutator',
         email: currentUser.email,

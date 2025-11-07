@@ -1,5 +1,5 @@
 import { annotationsDiffType } from '../annotationsDiff';
-import { idType } from '../id';
+import { ObjectId } from 'mongodb';
 
 type treatmentSourceType =
   | 'annotator'
@@ -10,9 +10,9 @@ type treatmentSourceType =
   | 'reimportedTreatment';
 
 export type treatmentType = {
-  _id: idType;
+  _id: ObjectId;
   annotationsDiff: annotationsDiffType;
-  documentId: idType;
+  documentId: ObjectId;
   duration: number;
   lastUpdateDate: number;
   order: number;

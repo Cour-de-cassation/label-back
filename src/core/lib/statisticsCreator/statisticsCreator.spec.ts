@@ -1,7 +1,7 @@
 import { annotationModule } from '../../modules/annotation';
 import { annotationsDiffModule } from '../../modules/annotationsDiff';
 import { documentModule } from '../../modules/document';
-import { idModule } from '../../modules/id';
+import { ObjectId } from 'mongodb';
 import { treatmentModule } from '../../modules/treatment';
 import { settingsModule } from '../../modules/settings';
 import { statisticsCreator } from './statisticsCreator';
@@ -15,7 +15,7 @@ describe('statisticsCreator', () => {
   const documentNumber = 123456;
   const jurisdiction = 'Cour de cassation';
   const duration = 1500;
-  const userId = idModule.lib.buildId();
+  const userId = new ObjectId();
   const decisionDate = new Date().getTime();
   const documentChecklist = documentModule.checklistGenerator.generate(4);
   const document = documentModule.generator.generate({

@@ -1,8 +1,8 @@
-import { idType } from '../id';
+import { ObjectId } from 'mongodb';
 
 export type preAssignationType = {
-  _id: idType;
-  userId: idType;
+  _id: ObjectId;
+  userId: ObjectId;
   number: string;
   source: string;
   creationDate: number;

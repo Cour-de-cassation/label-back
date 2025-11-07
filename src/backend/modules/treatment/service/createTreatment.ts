@@ -4,7 +4,6 @@ import {
   documentType,
   treatmentModule,
   treatmentType,
-  idModule,
   settingsModule,
   settingsType,
 } from '@src/core';
@@ -55,7 +54,7 @@ async function createTreatment(
     settingsForDocument,
   );
 
-  const actionToPerform = `create treatment "${source}" for documentId ${idModule.lib.convertToString(documentId)}`;
+  const actionToPerform = `create treatment "${source}" for documentId ${documentId.toHexString()}`;
 
   annotationsDiffModule.lib.assertAnnotationsDiffAreConsistent(
     annotationsDiff,

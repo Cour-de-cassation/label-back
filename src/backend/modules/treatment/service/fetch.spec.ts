@@ -1,4 +1,4 @@
-import { annotationModule, annotationsDiffModule, documentModule, idModule, treatmentModule } from '@src/core';
+import { annotationModule, annotationsDiffModule, documentModule, treatmentModule } from '@src/core';
 import { buildDocumentRepository } from '../../document';
 import { buildTreatmentRepository } from '../repository';
 import {
@@ -8,6 +8,7 @@ import {
   fetchTreatmentsByDocumentId,
   fetchTreatmentsByDocumentIds,
 } from './fetch';
+import { ObjectId } from 'mongodb';
 
 describe('fetch', () => {
   const treatmentRepository = buildTreatmentRepository();
@@ -18,7 +19,7 @@ describe('fetch', () => {
       const annotations = [{ text: '0' }, { text: '1' }, { text: '2' }, { text: '3' }, { text: '4' }].map(
         annotationModule.generator.generate,
       );
-      const documentId = idModule.lib.buildId();
+      const documentId = new ObjectId();
       const treatments = [
         {
           annotationsDiff: annotationsDiffModule.generator.generate({
@@ -63,8 +64,8 @@ describe('fetch', () => {
 
   describe('fetchTreatedDocumentIds', () => {
     it('should fetch the annotations from the treatments of the given document id', async () => {
-      const documentId1 = idModule.lib.buildId();
-      const documentId2 = idModule.lib.buildId();
+      const documentId1 = new ObjectId();
+      const documentId2 = new ObjectId();
       const treatments = [
         {
           documentId: documentId1,
@@ -89,8 +90,8 @@ describe('fetch', () => {
 
   describe('fetchTreatmentsByDocumentId', () => {
     it('should fetch the treatments for the given document id', async () => {
-      const documentId1 = idModule.lib.buildId();
-      const documentId2 = idModule.lib.buildId();
+      const documentId1 = new ObjectId();
+      const documentId2 = new ObjectId();
       const treatments = [
         {
           documentId: documentId1,
@@ -115,8 +116,8 @@ describe('fetch', () => {
 
   describe('fetchTreatmentsByDocumentIds', () => {
     it('should fetch the treatments for the given document ids', async () => {
-      const documentId1 = idModule.lib.buildId();
-      const documentId2 = idModule.lib.buildId();
+      const documentId1 = new ObjectId();
+      const documentId2 = new ObjectId();
       const treatments = [
         {
           documentId: documentId1,
@@ -139,8 +140,8 @@ describe('fetch', () => {
       const documentTreatments = await fetchTreatmentsByDocumentIds([documentId1, documentId2]);
 
       expect(documentTreatments).toEqual({
-        [idModule.lib.convertToString(documentId1)]: [treatments[1], treatments[0]],
-        [idModule.lib.convertToString(documentId2)]: [treatments[2]],
+        [documentId1.toHexString()]: [treatments[1], treatments[0]],
+        [documentId2.toHexString()]: [treatments[2]],
       });
     });
   });

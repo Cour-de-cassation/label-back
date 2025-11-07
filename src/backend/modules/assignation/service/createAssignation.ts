@@ -1,19 +1,18 @@
-import { assignationModule, idModule, idType } from '@src/core';
+import { assignationModule } from '@src/core';
 import { treatmentService } from '../../treatment';
 import { userService } from '../../user';
 import { buildAssignationRepository } from '../repository';
+import { ObjectId } from 'mongodb';
 
 export { createAssignation };
 
-async function createAssignation({ userId, documentId }: { userId: idType; documentId: idType }) {
+async function createAssignation({ userId, documentId }: { userId: ObjectId; documentId: ObjectId }) {
   const assignationRepository = buildAssignationRepository();
 
   const userRole = await userService.fetchUserRole(userId);
 
   if (userRole === 'publicator' || userRole === 'scrutator') {
-    throw new Error(
-      `User ${idModule.lib.convertToString(userId)} is a ${userRole} and is trying to create an assignation`,
-    );
+    throw new Error(`User ${userId.toHexString()} is a ${userRole} and is trying to create an assignation`);
   }
 
   const treatmentId = await treatmentService.createEmptyTreatment({

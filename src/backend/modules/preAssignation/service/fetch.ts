@@ -1,4 +1,4 @@
-import { idModule, preAssignationType } from '@src/core';
+import { preAssignationType } from '@src/core';
 import { buildPreAssignationRepository } from '..';
 import { userService } from '../../user';
 
@@ -11,7 +11,7 @@ async function fetchAllPreAssignation() {
   const usersByIds = await userService.fetchUsersByIds(preAssignations.map(({ userId }) => userId));
 
   return preAssignations.map((preAssignation) => {
-    const userIdString = idModule.lib.convertToString(preAssignation.userId);
+    const userIdString = preAssignation.userId.toHexString();
     return {
       preAssignation,
       userName: usersByIds[userIdString].name,

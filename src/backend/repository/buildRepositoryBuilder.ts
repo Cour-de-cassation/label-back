@@ -1,8 +1,8 @@
-import { idModule, idType, indexer } from '@src/core';
+import { indexer } from '@src/core';
 import { mongo, mongoCollectionType } from '../utils';
 import { projectedType, repositoryType } from './repositoryType';
 import { buildProjection } from './repositoryUtils';
-import { Filter, IndexSpecification, WithId } from 'mongodb';
+import { Filter, ObjectId, WithId } from 'mongodb';
 
 export { buildRepositoryBuilder };
 
@@ -15,7 +15,7 @@ type indexType<T extends { [key: string]: any }> = {
   [key in keyof Partial<T>]: 1 | -1;
 };
 
-function buildRepositoryBuilder<T extends { _id: idType }, U>({
+function buildRepositoryBuilder<T extends { _id: ObjectId }, U>({
   collectionName,
   indexes,
   buildCustomRepository,
@@ -53,14 +53,14 @@ function buildRepositoryBuilder<T extends { _id: idType }, U>({
       await collection.deleteMany({});
     }
 
-    async function deleteById(_id: idType) {
+    async function deleteById(_id: ObjectId) {
       const result = await collection.deleteOne({ _id } as any);
       if (result.deletedCount !== 1) {
-        throw new Error(`No ${collectionName} with _id ${idModule.lib.convertToString(_id)}`);
+        throw new Error(`No ${collectionName} with _id ${_id.toHexString()}`);
       }
     }
 
-    async function deleteManyByIds(ids: idType[]) {
+    async function deleteManyByIds(ids: ObjectId[]) {
       const deleteResult = await collection.deleteMany({
         _id: { $in: ids },
       } as any);
@@ -92,7 +92,7 @@ function buildRepositoryBuilder<T extends { _id: idType }, U>({
         .toArray() as any as Array<projectedType<T, projectionT>>;
     }
 
-    async function findAllByIds(idsToSearchIn?: idType[]) {
+    async function findAllByIds(idsToSearchIn?: ObjectId[]) {
       let items = [] as WithId<T>[];
       if (idsToSearchIn) {
         items = await collection.find({ _id: { $in: idsToSearchIn } } as any).toArray();
@@ -100,10 +100,10 @@ function buildRepositoryBuilder<T extends { _id: idType }, U>({
         items = await collection.find().toArray();
       }
 
-      return indexer.indexBy(items, (item) => idModule.lib.convertToString(item._id));
+      return indexer.indexBy(items, (item) => item._id.toHexString());
     }
 
-    async function findById(id: idType) {
+    async function findById(id: ObjectId) {
       const result = await collection.findOne({ _id: id } as any);
 
       if (!result) {
@@ -139,7 +139,7 @@ function buildRepositoryBuilder<T extends { _id: idType }, U>({
       }
     }
 
-    async function updateOne(_id: idType, objectFields: Partial<T>) {
+    async function updateOne(_id: ObjectId, objectFields: Partial<T>) {
       await collection.updateOne({ _id } as any, {
         $set: objectFields,
       });

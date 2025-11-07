@@ -1,6 +1,6 @@
 import { generatorType } from '../../../types';
-import { idModule } from '../../id';
 import { documentType } from '../documentType';
+import { ObjectId } from 'mongodb';
 
 export { documentGenerator, decisionMetadataGenerator, checklistGenerator };
 
@@ -103,7 +103,7 @@ const documentGenerator: generatorType<documentType> = {
     decisionMetadata: decisionMetadata ? decisionMetadata : decisionMetadataGenerator.generate(),
     documentNumber: documentNumber ?? Math.floor(Math.random() * 1000000),
     externalId: externalId ?? `EXTERNAL_ID_${Math.random()}`,
-    _id: _id ? idModule.lib.buildId(_id) : idModule.lib.buildId(),
+    _id: _id ? new ObjectId(_id) : new ObjectId(),
     importer: importer ?? 'default',
     loss: loss,
     priority: priority !== undefined ? priority : 0,

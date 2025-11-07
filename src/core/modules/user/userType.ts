@@ -1,9 +1,9 @@
-import { idType } from '../id';
+import { ObjectId } from 'mongodb';
 
 export type userRoleType = 'admin' | 'annotator' | 'publicator' | 'scrutator';
 
 export type userType = {
-  _id: idType;
+  _id: ObjectId;
   email: string;
   name: string;
   role: userRoleType;

@@ -1,10 +1,11 @@
-import { idModule, idType, indexer, keysOf } from '@src/core';
+import { indexer, keysOf } from '@src/core';
 import { omit } from 'lodash';
 import { projectedType, repositoryType } from './repositoryType';
+import { ObjectId } from 'mongodb';
 
 export { buildFakeRepositoryBuilder, projectFakeObjects, updateFakeCollection };
 
-function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
+function buildFakeRepositoryBuilder<T extends { _id: ObjectId }, U>({
   buildCustomFakeRepository,
   collectionName,
 }: {
@@ -43,21 +44,21 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
     }
   }
 
-  async function deleteById(_id: idType) {
-    const itemToDelete = collection.find((item) => !idModule.lib.equalId(item._id, _id));
+  async function deleteById(_id: ObjectId) {
+    const itemToDelete = collection.find((item) => !item._id.equals(_id));
     if (!itemToDelete) {
-      throw new Error(`No ${collectionName} with _id ${idModule.lib.convertToString(_id)}`);
+      throw new Error(`No ${collectionName} with _id ${_id.toHexString()}`);
     }
     updateFakeCollection(
       collection,
-      collection.filter((item) => !idModule.lib.equalId(item._id, _id)),
+      collection.filter((item) => !item._id.equals(_id)),
     );
   }
 
-  async function deleteManyByIds(ids: idType[]) {
+  async function deleteManyByIds(ids: ObjectId[]) {
     updateFakeCollection(
       collection,
-      collection.filter((item) => !ids.some((id) => idModule.lib.equalId(id, item._id))),
+      collection.filter((item) => !ids.some((id) => id.equals(item._id))),
     );
     return {
       success: true,
@@ -125,19 +126,19 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
     return collection.map((document) => projectFakeObjects(document, projections));
   }
 
-  async function findAllByIds(idsToSearchIn?: idType[]) {
+  async function findAllByIds(idsToSearchIn?: ObjectId[]) {
     let items = [] as T[];
     if (idsToSearchIn) {
-      items = collection.filter((item) => idsToSearchIn.some((id) => idModule.lib.equalId(id, item._id)));
+      items = collection.filter((item) => idsToSearchIn.some((id) => id.equals(item._id)));
     } else {
       items = collection;
     }
 
-    return indexer.indexBy(items, (item) => idModule.lib.convertToString(item._id));
+    return indexer.indexBy(items, (item) => item._id.toHexString());
   }
 
-  async function findById(id: idType) {
-    const result = collection.find((item) => idModule.lib.equalId(item._id, id));
+  async function findById(id: ObjectId) {
+    const result = collection.find((item) => item._id.equals(id));
 
     if (!result) {
       throw new Error(`No matching object for _id ${id}`);
@@ -157,13 +158,13 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
 
   async function setIndexes() {}
 
-  async function updateOne(id: idType, objectFields: Partial<T>) {
+  async function updateOne(id: ObjectId, objectFields: Partial<T>) {
     updateFakeCollection(
       collection,
-      collection.map((item) => (idModule.lib.equalId(id, item._id) ? { ...item, ...objectFields } : item)),
+      collection.map((item) => (id.equals(item._id) ? { ...item, ...objectFields } : item)),
     );
 
-    const updatedItem = collection.find((item) => idModule.lib.equalId(id, item._id));
+    const updatedItem = collection.find((item) => id.equals(item._id));
 
     return updatedItem;
   }
@@ -183,7 +184,7 @@ function buildFakeRepositoryBuilder<T extends { _id: idType }, U>({
   }
 
   async function upsert(newObject: T) {
-    if (collection.some((object) => idModule.lib.equalId(object._id, newObject._id))) {
+    if (collection.some((object) => object._id.equals(newObject._id))) {
       await updateOne(newObject._id, newObject);
     } else {
       await insert(newObject);

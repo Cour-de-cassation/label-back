@@ -1,4 +1,4 @@
-import { idModule, indexer, treatmentType } from '@src/core';
+import { indexer, treatmentType } from '@src/core';
 import { buildRepositoryBuilder } from '../../../repository';
 import { customTreatmentRepositoryType } from './customTreatmentRepositoryType';
 
@@ -37,7 +37,7 @@ const buildTreatmentRepository = buildRepositoryBuilder<treatmentType, customTre
 
       const sortedTreatments = treatments.sort((treatmentA, treatmentB) => treatmentA.order - treatmentB.order);
 
-      return indexer.indexManyBy(sortedTreatments, (treatment) => idModule.lib.convertToString(treatment.documentId));
+      return indexer.indexManyBy(sortedTreatments, (treatment) => treatment.documentId.toHexString());
     },
 
     async findExtremumLastUpdateDateBySources(sources) {

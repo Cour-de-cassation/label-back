@@ -1,5 +1,5 @@
 import { uniq } from 'lodash';
-import { documentType, idModule } from '@src/core';
+import { documentType } from '@src/core';
 import { buildFakeRepositoryBuilder, projectFakeObjects, updateFakeCollection } from '../../../repository';
 import { customDocumentRepositoryType } from './customDocumentRepositoryType';
 
@@ -13,12 +13,11 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
     },
 
     async countNotIn(idsNotToSearchIn) {
-      return collection.filter((document) => !idsNotToSearchIn.some((id) => idModule.lib.equalId(document._id, id)))
-        .length;
+      return collection.filter((document) => !idsNotToSearchIn.some((id) => id.equals(document._id))).length;
     },
 
     async findNotIn(idsNotToSearchIn) {
-      return collection.filter((document) => !idsNotToSearchIn.some((id) => idModule.lib.equalId(document._id, id)));
+      return collection.filter((document) => !idsNotToSearchIn.some((id) => id.equals(document._id)));
     },
 
     async findAllPublicationCategories() {
@@ -86,7 +85,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
         (document) =>
           document.status === status &&
           document.priority === priority &&
-          !idsNotToSearchIn.some((id) => idModule.lib.equalId(document._id, id)),
+          !idsNotToSearchIn.some((id) => id.equals(document._id)),
       );
       return document || undefined;
     },
@@ -96,7 +95,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
         (document) =>
           statuses.some((status: documentType['status']) => document.status === status) &&
           document.loss === undefined &&
-          !idsNotToSearchIn.some((id) => idModule.lib.equalId(document._id, id)),
+          !idsNotToSearchIn.some((id) => id.equals(document._id)),
       );
       return document || undefined;
     },
@@ -116,7 +115,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
           (document) =>
             document.priority === priority &&
             document.status === status &&
-            idsToSearchInFirst.some((id) => idModule.lib.equalId(document._id, id)),
+            idsToSearchInFirst.some((id) => id.equals(document._id)),
         )
         .sort((documentA, documentB) => documentB.decisionMetadata.date || 0 - (documentA.decisionMetadata.date || 0));
       return freeDocuments[0];
@@ -127,7 +126,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
         (document) =>
           document.priority === priority &&
           document.status === status &&
-          idsToSearchInFirst.some((id) => idModule.lib.equalId(document._id, id)),
+          idsToSearchInFirst.some((id) => id.equals(document._id)),
       );
 
       const sortedByMostRecent = freeDocuments.sort(
@@ -157,7 +156,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
           (document) =>
             document.priority === priority &&
             document.status === status &&
-            idsToSearchInFirst.some((id) => idModule.lib.equalId(document._id, id)),
+            idsToSearchInFirst.some((id) => id.equals(document._id)),
         )
         .sort((documentA, documentB) => (documentB.decisionMetadata.date || 0) - (documentA.decisionMetadata.date || 0))
         .slice(0, limit);
@@ -168,7 +167,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
       updateFakeCollection(
         collection,
         collection.map((document) =>
-          idModule.lib.equalId(_id, document._id)
+          _id.equals(document._id)
             ? {
                 ...document,
                 route,
@@ -176,7 +175,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
             : document,
         ),
       );
-      const updatedDocument = collection.find((document) => idModule.lib.equalId(_id, document._id));
+      const updatedDocument = collection.find((document) => _id.equals(document._id));
 
       return updatedDocument;
     },
@@ -185,7 +184,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
       updateFakeCollection(
         collection,
         collection.map((document) =>
-          idModule.lib.equalId(_id, document._id)
+          _id.equals(document._id)
             ? {
                 ...document,
                 status,
@@ -194,7 +193,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
             : document,
         ),
       );
-      const updatedDocument = collection.find((document) => idModule.lib.equalId(_id, document._id));
+      const updatedDocument = collection.find((document) => _id.equals(document._id));
 
       return updatedDocument;
     },
@@ -202,7 +201,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
       updateFakeCollection(
         collection,
         collection.map((document) =>
-          idModule.lib.equalId(filter._id, document._id) && document.status === filter.status
+          filter._id.equals(document._id) && document.status === filter.status
             ? {
                 ...document,
                 status: update.status,
@@ -212,7 +211,7 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
         ),
       );
 
-      const updatedDocument = collection.find((document) => idModule.lib.equalId(filter._id, document._id));
+      const updatedDocument = collection.find((document) => filter._id.equals(document._id));
 
       return updatedDocument;
     },

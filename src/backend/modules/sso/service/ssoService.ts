@@ -2,9 +2,10 @@ import { SamlService } from '../../../utils/saml';
 import { buildUserRepository, userService } from '../../user';
 import { logger } from '../../../utils';
 import every from 'lodash/every';
+import { ObjectId } from 'mongodb';
 
 import includes from 'lodash/includes';
-import { idModule, userType } from '@src/core';
+import { userType } from '@src/core';
 import { Request } from 'express';
 
 export interface BindingContext {
@@ -78,7 +79,7 @@ export async function acs(req: any) {
       });
 
       await userService.updateUser({
-        userId: idModule.lib.buildId(userDB._id),
+        userId: new ObjectId(userDB._id),
         name: userSSO.name,
         role: userSSO.role,
       });
@@ -98,7 +99,7 @@ export async function getUserByEmail(email: string) {
 export function setUserSessionAndReturnRedirectUrl(req: Request | any, user: userType, sessionIndex: string) {
   if (req.session) {
     req.session.user = {
-      _id: idModule.lib.convertToString(user._id),
+      _id: user._id.toString(),
       name: user.name as string,
       role: user.role as string,
       email: user.email as string,
@@ -141,7 +142,7 @@ export function getUserFromSSO(extract: ParseResponseResult['extract']): userTyp
     }`,
     email: attributes[`${process.env.SSO_ATTRIBUTE_MAIL}`] as string,
     role: roles[0] as 'annotator' | 'scrutator' | 'admin' | 'publicator',
-    _id: idModule.lib.buildId(),
+    _id: new ObjectId(),
   };
 }
 

@@ -1,9 +1,9 @@
-import { idType } from '../id';
+import { ObjectId } from 'mongodb';
 
 export type assignationType = {
-  _id: idType;
-  documentId: idType;
-  treatmentId: idType;
-  userId: idType;
+  _id: ObjectId;
+  documentId: ObjectId;
+  treatmentId: ObjectId;
+  userId: ObjectId;
   assignationDate: number;
 };

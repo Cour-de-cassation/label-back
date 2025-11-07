@@ -1,6 +1,7 @@
-import { idType, preAssignationType } from '@src/core';
+import { preAssignationType } from '@src/core';
 import { buildRepositoryBuilder } from '../../../repository';
 import { customPreAssignationRepositoryType } from './customPreAssignationRepositoryType';
+import { ObjectId } from 'mongodb';
 
 export { buildPreAssignationRepository };
 
@@ -21,7 +22,7 @@ const buildPreAssignationRepository = buildRepositoryBuilder<preAssignationType,
       return preAssignation || undefined;
     },
 
-    async deleteById(id: idType) {
+    async deleteById(id: ObjectId) {
       await collection.deleteOne({ _id: id });
     },
   }),
