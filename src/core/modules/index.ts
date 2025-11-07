@@ -7,7 +7,6 @@ import { documentModule, documentType, fetchedDocumentType } from './document';
 import { ressourceFilterModule, ressourceFilterType } from './ressourceFilter';
 import { idModule, idType } from './id';
 import { problemReportModule, problemReportType } from './problemReport';
-import { replacementTermModule, replacementTermType } from './replacementTerm';
 import {
   colorType,
   constantColorType,
@@ -30,14 +29,11 @@ export {
   ressourceFilterModule,
   idModule,
   problemReportModule,
-  replacementTermModule,
   settingsModule,
   statisticModule,
   treatmentModule,
   userModule,
 };
-
-export * from './modelType';
 
 export type {
   annotationType,
@@ -58,7 +54,6 @@ export type {
   statisticType,
   categoryIconNameType,
   userType,
-  replacementTermType,
   treatmentType,
   treatmentInfoType,
 };

@@ -1,5 +1,17 @@
 import { documentGenerator, decisionMetadataGenerator, checklistGenerator } from './generator';
-import { documentModel, documentType, fetchedDocumentModel, fetchedDocumentType } from './documentType';
+import {
+  documentType,
+  fetchedDocumentType,
+  documentRouteType,
+  documentImporterType,
+  documentStatusType,
+  checklistItemType,
+  checklistEntityType,
+  decisionMetadataType,
+  nlpVersionType,
+  nlpVersionsType,
+  reviewStatusType,
+} from './documentType';
 import {
   buildDocument,
   comparator,
@@ -12,11 +24,21 @@ import {
 
 export { documentModule };
 
-export type { documentType, fetchedDocumentType };
+export type {
+  documentType,
+  fetchedDocumentType,
+  documentRouteType,
+  documentImporterType,
+  documentStatusType,
+  checklistItemType,
+  checklistEntityType,
+  decisionMetadataType,
+  nlpVersionType,
+  nlpVersionsType,
+  reviewStatusType,
+};
 
 const documentModule = {
-  fetchedModel: fetchedDocumentModel,
-  model: documentModel,
   generator: documentGenerator,
   decisionMetadataGenerator: decisionMetadataGenerator,
   checklistGenerator: checklistGenerator,

@@ -33,7 +33,6 @@ describe('statisticsCreator', () => {
       NACCode: '',
       endCaseCode: '',
       occultationBlock: undefined,
-      parties: [],
       session: 'FRH',
       solution: '',
     }),

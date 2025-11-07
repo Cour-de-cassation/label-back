@@ -1,6 +1,6 @@
 import { Express, Request, Response, NextFunction } from 'express';
 import { mapValues } from 'lodash';
-import { idModule, replacementTermType, userType } from '@src/core';
+import { idModule, userType } from '@src/core';
 import { logger } from '../utils';
 import { ssoService } from '../modules/sso';
 import { settingsLoader } from '../lib/settingsLoader';
@@ -201,14 +201,6 @@ function buildApi(app: Express) {
     `${API_BASE_URL}/untreatedDocuments`,
     withAuth(['admin', 'scrutator'], async (user, req, res) => {
       const result = await documentService.fetchUntreatedDocuments();
-      res.status(200).json(result);
-    }),
-  );
-
-  app.get(
-    `${API_BASE_URL}/mandatoryReplacementTerms`,
-    withAuth(['admin', 'annotator', 'scrutator'], async (user, req, res) => {
-      const result: replacementTermType[] = []; // TO DO
       res.status(200).json(result);
     }),
   );

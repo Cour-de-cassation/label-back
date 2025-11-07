@@ -39,7 +39,7 @@ const statisticGenerator: generatorType<statisticType> = {
     decisionDate: decisionDate,
     documentExternalId: documentExternalId ? documentExternalId : idModule.lib.convertToString(idModule.lib.buildId()),
     documentNumber: documentNumber !== undefined ? documentNumber : Math.floor(Math.random() * 1000000),
-    jurisdiction,
+    jurisdiction: jurisdiction ? jurisdiction : '',
     linkedEntitiesCount: linkedEntitiesCount ? linkedEntitiesCount : 0,
     publicationCategory: publicationCategory ? publicationCategory : [],
     session: session || undefined,

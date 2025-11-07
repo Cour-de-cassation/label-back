@@ -33,7 +33,6 @@ describe('buildStatistic', () => {
         NACCode: '',
         endCaseCode: '',
         occultationBlock: undefined,
-        parties: [],
         session: 'FRH',
         solution: '',
       }),

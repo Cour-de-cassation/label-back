@@ -22,7 +22,6 @@ describe('fetchPublishableDocuments', () => {
           civilMatterCode: '',
           date: new Date().getTime(),
           jurisdiction: 'Cour de cassation',
-          parties: [],
           occultationBlock: undefined,
           session: '',
           solution: '',

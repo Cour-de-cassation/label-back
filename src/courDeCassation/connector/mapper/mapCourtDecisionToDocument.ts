@@ -155,7 +155,6 @@ async function mapCourtDecisionToDocument(
       jurisdiction: readableJurisdictionName,
       NACCode,
       endCaseCode,
-      parties: sderCourtDecision.parties ? sderCourtDecision.parties : [],
       occultationBlock: sderCourtDecision.blocOccultation || undefined,
       session,
       solution,
@@ -173,7 +172,6 @@ async function mapCourtDecisionToDocument(
     source,
     title,
     text: sderCourtDecision.originalText,
-    zoning: zoning,
     nlpVersions: nlpTreatment?.version,
     checklist: nlpTreatment?.checklist ?? [],
   });

@@ -36,7 +36,7 @@ function buildStatistic({
     documentNumber: document.documentNumber,
     jurisdiction: document.decisionMetadata.jurisdiction
       ? document.decisionMetadata.jurisdiction.trim().toLowerCase()
-      : undefined,
+      : '',
     linkedEntitiesCount,
     session: document.decisionMetadata.session || undefined,
     endCaseCode: document.decisionMetadata.endCaseCode || undefined,

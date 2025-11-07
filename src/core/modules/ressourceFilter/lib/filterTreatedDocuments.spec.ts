@@ -170,7 +170,6 @@ describe('filterTreatedDocuments', () => {
           boundDecisionDocumentNumbers: [],
           NACCode: '',
           endCaseCode: '',
-          parties: [],
           appealNumber: '',
         }),
       }),

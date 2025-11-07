@@ -291,7 +291,6 @@ export namespace Deprecated {
     endCaseCode?: string;
     filenameSource?: string;
     labelTreatments?: LabelTreatment[];
-    parties?: PartieTJ[] | object[];
     pubCategory?: string;
     selection: boolean;
     sommaire?: string;
