@@ -1,15 +1,15 @@
 import { generatorType } from '../../../types';
-import { idModule } from '../../id';
 import { assignationType } from '../assignationType';
+import { ObjectId } from 'mongodb';
 
 export { assignationGenerator };
 
 const assignationGenerator: generatorType<assignationType> = {
   generate: ({ documentId, _id, treatmentId, userId, assignationDate } = {}) => ({
-    documentId: documentId ? idModule.lib.buildId(documentId) : idModule.lib.buildId(),
-    _id: _id ? idModule.lib.buildId(_id) : idModule.lib.buildId(),
-    treatmentId: treatmentId ? idModule.lib.buildId(treatmentId) : idModule.lib.buildId(),
-    userId: userId ? idModule.lib.buildId(userId) : idModule.lib.buildId(),
+    documentId: documentId ? new ObjectId(documentId) : new ObjectId(),
+    _id: _id ? new ObjectId(_id) : new ObjectId(),
+    treatmentId: treatmentId ? new ObjectId(treatmentId) : new ObjectId(),
+    userId: userId ? new ObjectId(userId) : new ObjectId(),
     assignationDate: assignationDate ?? new Date().getTime(),
   }),
 };

@@ -1,97 +1,445 @@
-import { Express } from 'express';
+import { Express, Request, Response, NextFunction } from 'express';
 import { mapValues } from 'lodash';
-import { apiSchema, apiSchemaMethodNameType } from '@src/core';
+import { userType } from '@src/core';
 import { logger } from '../utils';
-import { controllers } from './controllers';
 import { ssoService } from '../modules/sso';
+import { settingsLoader } from '../lib/settingsLoader';
+import { assignationService } from '../modules/assignation';
+import { cacheService } from '../modules/cache';
+import { documentService } from '../modules/document';
+import { problemReportService } from '../modules/problemReport';
+import { statisticService } from '../modules/statistic';
+import { treatmentService } from '../modules/treatment';
+import { userService } from '../modules/user';
+import { preAssignationService } from '../modules/preAssignation';
+import { userModule } from '@src/core';
+import { ObjectId } from 'mongodb';
 
 export { buildApi };
 
 const API_BASE_URL = '/label/api';
 
 function buildApi(app: Express) {
-  const methodNames = Object.keys(apiSchema) as any as apiSchemaMethodNameType[];
+  app.get(
+    `${API_BASE_URL}/aggregatedStatistics`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const { ressourceFilter } = req.query as any;
+      const settings = settingsLoader.getSettings();
 
-  methodNames.map((methodName) => buildMethod(app, methodName));
+      const result = await statisticService.fetchAggregatedStatisticsAccordingToFilter(
+        {
+          ...ressourceFilter,
+          userId: ressourceFilter.userId !== undefined ? new ObjectId(ressourceFilter.userId) : undefined,
+        },
+        settings,
+      );
+      res.status(200).json(result);
+    }),
+  );
 
-  // urls SSO
-  buildApiSso(app);
-}
+  app.get(
+    `${API_BASE_URL}/documentStatistics`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const { documentNumber } = req.query as any;
+      const result = await statisticService.fetchDocumentStatistics(documentNumber);
+      res.status(200).json(result);
+    }),
+  );
 
-function buildMethod(app: Express, methodName: apiSchemaMethodNameType) {
-  switch (methodName) {
-    case 'get':
-      buildGetRoutes(app);
-      break;
-    case 'post':
-      buildPostRoutes(app);
-      break;
-  }
-}
+  app.get(
+    `${API_BASE_URL}/annotationsDiffDetails`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const { documentId } = req.query as any;
+      const result = await treatmentService.fetchAnnotationsDiffDetailsForDocument(new ObjectId(documentId));
+      res.status(200).json(result);
+    }),
+  );
 
-function buildGetRoutes(app: Express) {
-  const getRoutes = Object.keys(apiSchema.get) as any as Array<keyof (typeof apiSchema)['get']>;
+  app.get(
+    `${API_BASE_URL}/annotations`,
+    withAuth(['admin', 'annotator', 'scrutator'], async (user, req, res) => {
+      const { documentId } = req.query as any;
+      const result = await treatmentService.fetchAnnotationsOfDocument(new ObjectId(documentId));
+      res.status(200).json(result);
+    }),
+  );
 
-  getRoutes.forEach((getRoute) => {
-    app.get(`${API_BASE_URL}/${getRoute}`, buildController('get', controllers.get[getRoute]));
-  });
-}
-
-function buildPostRoutes(app: Express) {
-  const postRoutes = Object.keys(apiSchema.post) as any as Array<keyof (typeof apiSchema)['post']>;
-
-  postRoutes.forEach((postRoute) => {
-    app.post(`${API_BASE_URL}/${postRoute}`, buildController('post', controllers.post[postRoute]));
-  });
-}
-
-function buildController(
-  method: apiSchemaMethodNameType,
-  controller: (param: { headers: any; args: any; session: any; path: string }) => Promise<any>,
-) {
-  return async (req: any, res: any, next: any) => {
+  app.get(`${API_BASE_URL}/anonymizedDocumentText`, async (req, res, next) => {
     try {
-      const { data, statusCode } = await executeController();
-      res.status(statusCode);
-      res.send(data);
+      const { documentId } = parseQuery(req.query);
+      const result = await documentService.fetchAnonymizedDocumentText(new ObjectId(documentId));
+      res.status(200).json(result);
     } catch (error) {
-      logger.error({ operationName: 'buildController', msg: `${error}` });
-      res.status((error as any).statusCode || 500);
-      next(error);
+      handleError(error, res, next);
     }
+  });
 
-    async function executeController(): Promise<{
-      data: any;
-      statusCode: number;
-    }> {
-      switch (method) {
-        case 'get':
-          const sanitizedQuery = mapValues(req.query, (queryValue) => JSON.parse(queryValue));
-          return {
-            data: await controller({
-              headers: req.headers,
-              args: sanitizedQuery,
-              session: req.session,
-              path: req.path,
-            }),
-            statusCode: 200,
-          };
-        case 'post':
-          return {
-            data: await controller({
-              headers: req.headers,
-              args: req.body,
-              session: req.session,
-              path: req.path,
-            }),
-            statusCode: 201,
-          };
+  app.get(
+    `${API_BASE_URL}/availableStatisticFilters`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const cache = (await cacheService.fetchAllByKey('availableStatisticFilters'))[0];
+      if (cache) {
+        res.status(200).json(JSON.parse(cache.content));
+      } else {
+        res.status(200).json({
+          publicationCategories: [],
+          maxDate: undefined,
+          minDate: undefined,
+          routes: [],
+          importers: [],
+          sources: [],
+          jurisdictions: [],
+        });
       }
-    }
-  };
-}
+    }),
+  );
 
-function buildApiSso(app: Express) {
+  app.get(
+    `${API_BASE_URL}/document`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const { documentId } = req.query as any;
+      if (user.role === 'admin') {
+        await documentService.updateDocumentReviewStatus(new ObjectId(documentId), {
+          viewerNameToAdd: user.name,
+        });
+      }
+      const result = await documentService.fetchDocument(new ObjectId(documentId));
+      res.status(200).json(result);
+    }),
+  );
+
+  app.get(
+    `${API_BASE_URL}/documentStatus`,
+    withAuth(['admin', 'annotator', 'publicator'], async (user, req, res) => {
+      const { documentId } = req.query as any;
+      const document = await documentService.fetchDocument(new ObjectId(documentId));
+      res.status(200).json(document.status);
+    }),
+  );
+
+  app.get(
+    `${API_BASE_URL}/documentsForUser`,
+    withAuth(['admin', 'annotator'], async (user, req, res) => {
+      const { documentsMaxCount } = req.query as any;
+      const result = await documentService.fetchDocumentsForUser(new ObjectId(user._id), documentsMaxCount);
+      res.status(200).json(result);
+    }),
+  );
+
+  app.get(`${API_BASE_URL}/health`, async (req, res, next) => {
+    try {
+      await userService.fetchUsers();
+      res.status(200).json(true);
+    } catch (error) {
+      handleError(error, res, next);
+    }
+  });
+
+  app.get(
+    `${API_BASE_URL}/problemReportsWithDetails`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const result = await problemReportService.fetchProblemReportsWithDetails();
+      res.status(200).json(result);
+    }),
+  );
+
+  app.get(
+    `${API_BASE_URL}/settings`,
+    withAuth(['admin', 'annotator', 'scrutator'], async (user, req, res) => {
+      res.status(200).json({
+        json: JSON.stringify(settingsLoader.getSettings()),
+      });
+    }),
+  );
+
+  app.get(
+    `${API_BASE_URL}/summary`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const result = await statisticService.fetchSummary();
+      res.status(200).json(result);
+    }),
+  );
+
+  app.get(
+    `${API_BASE_URL}/personalStatistics`,
+    withAuth(['admin', 'annotator', 'scrutator'], async (user, req, res) => {
+      const settings = settingsLoader.getSettings();
+      const result = await statisticService.fetchPersonalStatistics(user, settings);
+      res.status(200).json(result);
+    }),
+  );
+
+  app.get(
+    `${API_BASE_URL}/publishableDocuments`,
+    withAuth(['admin', 'publicator'], async (user, req, res) => {
+      const result = await documentService.fetchPublishableDocuments();
+      res.status(200).json(result);
+    }),
+  );
+
+  app.get(
+    `${API_BASE_URL}/toBeConfirmedDocuments`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const result = await documentService.fetchToBeConfirmedDocuments();
+      res.status(200).json(result);
+    }),
+  );
+
+  app.get(
+    `${API_BASE_URL}/treatedDocuments`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const settings = settingsLoader.getSettings();
+      const result = await documentService.fetchTreatedDocuments(settings);
+      res.status(200).json(result);
+    }),
+  );
+
+  app.get(
+    `${API_BASE_URL}/untreatedDocuments`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const result = await documentService.fetchUntreatedDocuments();
+      res.status(200).json(result);
+    }),
+  );
+
+  app.get(
+    `${API_BASE_URL}/workingUsers`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const result = await userService.fetchWorkingUsers();
+      res.status(200).json(result);
+    }),
+  );
+
+  app.get(
+    `${API_BASE_URL}/preAssignations`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const result = await preAssignationService.fetchAllPreAssignation();
+      res.status(200).json(result);
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/assignDocumentToUser`,
+    withAuth(['admin'], async (user, req, res) => {
+      const { documentId, userId } = req.body;
+      await documentService.assertDocumentStatus({
+        documentId: new ObjectId(documentId),
+        status: 'free',
+      });
+      await assignationService.createAssignation({
+        documentId: new ObjectId(documentId),
+        userId: new ObjectId(userId),
+      });
+      const result = await documentService.updateDocumentStatus(new ObjectId(documentId), 'saved');
+      res.status(201).json(result);
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/createUser`,
+    withAuth(['admin'], async (user, req, res) => {
+      const { name, email, role } = req.body;
+      const result = await userService.createUser({ name, email, role });
+      res.status(201).json(result);
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/deleteProblemReport`,
+    withAuth(['admin'], async (user, req, res) => {
+      const { problemReportId } = req.body;
+      await problemReportService.deleteProblemReportById(new ObjectId(problemReportId));
+      res.status(201).send();
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/deletePreAssignation`,
+    withAuth(['admin'], async (user, req, res) => {
+      const { preAssignationId } = req.body;
+      await preAssignationService.deletePreAssignation(new ObjectId(preAssignationId));
+      res.status(201).send();
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/deleteHumanTreatmentsForDocument`,
+    withAuth(['admin'], async (user, req, res) => {
+      const { documentId } = req.body;
+      await assignationService.deleteAssignationsByDocumentId(new ObjectId(documentId));
+      await documentService.updateDocumentStatus(new ObjectId(documentId), 'free');
+      await documentService.resetDocumentReviewStatus(new ObjectId(documentId));
+      res.status(201).send();
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/problemReport`,
+    withAuth(['admin', 'annotator', 'scrutator'], async (user, req, res) => {
+      const { documentId, problemText, problemType } = req.body;
+      await problemReportService.createProblemReport({
+        userId: new ObjectId(user._id),
+        documentId: new ObjectId(documentId),
+        problemText,
+        problemType,
+      });
+      res.status(201).send();
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/deleteDocument`,
+    withAuth(['admin'], async (user, req, res) => {
+      const { documentId } = req.body;
+      const documentToDelete = await documentService.fetchDocument(new ObjectId(documentId));
+      const settings = settingsLoader.getSettings();
+      await statisticService.saveStatisticsOfDocument(documentToDelete, settings, 'deleted from the interface');
+      await documentService.deleteDocument(new ObjectId(documentId));
+      res.status(201).send();
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/resetTreatmentLastUpdateDate`,
+    withAuth(['admin', 'annotator'], async (user, req, res) => {
+      const { assignationId } = req.body;
+      const assignation = await assignationService.fetchAssignation(new ObjectId(assignationId));
+
+      if (!new ObjectId(user._id).equals(assignation.userId)) {
+        throw new Error(
+          `User ${user._id.toHexString()} is trying to update a treatment that is not assigned to him/her`,
+        );
+      }
+
+      const result = await treatmentService.resetTreatmentLastUpdateDate(assignation.treatmentId);
+      res.status(201).json(result);
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/updateAssignationDocumentStatus`,
+    withAuth(['admin'], async (user, req, res) => {
+      const { assignationId, status } = req.body;
+      const result = await assignationService.updateAssignationDocumentStatus(new ObjectId(assignationId), status);
+      res.status(201).json(result);
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/updateDocumentStatus`,
+    withAuth(['admin', 'annotator', 'publicator'], async (user, req, res) => {
+      const { documentId, status } = req.body;
+      if (user.role !== 'admin' && user.role !== 'publicator') {
+        await assignationService.assertDocumentIsAssignatedToUser({
+          documentId: new ObjectId(documentId),
+          userId: new ObjectId(user._id),
+        });
+      }
+      const result = await documentService.updateDocumentStatus(new ObjectId(documentId), status);
+      res.status(201).json(result);
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/updateDocumentRoute`,
+    withAuth(['admin'], async (user, req, res) => {
+      const { documentId, route } = req.body;
+      const result = await documentService.updateDocumentRoute(new ObjectId(documentId), route);
+      res.status(201).json(result);
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/updatePublishableDocumentStatus`,
+    withAuth(['admin', 'publicator'], async (user, req, res) => {
+      const { documentId, status } = req.body;
+      await documentService.assertDocumentIsPublishable(new ObjectId(documentId));
+      const result = await documentService.updateDocumentStatus(new ObjectId(documentId), status);
+      res.status(201).json(result);
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/updateProblemReportHasBeenRead`,
+    withAuth(['admin'], async (user, req, res) => {
+      const { problemReportId, hasBeenRead } = req.body;
+      await problemReportService.updateHasBeenRead(new ObjectId(problemReportId), hasBeenRead);
+      res.status(201).send();
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/updateTreatmentDuration`,
+    withAuth(['admin', 'annotator'], async (user, req, res) => {
+      const { assignationId } = req.body;
+      const assignation = await assignationService.fetchAssignation(new ObjectId(assignationId));
+
+      if (!new ObjectId(user._id).equals(assignation.userId)) {
+        throw new Error(
+          `User ${user._id.toHexString()} is trying to update a treatment that is not assigned to him/her`,
+        );
+      }
+
+      const result = await treatmentService.updateTreatmentDuration(assignation.treatmentId);
+      res.status(201).json(result);
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/updateTreatmentForAssignationId`,
+    withAuth(['admin', 'annotator'], async (user, req, res) => {
+      const { annotationsDiff, assignationId } = req.body;
+      const assignation = await assignationService.fetchAssignation(new ObjectId(assignationId));
+
+      if (!new ObjectId(user._id).equals(assignation.userId)) {
+        throw new Error(
+          `User ${user._id.toHexString()} is trying to update a treatment that is not assigned to him/her`,
+        );
+      }
+
+      const settings = settingsLoader.getSettings();
+      const result = await treatmentService.updateTreatment({
+        annotationsDiff,
+        assignation,
+        settings,
+      });
+      res.status(201).json(result);
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/updateTreatmentForDocumentId`,
+    withAuth(['admin'], async (user, req, res) => {
+      const { annotationsDiff, documentId } = req.body;
+      const settings = settingsLoader.getSettings();
+      const result = await treatmentService.updateTreatmentForDocumentIdAndUserId(
+        {
+          annotationsDiff,
+          documentId: new ObjectId(documentId),
+          userId: new ObjectId(user._id),
+        },
+        settings,
+      );
+      res.status(201).json(result);
+    }),
+  );
+
+  app.post(
+    `${API_BASE_URL}/createPreAssignation`,
+    withAuth(['admin'], async (user, req, res) => {
+      const { userId, source, number } = req.body;
+      await preAssignationService.createPreAssignation({
+        userId: new ObjectId(userId),
+        source,
+        number,
+      });
+      res.status(201).send();
+    }),
+  );
+
+  // ===================================================
+  // SSO ENDPOINTS
+
   app.get(`${API_BASE_URL}/sso/metadata`, async (req, res) => {
     try {
       const xml = await ssoService.getMetadata();
@@ -157,4 +505,60 @@ function buildApiSso(app: Express) {
       res.redirect(`${API_BASE_URL}/sso/logout`);
     }
   });
+
+  // ===================================================
+}
+
+function withAuth(
+  permissions: Array<userType['role']>,
+  handler: (user: userType, req: Request, res: Response) => Promise<void>,
+) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const currentUser = req.session?.user ?? null;
+      if (!currentUser) {
+        throw new Error(`user session has expired or is invalid`);
+      }
+
+      const resolvedUser: userType = {
+        _id: new ObjectId(currentUser._id) as userType['_id'],
+        name: currentUser.name,
+        role: currentUser.role as 'admin' | 'annotator' | 'publicator' | 'scrutator',
+        email: currentUser.email,
+      };
+
+      userModule.lib.assertPermissions(resolvedUser, permissions);
+
+      // Parse query parameters for GET requests (create a new parsed query object)
+      if (req.method === 'GET' && Object.keys(req.query).length > 0) {
+        const parsedQuery = parseQuery(req.query);
+        // Override the query getter temporarily with parsed values
+        Object.defineProperty(req, 'query', {
+          value: parsedQuery,
+          writable: false,
+          configurable: true,
+        });
+      }
+
+      await handler(resolvedUser, req, res);
+    } catch (error) {
+      handleError(error, res, next);
+    }
+  };
+}
+
+function parseQuery(query: any): any {
+  return mapValues(query, (queryValue) => {
+    try {
+      return JSON.parse(queryValue);
+    } catch {
+      return queryValue;
+    }
+  });
+}
+
+function handleError(error: any, res: Response, next: NextFunction) {
+  logger.error({ operationName: 'apiError', msg: `${error}` });
+  res.status(error.statusCode || 500);
+  next(error);
 }

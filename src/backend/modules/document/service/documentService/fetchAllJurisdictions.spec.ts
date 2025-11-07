@@ -19,7 +19,6 @@ describe('fetchAllJurisdictions', () => {
             civilMatterCode: '',
             date: new Date().getTime(),
             occultationBlock: undefined,
-            parties: [],
             session: '',
             solution: '',
             jurisdiction,

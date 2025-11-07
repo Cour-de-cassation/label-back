@@ -1,9 +1,10 @@
-import { documentType, idModule, settingsType, statisticsCreator, timeOperator, treatmentModule } from '@src/core';
+import { documentType, settingsType, statisticsCreator, timeOperator, treatmentModule } from '@src/core';
 import { assignationService } from '../../assignation';
 import { treatmentService } from '../../treatment';
 import { buildStatisticRepository } from '../repository';
 import { logger } from '../../../utils';
 import { userService } from '../../user';
+import { ObjectId } from 'mongodb';
 
 export { saveStatisticsOfDocument };
 
@@ -27,11 +28,11 @@ async function saveStatisticsOfDocument(document: documentType, settings: settin
   });
 
   if (humanTreatments && humanTreatments.length > 0) {
-    const userIds = humanTreatments.map((humanTreatment) => idModule.lib.buildId(humanTreatment.userId));
+    const userIds = humanTreatments.map((humanTreatment) => new ObjectId(humanTreatment.userId));
     const users = await userService.fetchUsersByIds(userIds);
 
     for (const humanTreatment of humanTreatments) {
-      const user = users[idModule.lib.convertToString(humanTreatment.userId)];
+      const user = users[humanTreatment.userId.toHexString()];
 
       if (user) {
         logger.log({

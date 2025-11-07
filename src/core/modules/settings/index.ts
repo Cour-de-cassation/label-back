@@ -14,7 +14,6 @@ import {
   colorType,
   constantColorType,
   displayModeType,
-  settingsModel,
   settingsType,
   shadeColorType,
   categoryIconNameType,
@@ -25,7 +24,6 @@ export { settingsModule };
 export type { colorType, constantColorType, displayModeType, settingsType, shadeColorType, categoryIconNameType };
 
 const settingsModule = {
-  model: settingsModel,
   lib: {
     additionalAnnotationCategoryHandler,
     buildSettings,

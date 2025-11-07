@@ -1,5 +1,5 @@
 import { sumBy } from 'lodash';
-import { assignationType, idModule, settingsType, treatmentModule } from '@src/core';
+import { assignationType, settingsType, treatmentModule } from '@src/core';
 import { assignationService } from '../../../assignation';
 import { treatmentService } from '../../../treatment';
 import { userService } from '../../../user';
@@ -35,7 +35,7 @@ async function fetchTreatedDocuments(settings: settingsType) {
   const treatmentsByDocumentId = await treatmentService.fetchTreatmentsByDocumentIds(documentIds);
 
   return treatedDocuments.map((treatedDocument) => {
-    const documentIdString = idModule.lib.convertToString(treatedDocument._id);
+    const documentIdString = treatedDocument._id.toHexString();
     const assignations = assignationsByDocumentId[documentIdString];
     let totalTreatmentDuration: number | undefined,
       lastTreatmentDate: number | undefined,
@@ -49,7 +49,7 @@ async function fetchTreatedDocuments(settings: settingsType) {
       if (humanTreatments.length === 0) {
         throw new Error(`No human treatment found for document ${documentIdString}`);
       }
-      userNames = humanTreatments.map(({ userId }) => usersByIds[idModule.lib.convertToString(userId)].name);
+      userNames = humanTreatments.map(({ userId }) => usersByIds[userId.toHexString()].name);
       totalTreatmentDuration = sumBy(humanTreatments, ({ treatment }) => treatment.duration);
       lastTreatmentDate = humanTreatments[humanTreatments.length - 1].treatment.lastUpdateDate;
 

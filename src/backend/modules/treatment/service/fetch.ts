@@ -3,13 +3,12 @@ import {
   annotationsDiffModule,
   annotationType,
   documentType,
-  idModule,
-  idType,
   indexer,
   treatmentModule,
 } from '@src/core';
 import { buildDocumentRepository } from '../../document';
 import { buildTreatmentRepository } from '../repository';
+import { ObjectId } from 'mongodb';
 
 export {
   fetchAnnotationsOfDocument,
@@ -19,7 +18,7 @@ export {
   fetchTreatmentsByDocumentIds,
 };
 
-async function fetchAnnotationsOfDocument(documentId: idType) {
+async function fetchAnnotationsOfDocument(documentId: ObjectId) {
   const treatmentRepository = buildTreatmentRepository();
   const treatments = await treatmentRepository.findAllByDocumentId(documentId);
 
@@ -104,19 +103,19 @@ async function fetchTreatedDocumentIds() {
   return treatmentRepository.distinct('documentId');
 }
 
-async function fetchTreatmentsByDocumentId(documentId: idType) {
+async function fetchTreatmentsByDocumentId(documentId: ObjectId) {
   const treatmentRepository = buildTreatmentRepository();
   const treatments = await treatmentRepository.findAllByDocumentId(documentId);
 
   return treatments;
 }
 
-async function fetchTreatmentsByDocumentIds(documentIds: idType[]) {
+async function fetchTreatmentsByDocumentIds(documentIds: ObjectId[]) {
   const treatmentRepository = buildTreatmentRepository();
   const treatmentsByDocumentIds = await treatmentRepository.findAllByDocumentIds(documentIds);
 
   indexer.assertEveryIdIsDefined(
-    documentIds.map((documentId) => idModule.lib.convertToString(documentId)),
+    documentIds.map((documentId) => documentId.toHexString()),
     treatmentsByDocumentIds,
     (_id) => `The document id ${_id} has no matching treatments`,
   );

@@ -1,4 +1,4 @@
-import { assignationModule, idModule, userModule } from '@src/core';
+import { assignationModule, userModule } from '@src/core';
 import { assignationService, buildAssignationRepository } from '../../../assignation';
 import { buildUserRepository } from '../../repository';
 import { buildUserService } from './index';
@@ -20,7 +20,7 @@ describe('fetchUsersByAssignations', () => {
     const assignationsById = await assignationService.fetchAllAssignationsById();
 
     const userNamesByAssignationId = await userService.fetchUsersByAssignations(Object.values(assignationsById));
-    expect(userNamesByAssignationId[idModule.lib.convertToString(assignation1._id)].name).toEqual('Nicolas');
-    expect(userNamesByAssignationId[idModule.lib.convertToString(assignation2._id)].name).toEqual('Benoit');
+    expect(userNamesByAssignationId[assignation1._id.toHexString()].name).toEqual('Nicolas');
+    expect(userNamesByAssignationId[assignation2._id.toHexString()].name).toEqual('Benoit');
   });
 });

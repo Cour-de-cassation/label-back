@@ -1,4 +1,5 @@
-import { idType, preAssignationType } from '@src/core';
+import { preAssignationType } from '@src/core';
+import { ObjectId } from 'mongodb';
 
 export type { customPreAssignationRepositoryType };
 
@@ -10,5 +11,5 @@ type customPreAssignationRepositoryType = {
     number: string;
     source: string;
   }) => Promise<preAssignationType | undefined>;
-  deleteById: (id: idType) => Promise<void>;
+  deleteById: (id: ObjectId) => Promise<void>;
 };

@@ -1,4 +1,4 @@
-import { assignationType, idModule, indexer } from '@src/core';
+import { assignationType, indexer } from '@src/core';
 import { buildFakeRepositoryBuilder } from '../../../repository';
 import { customAssignationRepositoryType } from './customAssignationRepositoryType';
 
@@ -8,32 +8,31 @@ const buildFakeAssignationRepository = buildFakeRepositoryBuilder<assignationTyp
   collectionName: 'assignations',
   buildCustomFakeRepository: (collection) => ({
     async findAllByUserId(userId) {
-      return collection.filter((assignation) => idModule.lib.equalId(assignation.userId, userId));
+      return collection.filter((assignation) => assignation.userId.equals(userId));
     },
 
     async findAllByDocumentIds(documentIdsToSearchIn) {
       const assignations = collection.filter((assignation) =>
-        documentIdsToSearchIn.some((documentId) => idModule.lib.equalId(documentId, assignation.documentId)),
+        documentIdsToSearchIn.some((documentId) => documentId.equals(assignation.documentId)),
       );
 
-      return indexer.indexManyBy(assignations, (assignation) => idModule.lib.convertToString(assignation.documentId));
+      return indexer.indexManyBy(assignations, (assignation) => assignation.documentId.toHexString());
     },
 
     async findByDocumentIdAndUserId({ documentId, userId }) {
       const result = collection.find(
-        (assignation) =>
-          idModule.lib.equalId(assignation.documentId, documentId) && idModule.lib.equalId(assignation.userId, userId),
+        (assignation) => assignation.documentId.equals(documentId) && assignation.userId.equals(userId),
       );
 
       return result;
     },
 
     async findAllByDocumentId(documentId) {
-      return collection.filter((assignation) => idModule.lib.equalId(assignation.documentId, documentId));
+      return collection.filter((assignation) => assignation.documentId.equals(documentId));
     },
 
     async findByTreatmentId(treatmentId) {
-      return collection.find((assignation) => idModule.lib.equalId(assignation.treatmentId, treatmentId));
+      return collection.find((assignation) => assignation.treatmentId.equals(treatmentId));
     },
   }),
 });

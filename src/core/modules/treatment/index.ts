@@ -1,5 +1,5 @@
 import { treatmentGenerator } from './generator';
-import { treatmentModel, treatmentType } from './treatmentType';
+import { treatmentType } from './treatmentType';
 import {
   aggregateTreatmentInfo,
   assertTreatmentsSourcesFollowRightOrder,
@@ -23,7 +23,6 @@ export { treatmentModule };
 export type { treatmentType, treatmentInfoType };
 
 const treatmentModule = {
-  model: treatmentModel,
   generator: treatmentGenerator,
   lib: {
     aggregateTreatmentInfo,

@@ -1,5 +1,5 @@
 import { range } from 'lodash';
-import { assignationModule, documentModule, idModule, treatmentModule, userModule } from '@src/core';
+import { assignationModule, documentModule, treatmentModule, userModule } from '@src/core';
 import { buildAssignationRepository } from '../../../assignation/repository';
 import { buildTreatmentRepository } from '../../../treatment/repository';
 import { buildUserRepository } from '../../../user/repository';
@@ -223,8 +223,6 @@ describe('fetchDocumentsForUser', () => {
 
     const promise = () => documentService.fetchDocumentsForUser(user._id, 1);
 
-    await expect(promise()).rejects.toThrow(
-      `Too many call attempts for identifier ${idModule.lib.convertToString(user._id)}`,
-    );
+    await expect(promise()).rejects.toThrow(`Too many call attempts for identifier ${user._id.toHexString()}`);
   });
 });

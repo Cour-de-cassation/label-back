@@ -1,8 +1,9 @@
-import { documentType, idModule, idType, problemReportModule, problemReportType } from '@src/core';
+import { documentType, problemReportModule, problemReportType } from '@src/core';
 import { documentService } from '../../document';
 import { userService } from '../../user';
 import { buildProblemReportRepository } from '../repository';
 import { logger } from '../../../utils';
+import { ObjectId } from 'mongodb';
 
 export { problemReportService };
 
@@ -13,8 +14,8 @@ const problemReportService = {
     problemText,
     problemType,
   }: {
-    userId: idType;
-    documentId: idType;
+    userId: ObjectId;
+    documentId: ObjectId;
     problemText: string;
     problemType: problemReportType['type'];
   }) {
@@ -35,8 +36,8 @@ const problemReportService = {
         }),
       );
 
-      const document = documents[idModule.lib.convertToString(documentId)];
-      const user = users[idModule.lib.convertToString(userId)];
+      const document = documents[documentId.toHexString()];
+      const user = users[userId.toHexString()];
 
       if (document && user) {
         logger.log({
@@ -78,11 +79,11 @@ const problemReportService = {
     const usersByIds = await userService.fetchUsersByIds(problemReports.map(({ userId }) => userId));
 
     return problemReports.map((problemReport) => {
-      const userIdString = idModule.lib.convertToString(problemReport.userId);
+      const userIdString = problemReport.userId.toHexString();
       const { email, name } = usersByIds[userIdString];
       let documentToReturn = undefined;
       try {
-        const document = documentsById[idModule.lib.convertToString(problemReport.documentId)];
+        const document = documentsById[problemReport.documentId.toHexString()];
         documentToReturn = {
           _id: document._id,
           documentNumber: document.documentNumber,

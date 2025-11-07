@@ -1,11 +1,11 @@
-import { idModule, omitIdType } from '../../id';
 import { cacheType } from '../cacheType';
+import { ObjectId } from 'mongodb';
 
 export { buildCache };
 
-function buildCache(cacheFields: omitIdType<cacheType>): cacheType {
+function buildCache(cacheFields: Omit<cacheType, '_id'>): cacheType {
   return {
     ...cacheFields,
-    _id: idModule.lib.buildId(),
+    _id: new ObjectId(),
   };
 }

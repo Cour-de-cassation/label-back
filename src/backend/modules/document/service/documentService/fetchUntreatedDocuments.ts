@@ -1,5 +1,4 @@
 import { flatten } from 'lodash';
-import { idModule } from '@src/core';
 import { assignationService } from '../../../assignation';
 import { userService } from '../../../user';
 import { buildDocumentRepository } from '../../repository';
@@ -21,11 +20,9 @@ async function fetchUntreatedDocuments() {
   const allAssignations = flatten(Object.values(assignationsByDocumentId));
   const usersByAssignationId = await userService.fetchUsersByAssignations(allAssignations);
   return untreatedDocuments.map((untreatedDocument) => {
-    const assignationsForDocument = assignationsByDocumentId[idModule.lib.convertToString(untreatedDocument._id)];
+    const assignationsForDocument = assignationsByDocumentId[untreatedDocument._id.toHexString()];
     const userNames = assignationsForDocument
-      ? assignationsForDocument.map(
-          (assignation) => usersByAssignationId[idModule.lib.convertToString(assignation._id)].name,
-        )
+      ? assignationsForDocument.map((assignation) => usersByAssignationId[assignation._id.toHexString()].name)
       : [];
 
     return {

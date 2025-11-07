@@ -1,11 +1,11 @@
-import { idModule } from '../../id';
 import { ressourceFilterModule } from '../../ressourceFilter';
 import { statisticGenerator } from '../generator';
 import { aggregate } from './aggregate';
+import { ObjectId } from 'mongodb';
 
 describe('aggregate', () => {
-  const userId1 = idModule.lib.buildId();
-  const userId2 = idModule.lib.buildId();
+  const userId1 = new ObjectId();
+  const userId2 = new ObjectId();
 
   const statistics = [
     {

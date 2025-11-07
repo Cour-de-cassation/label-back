@@ -1,6 +1,5 @@
 import { annotationType } from '../../annotation';
 import { annotationsDiffModule, annotationsDiffType } from '../../annotationsDiff';
-import { idModule } from '../../id';
 import { treatmentType } from '../treatmentType';
 import { assertTreatmentsSourcesFollowRightOrder } from './assertTreatmentsSourcesFollowRightOrder';
 import { sortInConsistentOrder } from './sortInConsistentOrder';
@@ -48,7 +47,7 @@ function checkTreatmentsConsistency(treatments: treatmentType[]): boolean {
 }
 
 function areOnTheSameDocument(treatments: treatmentType[]): boolean {
-  return treatments.every((treatment) => idModule.lib.equalId(treatment.documentId, treatments[0].documentId));
+  return treatments.every((treatment) => treatment.documentId.equals(treatments[0].documentId));
 }
 
 function haveConsistentOrder(treatments: treatmentType[]): boolean {

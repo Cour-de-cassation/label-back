@@ -2,7 +2,6 @@ import { logger } from '../../utils';
 import { assignationService } from '../../modules/assignation';
 import { buildDocumentRepository } from '../../modules/document';
 import { userService } from '../../modules/user';
-import { idModule } from '@src/core';
 
 export { displayMultipleAssignatedDocuments };
 
@@ -19,7 +18,7 @@ async function displayMultipleAssignatedDocuments() {
     const assignations = await assignationService.fetchAssignationsOfDocumentId(document._id);
     const usersByAssignationId = await userService.fetchUsersByAssignations(assignations);
     const userNames = assignations
-      ? assignations.map((assignation) => usersByAssignationId[idModule.lib.convertToString(assignation._id)].name)
+      ? assignations.map((assignation) => usersByAssignationId[assignation._id.toHexString()].name)
       : [];
     if (userNames.length > 1) {
       documentCount++;

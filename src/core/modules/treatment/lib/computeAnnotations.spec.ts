@@ -1,6 +1,6 @@
 import { annotationModule } from '../../annotation';
 import { annotationsDiffModule } from '../../annotationsDiff';
-import { idModule } from '../../id';
+import { ObjectId } from 'mongodb';
 import { treatmentGenerator } from '../generator';
 import { computeAnnotations, computeAnnotationsDiff } from './computeAnnotations';
 
@@ -8,7 +8,7 @@ describe('computeAnnotations', () => {
   const annotations = [{ text: '0' }, { text: '1' }, { text: '2' }, { text: '3' }, { text: '4' }].map(
     annotationModule.generator.generate,
   );
-  const documentId = idModule.lib.buildId();
+  const documentId = new ObjectId();
 
   it('should compute the annotations set from treatments', () => {
     const treatments = [
@@ -55,7 +55,7 @@ describe('computeAnnotations', () => {
           before: [],
           after: [annotations[0], annotations[1]],
         }),
-        documentId: idModule.lib.buildId(),
+        documentId: new ObjectId(),
         order: 0,
         source: 'NLP' as const,
       },
@@ -64,16 +64,14 @@ describe('computeAnnotations', () => {
           before: [annotations[0]],
           after: [annotations[2]],
         }),
-        documentId: idModule.lib.buildId(),
+        documentId: new ObjectId(),
         order: 1,
         source: 'postProcess' as const,
       },
     ].map(treatmentGenerator.generate);
 
     expect(() => computeAnnotations(treatments)).toThrow(
-      `Can not compute annotations from inconsistent treatments : [${idModule.lib.convertToString(
-        treatments[0]._id,
-      )}, ${idModule.lib.convertToString(treatments[1]._id)}]`,
+      `Can not compute annotations from inconsistent treatments : [${treatments[0]._id.toHexString()}, ${treatments[1]._id.toHexString()}]`,
     );
   });
 
@@ -100,9 +98,7 @@ describe('computeAnnotations', () => {
     ].map(treatmentGenerator.generate);
 
     expect(() => computeAnnotations(treatments)).toThrow(
-      `Can not compute annotations from inconsistent treatments : [${idModule.lib.convertToString(
-        treatments[0]._id,
-      )}, ${idModule.lib.convertToString(treatments[1]._id)}]`,
+      `Can not compute annotations from inconsistent treatments : [${treatments[0]._id.toHexString()}, ${treatments[1]._id.toHexString()}]`,
     );
   });
 
@@ -129,9 +125,7 @@ describe('computeAnnotations', () => {
     ].map(treatmentGenerator.generate);
 
     expect(() => computeAnnotations(treatments)).toThrow(
-      `Can not compute annotations from inconsistent treatments : [${idModule.lib.convertToString(
-        treatments[0]._id,
-      )}, ${idModule.lib.convertToString(treatments[1]._id)}]`,
+      `Can not compute annotations from inconsistent treatments : [${treatments[0]._id.toHexString()}, ${treatments[1]._id.toHexString()}]`,
     );
   });
 });
@@ -140,7 +134,7 @@ describe('computeAnnotationsDiff', () => {
   const annotations = [{ text: '0' }, { text: '1' }, { text: '2' }, { text: '3' }, { text: '4' }].map(
     annotationModule.generator.generate,
   );
-  const documentId = idModule.lib.buildId();
+  const documentId = new ObjectId();
 
   it('should compute the annotations set from treatments', () => {
     const treatments = [

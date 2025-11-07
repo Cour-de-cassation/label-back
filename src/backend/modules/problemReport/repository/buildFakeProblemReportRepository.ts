@@ -1,4 +1,4 @@
-import { idModule, problemReportType } from '@src/core';
+import { problemReportType } from '@src/core';
 import { buildFakeRepositoryBuilder, updateFakeCollection } from '../../../repository';
 import { customProblemReportRepositoryType } from './customProblemReportRepositoryType';
 
@@ -13,7 +13,7 @@ const buildFakeProblemReportRepository = buildFakeRepositoryBuilder<
     async deleteByDocumentId(documentId) {
       updateFakeCollection(
         collection,
-        collection.filter((problemReport) => !idModule.lib.equalId(problemReport.documentId, documentId)),
+        collection.filter((problemReport) => !problemReport.documentId.equals(documentId)),
       );
     },
   }),
