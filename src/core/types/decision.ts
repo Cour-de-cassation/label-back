@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongodb';
+
 export namespace Deprecated {
   export enum LabelStatus {
     TOBETREATED = 'toBeTreated',
@@ -359,4 +361,51 @@ export namespace Deprecated {
     routeCA?: LabelRoute;
     routeTJ?: LabelRoute;
   }
+
+  export enum Category {
+    ADRESSE = 'adresse',
+    CADASTRE = 'cadastre',
+    PERSONNEMORALE = 'personneMorale',
+    PERSONNEPHYSIQUE = 'personnePhysique',
+    PROFESSIONNELAVOCAT = 'professionnelAvocat',
+    PROFESSIONNELMAGISTRATGREFFIER = 'professionnelMagistratGreffier',
+    DATENAISSANCE = 'dateNaissance',
+    DATEDECES = 'dateDeces',
+    DATEMARIAGE = 'dateMariage',
+    INSEE = 'insee',
+    NUMEROIDENTIFIANT = 'numeroIdentifiant',
+    PLAQUEIMMATRICULATION = 'plaqueImmatriculation',
+    COMPTEBANCAIRE = 'compteBancaire',
+    LOCALITE = 'localite',
+    NUMEROSIRETSIREN = 'numeroSiretSiren',
+    SITEWEBSENSIBLE = 'siteWebSensible',
+    ETABLISSEMENT = 'etablissement',
+    TELEPHONEFAX = 'telephoneFax',
+    EMAIL = 'email',
+    MOTIVATIONS = 'motivations',
+    ANNOTATIONSUPPLEMENTAIRE = 'annotationSupplementaire',
+    PERSONNEPHYSIQUENOM = 'personnePhysiqueNom',
+    PERSONNEPHYSIQUEPRENOM = 'personnePhysiquePrenom',
+    PROFESSIONNELNOM = 'professionnelNom',
+    PROFESSIONNELPRENOM = 'professionnelPrenom',
+    PERSONNEPHYSICOMORALE = 'personnePhysicoMorale',
+    PERSONNEGEOMORALE = 'personneGeoMorale',
+    CUSTOM = 'custom',
+  }
+
+  export type Affaire = {
+    _id: ObjectId;
+    replacementTerms: replacementTerms[];
+    decisionIds: ObjectId[];
+    numeroPourvois: string[];
+  };
+
+  export type replacementTerms = {
+    entityId: string;
+    replacementTerm: string;
+    originalTextInstances: string[];
+    category: Category;
+  };
+
+  export type UnIdentifiedAffaire = Omit<Affaire, '_id'>;
 }

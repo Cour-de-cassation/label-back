@@ -115,16 +115,14 @@ const sderApi = {
     });
   },
 
-  async updateDecisionPseudonymisation({
+  async patchDecisionInSder({
     externalId,
     labelTreatments,
-    pseudoText,
     labelStatus,
     publishStatus,
   }: {
     externalId: documentType['externalId'];
     labelTreatments: Deprecated.LabelTreatment[];
-    pseudoText: string;
     labelStatus: Deprecated.LabelStatus;
     publishStatus: Deprecated.PublishStatus;
   }) {
@@ -132,11 +130,27 @@ const sderApi = {
       method: 'patch',
       path: `decisions/${externalId}`,
       body: {
-        pseudoText,
         labelTreatments,
         labelStatus,
         publishStatus,
       },
     });
+  },
+
+  async getAffaire(externalId: documentType['externalId']): Promise<Deprecated.Affaire> {
+    const affaire = await fetchApi<Deprecated.Affaire>({
+      method: 'get',
+      path: `affaires?decisionId=${externalId}`,
+    });
+    return affaire;
+  },
+
+  async patchAffaire(externalId: string, replacementTerms: Deprecated.replacementTerms[]): Promise<Deprecated.Affaire> {
+    const affaire = await fetchApi<Deprecated.Affaire>({
+      method: 'patch',
+      path: `affaires/${externalId}`,
+      body: { replacementTerms },
+    });
+    return affaire;
   },
 };

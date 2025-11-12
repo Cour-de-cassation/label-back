@@ -1,17 +1,11 @@
-import {
-  buildAnonymizer,
-  Deprecated,
-  documentModule,
-  documentType,
-  settingsModule,
-  settingsType,
-  treatmentModule,
-} from '@src/core';
+import { Deprecated, documentType, settingsModule, settingsType, treatmentModule } from '@src/core';
 import { documentService } from '../../modules/document';
 import { statisticService } from '../../modules/statistic';
 import { treatmentService } from '../../modules/treatment';
 import { logger } from '../../utils';
 import { exporterConfigType } from './exporterConfigType';
+import { sderApi } from '@src/courDeCassation/sderApi';
+import { nlpApi } from '@src/courDeCassation/nlpApi';
 
 export { buildExporter };
 
@@ -160,8 +154,6 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
 
   async function exportDocument(document: documentType) {
     const treatments = await treatmentService.fetchTreatmentsByDocumentId(document._id);
-    const annotations = treatmentModule.lib.computeAnnotations(treatments);
-    const seed = documentModule.lib.computeCaseNumber(document);
     const settingsForDocument = settingsModule.lib.computeFilteredSettings(
       settings,
       document.decisionMetadata.categoriesToOmit,
@@ -170,7 +162,6 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
       document.decisionMetadata.additionalTermsParsingFailed,
       document.decisionMetadata.motivationOccultation,
     );
-    const anonymizer = buildAnonymizer(settingsForDocument, annotations, seed);
 
     try {
       const currentDecision = await exporterConfig.fetchDecisionByExternalId(document.externalId);
@@ -191,9 +182,24 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
           ]
         : currentDecisionTreatments;
 
-      await exporterConfig.updateDecisionPseudonymisation({
+      const currentAffaire = await sderApi.getAffaire(document.externalId);
+
+      const categoriesToOccult = Object.entries(settingsForDocument)
+        .filter(([_, categorySetting]) => categorySetting.status == 'annotable')
+        .map(([category]) => category) as Deprecated.Category[];
+
+      const replacementTerms = await nlpApi.getPseudo(
+        document.externalId,
+        currentAffaire._id.toString(),
+        labelTreatments,
+        currentAffaire.replacementTerms,
+        categoriesToOccult,
+      );
+
+      sderApi.patchAffaire(currentAffaire._id.toString(), replacementTerms);
+
+      await exporterConfig.patchDecisionInSder({
         externalId: document.externalId,
-        pseudoText: anonymizer.anonymizeDocument(document).text,
         labelTreatments: updatedLabelTreatments,
         labelStatus: Deprecated.LabelStatus.DONE,
         publishStatus: publishStatus,

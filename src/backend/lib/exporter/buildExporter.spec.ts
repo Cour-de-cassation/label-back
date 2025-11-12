@@ -3,12 +3,32 @@ import { buildDocumentRepository } from '../../modules/document';
 import { buildTreatmentRepository } from '../../modules/treatment';
 import { buildExporter } from './buildExporter';
 import { exporterConfigType } from './exporterConfigType';
+import { sderApi } from '@src/courDeCassation/sderApi';
+import { nlpApi } from '@src/courDeCassation/nlpApi';
+import { ObjectId } from 'mongodb';
+
+jest.mock('@src/courDeCassation/sderApi');
+jest.mock('@src/courDeCassation/nlpApi');
 
 describe('buildExporter', () => {
   const documentRepository = buildDocumentRepository();
   const treatmentRepository = buildTreatmentRepository();
   const settings = settingsModule.lib.buildSettings({
     firstName: { anonymization: '[FIRST_NAME %d]' },
+  });
+
+  beforeEach(() => {
+    const mockAffaire: Deprecated.Affaire = {
+      _id: new ObjectId(),
+      replacementTerms: [],
+      decisionIds: [],
+      numeroPourvois: [],
+    };
+
+    (sderApi.getAffaire as jest.Mock) = jest.fn().mockResolvedValue(mockAffaire);
+    (sderApi.patchAffaire as jest.Mock) = jest.fn().mockResolvedValue(mockAffaire);
+
+    (nlpApi.getPseudo as jest.Mock) = jest.fn().mockResolvedValue([]);
   });
 
   describe('exportTreatedDocumentsSince', () => {
@@ -93,12 +113,8 @@ describe('buildExporter', () => {
       await exporter.exportTreatedDocumentsSince(days);
 
       const exportedExternalIds = fakeExporterConfig.getExportedExternalIds();
-      const exportedPseudonymizationTexts = fakeExporterConfig.getExportedPseudonymizationTexts();
       const exportedLabelTreatments = fakeExporterConfig.getExportedLabelTreatments();
       expect(exportedExternalIds.sort()).toEqual([documents[0].externalId, documents[2].externalId].sort());
-      expect(exportedPseudonymizationTexts.sort()).toEqual(
-        ['[FIRST_NAME 1] est ingénieur', '[FIRST_NAME 1] est designer'].sort(),
-      );
       expect(exportedLabelTreatments.sort()).toEqual([
         {
           annotations: [
@@ -153,9 +169,8 @@ function buildFakeExporterConfig(): exporterConfigType & {
   return {
     name: 'FAKE_EXPORTER',
 
-    async updateDecisionPseudonymisation({ externalId, pseudoText, labelTreatments }) {
+    async patchDecisionInSder({ externalId, labelTreatments }) {
       exportedExternalIds.push(externalId);
-      exportedpseudonymizationTexts.push(pseudoText);
       exportedlabelTreatments.push(...labelTreatments);
     },
 
