@@ -182,7 +182,14 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
           ]
         : currentDecisionTreatments;
 
-      const currentAffaire = await sderApi.getAffaire(document.externalId);
+      let currentAffaire;
+      if (document.source == 'jurinet') {
+        currentAffaire = await sderApi.getAffaire({
+          numeroPourvoi: document.decisionMetadata.appealNumber.replace(/[-.]/g, ''),
+        });
+      } else {
+        currentAffaire = await sderApi.getAffaire({ decisionId: document.externalId });
+      }
 
       const categoriesToOccult = Object.entries(settingsForDocument)
         .filter(([_, categorySetting]) => categorySetting.status == 'annotable')
@@ -196,7 +203,7 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
         categoriesToOccult,
       );
 
-      sderApi.patchAffaire(currentAffaire._id.toString(), replacementTerms);
+      await sderApi.patchAffaire(currentAffaire._id.toString(), replacementTerms);
 
       await exporterConfig.patchDecisionInSder({
         externalId: document.externalId,

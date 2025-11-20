@@ -137,10 +137,11 @@ const sderApi = {
     });
   },
 
-  async getAffaire(externalId: documentType['externalId']): Promise<Deprecated.Affaire> {
+  async getAffaire(query: Record<string, unknown>): Promise<Deprecated.Affaire> {
     const affaire = await fetchApi<Deprecated.Affaire>({
       method: 'get',
-      path: `affaires?decisionId=${externalId}`,
+      path: `affaires`,
+      query,
     });
     return affaire;
   },
