@@ -46,6 +46,7 @@ async function fetchDecisions(query: Record<string, unknown>) {
     totalDecisions: number;
     nextCursor?: string;
   };
+  console.log(query)
   const decisions = await fetchApi<Response>({
     method: 'get',
     path: `decisions`,
@@ -75,7 +76,7 @@ const sderApi = {
           response = await fetchDecisions({
             labelStatus: 'toBeTreated',
             sourceName,
-            nextCursor: response.nextCursor,
+            searchAfter: response.nextCursor,
           });
           response.decisions = response.decisions.filter(({ originalText }) => !!originalText);
           index = 1;
