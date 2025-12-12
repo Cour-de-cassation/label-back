@@ -46,7 +46,6 @@ async function fetchDecisions(query: Record<string, unknown>) {
     totalDecisions: number;
     nextCursor?: string;
   };
-  console.log(query)
   const decisions = await fetchApi<Response>({
     method: 'get',
     path: `decisions`,

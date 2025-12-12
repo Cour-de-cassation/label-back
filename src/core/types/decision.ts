@@ -397,7 +397,7 @@ export namespace Deprecated {
     _id: ObjectId;
     replacementTerms: replacementTerms[];
     decisionIds: ObjectId[];
-    numeroPourvois: string[];
+    documentAssocieIds: ObjectId[];
   };
 
   export type replacementTerms = {

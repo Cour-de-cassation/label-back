@@ -22,7 +22,7 @@ describe('buildExporter', () => {
       _id: new ObjectId(),
       replacementTerms: [],
       decisionIds: [],
-      numeroPourvois: [],
+      documentAssocieIds: [],
     };
 
     (sderApi.getAffaire as jest.Mock) = jest.fn().mockResolvedValue(mockAffaire);

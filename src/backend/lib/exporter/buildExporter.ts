@@ -182,14 +182,7 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
           ]
         : currentDecisionTreatments;
 
-      let currentAffaire;
-      if (document.source == 'jurinet') {
-        currentAffaire = await sderApi.getAffaire({
-          numeroPourvoi: document.decisionMetadata.appealNumber.replace(/[-.]/g, ''),
-        });
-      } else {
-        currentAffaire = await sderApi.getAffaire({ decisionId: document.externalId });
-      }
+      let currentAffaire = await sderApi.getAffaire({ decisionId: document.externalId });
 
       const categoriesToOccult = Object.entries(settingsForDocument)
         .filter(([_, categorySetting]) => categorySetting.status == 'annotable')
