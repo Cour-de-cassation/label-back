@@ -75,7 +75,7 @@ const sderApi = {
           response = await fetchDecisions({
             labelStatus: 'toBeTreated',
             sourceName,
-            nextCursor: response.nextCursor,
+            searchAfter: response.nextCursor,
           });
           response.decisions = response.decisions.filter(({ originalText }) => !!originalText);
           index = 1;
@@ -115,16 +115,14 @@ const sderApi = {
     });
   },
 
-  async updateDecisionPseudonymisation({
+  async patchDecisionInSder({
     externalId,
     labelTreatments,
-    pseudoText,
     labelStatus,
     publishStatus,
   }: {
     externalId: documentType['externalId'];
     labelTreatments: Deprecated.LabelTreatment[];
-    pseudoText: string;
     labelStatus: Deprecated.LabelStatus;
     publishStatus: Deprecated.PublishStatus;
   }) {
@@ -132,11 +130,28 @@ const sderApi = {
       method: 'patch',
       path: `decisions/${externalId}`,
       body: {
-        pseudoText,
         labelTreatments,
         labelStatus,
         publishStatus,
       },
     });
+  },
+
+  async getAffaire(query: Record<string, unknown>): Promise<Deprecated.Affaire> {
+    const affaire = await fetchApi<Deprecated.Affaire>({
+      method: 'get',
+      path: `affaires`,
+      query,
+    });
+    return affaire;
+  },
+
+  async patchAffaire(externalId: string, replacementTerms: Deprecated.replacementTerms[]): Promise<Deprecated.Affaire> {
+    const affaire = await fetchApi<Deprecated.Affaire>({
+      method: 'patch',
+      path: `affaires/${externalId}`,
+      body: { replacementTerms },
+    });
+    return affaire;
   },
 };
