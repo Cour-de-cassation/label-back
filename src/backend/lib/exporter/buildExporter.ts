@@ -174,24 +174,32 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
       const currentDecisionTreatments = currentDecision?.labelTreatments ?? [];
       const updatedLabelTreatments = labelTreatments
         ? [
-            ...currentDecisionTreatments,
-            ...labelTreatments.map(({ order, ..._ }) => ({
-              ..._,
-              order: currentDecisionTreatments.length + order,
-            })),
-          ]
+          ...currentDecisionTreatments,
+          ...labelTreatments.map(({ order, ..._ }) => ({
+            ..._,
+            order: currentDecisionTreatments.length + order,
+          })),
+        ]
         : currentDecisionTreatments;
 
       let currentAffaire = await sderApi.getAffaire({ decisionId: document.externalId });
 
-      const categoriesToOccult = Object.entries(settingsForDocument)
+      const categoriesToOccult = (Object.entries(settingsForDocument)
         .filter(([_, categorySetting]) => categorySetting.status == 'annotable')
-        .map(([category]) => category) as Deprecated.Category[];
+        .map(([category]) => category) as Deprecated.Category[])
+        // MOTIVATIONS NOT SEND TO GETPSEUDO:
+        .filter(_ => _ !== Deprecated.Category.MOTIVATIONS)
+
+      // if (document.externalId === "69427fdd62345a940dcc7d49") {
+      //   console.dir({ labelTreatments, updatedLabelTreatments }, { depth: null })
+      //   process.exit(1)
+      // }
 
       const replacementTerms = await nlpApi.getPseudo(
         document.externalId,
         currentAffaire._id.toString(),
-        labelTreatments,
+        updatedLabelTreatments // MOTIVATIONS NOT SEND TO GETPSEUDO:
+          .map(_ => ({ ..._, annotations: _.annotations.filter(_ => _.category !== "motivations") })),
         currentAffaire.replacementTerms,
         categoriesToOccult,
       );
