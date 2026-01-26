@@ -15,11 +15,6 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
   const checklist = document.checklist;
   const categoriesToOmit = document.decisionMetadata.categoriesToOmit;
 
-  // En attente de stabilisation du flux avant d'implémenter les règles spécifiques
-  if (source === Deprecated.Sources.TCOM) {
-    return 'default';
-  }
-
   if (
     checklist.length > 0 &&
     // TEMP : ne pas prendre en compte les checklist si occultation des motifs
