@@ -95,7 +95,7 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
       const routeRelecture = Math.random() < nonSensibleRatio ? 'exhaustive' : 'automatic';
       logger.log({
         operationName: 'computeRouteForTcom',
-        msg: `Occultation personneMorale demandée, décision sensible, relecture ${routeRelecture} appliquée`,
+        msg: `Occultation personneMorale NON demandée, décision non sensible, relecture ${routeRelecture} appliquée`,
         data: { routeRelecture },
       });
       return routeRelecture;
