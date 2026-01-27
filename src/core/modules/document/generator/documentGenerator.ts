@@ -53,7 +53,8 @@ const decisionMetadataGenerator: generatorType<documentType['decisionMetadata']>
     session,
     solution,
     motivationOccultation,
-    selection,
+    interetParticulier,
+    raisonInteretParticulier,
     sommaire,
   } = {}) => ({
     additionalTermsToAnnotate: additionalTermsToAnnotate ?? '',
@@ -75,7 +76,8 @@ const decisionMetadataGenerator: generatorType<documentType['decisionMetadata']>
     session: session ?? '',
     solution: solution ?? '',
     motivationOccultation: motivationOccultation ?? undefined,
-    selection: selection ?? false,
+    interetParticulier: interetParticulier ?? false,
+    raisonInteretParticulier: raisonInteretParticulier ?? undefined,
     sommaire: sommaire ?? '',
   }),
 };

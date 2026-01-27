@@ -7,7 +7,7 @@ import { logger } from '../../utils';
 export { extractRouteForCivilJurisdiction };
 
 async function extractRouteForCivilJurisdiction(document: documentType): Promise<documentType['route']> {
-  const selection = document.decisionMetadata.selection;
+  const interetParticulier = document.decisionMetadata.interetParticulier;
   // const sommaire = document.decisionMetadata.sommaire;
   const NACCode = document.decisionMetadata.NACCode;
   const source = document.source;
@@ -28,7 +28,7 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
   }
 
   // Relecture exhaustive pour les décisions présentant un intéret particulier
-  if (selection === true /* && sommaire != '' */) {
+  if (interetParticulier === true) {
     return 'exhaustive';
   }
 
