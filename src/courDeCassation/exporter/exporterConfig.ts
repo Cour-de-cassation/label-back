@@ -6,10 +6,9 @@ export { exporterConfig };
 const exporterConfig: exporterConfigType = {
   name: 'SDER',
 
-  async updateDecisionPseudonymisation({ externalId, pseudoText, labelTreatments, labelStatus, publishStatus }) {
-    await sderApi.updateDecisionPseudonymisation({
+  async patchDecisionInSder({ externalId, labelTreatments, labelStatus, publishStatus }) {
+    await sderApi.patchDecisionInSder({
       externalId,
-      pseudoText,
       labelTreatments,
       labelStatus,
       publishStatus,
