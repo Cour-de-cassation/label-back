@@ -12,7 +12,7 @@ label_client_url: "https://label.cour-de-cassation.justice.fr:55432" # strange u
 label_kube_namespace: "label"
 session_duration: "518400000"
 
-nlp_api_url=http://nlp-pseudonymisation-api-service.nlp.svc.cluster.local:8081
+nlp_api_url: "http://nlp-api-service.nlp.svc.cluster.local:8081"
 
 # SSO 
 sso_name_id_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
