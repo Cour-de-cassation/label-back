@@ -1,12 +1,12 @@
 import { userType } from '@src/core';
-import { buildUserRepository } from '../../repository';
+import { userRepository } from '../../repository/userRepository';
 
 export { fetchUserRole };
 
 async function fetchUserRole(userId: userType['_id']) {
-  const userRepository = buildUserRepository();
+  const repo = userRepository();
 
-  const user = await userRepository.findById(userId);
+  const user = await repo.findOne({ _id: userId });
 
   return user.role;
 }

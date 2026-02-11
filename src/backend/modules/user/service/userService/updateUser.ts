@@ -1,9 +1,9 @@
 import { userType } from '@src/core';
-import { buildUserRepository } from '../../repository';
+import { userRepository } from '../../repository/userRepository';
 
 export { updateUser };
 
 async function updateUser({ userId, name, role }: { userId: userType['_id']; name: string; role: userType['role'] }) {
-  const userRepository = buildUserRepository();
-  return await userRepository.updateNameAndRoleById(userId, name, role);
+  const repo = userRepository();
+  return await repo.updateNameAndRoleById(userId, name, role);
 }

@@ -1,8 +1,8 @@
-import { buildUserRepository } from '../../repository';
+import { userRepository } from '../../repository/userRepository';
 
 export { fetchUsers };
 
 async function fetchUsers() {
-  const userRepository = buildUserRepository();
-  return userRepository.findAllByIds();
+  const repo = userRepository();
+  return repo.find({});
 }

@@ -1,5 +1,5 @@
 import { userModule, userType } from '@src/core';
-import { buildUserRepository } from '../../repository';
+import { userRepository } from '../../repository/userRepository';
 
 const DEFAULT_ROLE = 'annotator';
 
@@ -14,12 +14,12 @@ async function signUpUser({
   name: string;
   role?: userType['role'];
 }) {
-  const userRepository = buildUserRepository();
+  const repo = userRepository();
   const newUser = await userModule.lib.buildUser({
     email,
     name,
     role,
   });
 
-  return userRepository.insert(newUser);
+  return repo.insert(newUser);
 }

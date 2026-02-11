@@ -1,10 +1,10 @@
-import { buildUserRepository } from '../../repository';
+import { userRepository } from '../../repository/userRepository';
 
 export { fetchWorkingUsers };
 
 async function fetchWorkingUsers() {
-  const userRepository = buildUserRepository();
-  const users = await userRepository.findAll(); // This returns an array of users
+  const repo = userRepository();
+  const users = await repo.find({});
 
   if (!users || users.length === 0) {
     throw new Error('No users found');

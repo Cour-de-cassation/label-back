@@ -1,23 +1,17 @@
-import { assignationType, indexer } from '@src/core';
-import { buildUserRepository } from '../../repository';
+import { assignationType, userType } from '@src/core';
+import { userRepository } from '../../repository/userRepository';
 
 export { fetchUsersByAssignations };
 
 async function fetchUsersByAssignations(assignations: assignationType[]) {
-  const userRepository = buildUserRepository();
+  const repo = userRepository();
   const userIds = assignations.map((assignation) => assignation.userId);
-  const usersById = await userRepository.findAllByIds(userIds);
+  const users = await repo.find({ _id: { $in: userIds } } as any);
 
-  const usersByAssignationId = indexer.mapIndexBy(
-    assignations,
-    (assignation) => assignation._id.toHexString(),
-    (assignation) => usersById[assignation.userId.toHexString()],
-  );
+  const usersById = Object.fromEntries(users.map((user) => [user._id.toHexString(), user])) as Record<string, userType>;
 
-  indexer.assertEveryIdIsDefined(
-    assignations.map((assignation) => assignation._id.toHexString()),
-    usersByAssignationId,
-    (_id) => `The assignation ${_id} has no matching user`,
+  const usersByAssignationId = Object.fromEntries(
+    assignations.map((assignation) => [assignation._id.toHexString(), usersById[assignation.userId.toHexString()]]),
   );
   return usersByAssignationId;
 }
