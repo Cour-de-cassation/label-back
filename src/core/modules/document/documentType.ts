@@ -79,7 +79,7 @@ export type reviewStatusType = {
   hasBeenAmended: boolean;
 };
 
-export type fetchedDocumentType = {
+export type documentType = {
   _id: ObjectId;
   creationDate?: number;
   decisionMetadata: decisionMetadataType;
@@ -95,9 +95,6 @@ export type fetchedDocumentType = {
   title: string;
   text: string;
   checklist: checklistItemType[];
-};
-
-export type documentType = fetchedDocumentType & {
   externalId: string;
   priority: number;
   updateDate: number;

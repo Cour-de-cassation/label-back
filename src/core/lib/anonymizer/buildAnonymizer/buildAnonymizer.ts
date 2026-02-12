@@ -1,5 +1,5 @@
 import { annotationType } from '../../../modules/annotation';
-import { fetchedDocumentType } from '../../../modules/document';
+import { documentType } from '../../../modules/document';
 import { settingsType } from '../../../modules/settings';
 import { textSplitter } from '../../textSplitter';
 import { buildEntityIdMapper } from './buildEntityIdMapper';
@@ -9,12 +9,12 @@ export { buildAnonymizer };
 
 export type { anonymizerType };
 
-type anonymizerType<documentT extends fetchedDocumentType> = {
+type anonymizerType<documentT extends documentType> = {
   anonymizeDocument: (document: documentT) => documentT;
   anonymize: (annotation: annotationType) => string;
 };
 
-function buildAnonymizer<documentT extends fetchedDocumentType>(
+function buildAnonymizer<documentT extends documentType>(
   settings: settingsType,
   annotations: annotationType[],
   seed: number,

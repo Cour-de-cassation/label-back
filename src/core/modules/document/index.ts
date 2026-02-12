@@ -1,7 +1,6 @@
 import { documentGenerator, decisionMetadataGenerator, checklistGenerator } from './generator';
 import {
   documentType,
-  fetchedDocumentType,
   documentRouteType,
   documentImporterType,
   documentStatusType,
@@ -26,7 +25,6 @@ export { documentModule };
 
 export type {
   documentType,
-  fetchedDocumentType,
   documentRouteType,
   documentImporterType,
   documentStatusType,
