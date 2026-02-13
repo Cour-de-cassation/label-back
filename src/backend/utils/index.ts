@@ -4,7 +4,18 @@ import { buildHandlingErrorController, expressRequestHandlerType } from './expre
 import { fileSystem } from './fileSystem';
 import { logger } from './logger';
 import { buildMongo, mongo, mongoCollectionType } from './mongo';
+import { jwtHandler, jwtMiddleware } from './jwt';
 
-export { buildHandlingErrorController, buildMongo, decoder, dependencyManager, fileSystem, logger, mongo };
+export {
+  buildHandlingErrorController,
+  buildMongo,
+  decoder,
+  dependencyManager,
+  fileSystem,
+  logger,
+  mongo,
+  jwtHandler,
+  jwtMiddleware,
+};
 
 export type { expressRequestHandlerType, mongoCollectionType };

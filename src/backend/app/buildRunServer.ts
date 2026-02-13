@@ -6,8 +6,7 @@ import { settingsType } from '@src/core';
 import { buildApi } from '../api';
 import { setup } from './setup';
 import { envSchema } from './envSchema';
-
-import session from 'express-session';
+import { jwtMiddleware } from '../utils';
 
 export { buildRunServer };
 
@@ -33,20 +32,8 @@ function buildRunServer(settings: settingsType) {
     app.use(bodyParser.json({ limit: '1mb' }));
     app.use(bodyParser.urlencoded({ extended: true }));
 
-    // Configuration de la session
-    const sessionMiddleware = session({
-      secret: `${process.env.COOKIE_PRIVATE_KEY}`,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        maxAge: Number(process.env.SESSION_DURATION),
-        secure: false,
-      },
-    });
-
-    app.use((req, res, next) => {
-      sessionMiddleware(req, res, next);
-    });
+    // Use JWT middleware instead of express-session
+    app.use(jwtMiddleware);
 
     buildApi(app);
 

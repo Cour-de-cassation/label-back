@@ -1,6 +1,6 @@
 import { SamlService } from '../../../utils/saml';
 import { buildUserRepository, userService } from '../../user';
-import { logger } from '../../../utils';
+import { logger, jwtHandler } from '../../../utils';
 import every from 'lodash/every';
 
 import includes from 'lodash/includes';
@@ -32,7 +32,16 @@ export async function getMetadata() {
 }
 
 export async function login() {
-  return samlService.createLoginRequestUrl();
+  logger.log({
+    operationName: 'SSO Login',
+    msg: 'Initiating SAML login request',
+  });
+  const loginUrl = await samlService.createLoginRequestUrl();
+  logger.log({
+    operationName: 'SSO Login',
+    msg: `Redirecting to IdP: ${loginUrl}`,
+  });
+  return loginUrl;
 }
 
 export async function logout(user: { nameID: string; sessionIndex: string }) {
@@ -40,8 +49,18 @@ export async function logout(user: { nameID: string; sessionIndex: string }) {
 }
 
 export async function acs(req: any) {
+  logger.log({
+    operationName: 'SSO ACS',
+    msg: 'Received SAML response from IdP',
+  });
+
   const response = (await samlService.parseResponse(req)) as ParseResponseResult;
   const { extract } = response;
+
+  logger.log({
+    operationName: 'SSO ACS',
+    msg: `SAML response extracted - NameID: ${extract?.nameID}`,
+  });
 
   const userSSO = getUserFromSSO(extract);
 
@@ -96,15 +115,18 @@ export async function getUserByEmail(email: string) {
 }
 
 export function setUserSessionAndReturnRedirectUrl(req: Request | any, user: userType, sessionIndex: string) {
-  if (req.session) {
-    req.session.user = {
-      _id: idModule.lib.convertToString(user._id),
-      name: user.name as string,
-      role: user.role as string,
-      email: user.email as string,
-      sessionIndex: sessionIndex,
-    };
-  }
+  logger.log({
+    operationName: 'SSO Set Session',
+    msg: `Generating JWT for user: ${user.email} (role: ${user.role})`,
+  });
+
+  // Generate JWT token instead of using session
+  const token = jwtHandler.generateToken(user, sessionIndex);
+
+  logger.log({
+    operationName: 'SSO Set Session',
+    msg: `JWT generated successfully (length: ${token.length})`,
+  });
 
   const roleToUrlMap: Record<string, string> = {
     annotator: process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL as string,
@@ -117,7 +139,16 @@ export function setUserSessionAndReturnRedirectUrl(req: Request | any, user: use
     throw new Error(`Role doesn't exist in label`);
   }
 
-  return roleToUrlMap[user.role];
+  // Return URL with token as query parameter
+  const redirectUrl = roleToUrlMap[user.role];
+  const finalUrl = `${redirectUrl}?token=${token}`;
+
+  logger.log({
+    operationName: 'SSO Set Session',
+    msg: `Redirecting to: ${redirectUrl} (with JWT token)`,
+  });
+
+  return finalUrl;
 }
 
 export function getUserFromSSO(extract: ParseResponseResult['extract']): userType {

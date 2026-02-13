@@ -47,7 +47,7 @@ function buildPostRoutes(app: Express) {
 
 function buildController(
   method: apiSchemaMethodNameType,
-  controller: (param: { headers: any; args: any; session: any; path: string }) => Promise<any>,
+  controller: (param: { headers: any; args: any; user?: any; path: string }) => Promise<any>,
 ) {
   return async (req: any, res: any, next: any) => {
     try {
@@ -71,7 +71,7 @@ function buildController(
             data: await controller({
               headers: req.headers,
               args: sanitizedQuery,
-              session: req.session,
+              user: req.user,
               path: req.path,
             }),
             statusCode: 200,
@@ -81,7 +81,7 @@ function buildController(
             data: await controller({
               headers: req.headers,
               args: req.body,
-              session: req.session,
+              user: req.user,
               path: req.path,
             }),
             statusCode: 201,
@@ -102,13 +102,21 @@ function buildApiSso(app: Express) {
   });
 
   app.get(`${API_BASE_URL}/sso/login`, async (req, res) => {
+    logger.log({
+      operationName: 'SSO Login Endpoint',
+      msg: 'Login endpoint called',
+    });
     try {
       const context = await ssoService.login();
+      logger.log({
+        operationName: 'SSO Login Endpoint',
+        msg: `Redirecting user to IdP`,
+      });
       res.redirect(context);
     } catch (err) {
       logger.error({
-        operationName: 'login SSO ',
-        msg: `${err}`,
+        operationName: 'SSO Login Endpoint',
+        msg: `Login error: ${err}`,
       });
       res.status(401).json({
         status: 401,
@@ -117,42 +125,62 @@ function buildApiSso(app: Express) {
     }
   });
 
-  app.get(`${API_BASE_URL}/sso/logout`, (req, res) => {
-    const nameID = String(req.session.user?.email);
-    const sessionIndex = String(req.session.user?.sessionIndex);
-    req.session.destroy(async (err) => {
-      if (err) {
-        res.status(500);
-      }
-      try {
-        const context = await ssoService.logout({ nameID, sessionIndex });
-        res.redirect(context);
-      } catch (err) {
-        logger.error({
-          operationName: 'logoutSso',
-          msg: `${err}`,
-        });
-        res.status(500).json({
-          status: 500,
-          message: err instanceof Error ? err.message : `${err}`,
-        });
-      }
-    });
+  app.get(`${API_BASE_URL}/sso/logout`, async (req, res) => {
+    const nameID = String(req.user?.email);
+    const sessionIndex = String(req.user?.sessionIndex);
+
+    try {
+      const context = await ssoService.logout({ nameID, sessionIndex });
+      res.redirect(context);
+    } catch (err) {
+      logger.error({
+        operationName: 'logoutSso',
+        msg: `${err}`,
+      });
+      res.status(500).json({
+        status: 500,
+        message: err instanceof Error ? err.message : `${err}`,
+      });
+    }
   });
 
   app.get(`${API_BASE_URL}/sso/whoami`, (req, res) => {
-    const user = req.session?.user ?? null;
+    logger.log({
+      operationName: 'SSO Whoami',
+      msg: `Whoami endpoint called - User present: ${!!req.user}`,
+    });
+    const user = req.user ?? null;
     if (!user) {
-      return res.status(401).send({ status: 401, message: `Session invalid or expired` });
+      logger.log({
+        operationName: 'SSO Whoami',
+        msg: 'No authenticated user found, returning 401',
+      });
+      return res.status(401).send({ status: 401, message: `Token invalid or expired` });
     }
+    logger.log({
+      operationName: 'SSO Whoami',
+      msg: `Authenticated user: ${user.email}`,
+    });
     res.type('application/json').send(user);
   });
 
   app.post(`${API_BASE_URL}/sso/acs`, async (req, res) => {
+    logger.log({
+      operationName: 'SSO ACS Endpoint',
+      msg: 'ACS endpoint called - Processing SAML response',
+    });
     try {
       const url = await ssoService.acs(req);
+      logger.log({
+        operationName: 'SSO ACS Endpoint',
+        msg: `ACS successful, redirecting to: ${url}`,
+      });
       res.redirect(url);
     } catch (err) {
+      logger.error({
+        operationName: 'SSO ACS Endpoint',
+        msg: `ACS error: ${err}`,
+      });
       res.status(500);
       res.redirect(`${API_BASE_URL}/sso/logout`);
     }
