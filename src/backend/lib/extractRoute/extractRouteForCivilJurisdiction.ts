@@ -128,7 +128,7 @@ async function getDecisionRoute(code: string): Promise<string | undefined> {
       path: `codenacs/${code}`,
     });
 
-    return codenac.routeRelecture;
+    return codenac.routeRelecture?.toString();
   } catch (error) {
     logger.error({
       operationName: 'getDecisionRoute',
