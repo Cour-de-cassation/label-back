@@ -138,11 +138,12 @@ export class SamlService {
       signatureAlgorithm: process.env.SSO_SIGNATURE_ALGORITHM,
     });
 
-    const urlLogoutRequest = new URL(context);
+    return context;
+    // const urlLogoutRequest = new URL(context);
 
-    // Nécessaire pour le logout de pages blanches
-    urlLogoutRequest.searchParams.append('logout', '1');
+    // // Nécessaire pour le logout de pages blanches
+    // urlLogoutRequest.searchParams.append('logout', '1');
 
-    return urlLogoutRequest.toString();
+    // return urlLogoutRequest.toString();
   }
 }
