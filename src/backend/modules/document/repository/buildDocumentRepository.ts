@@ -63,6 +63,11 @@ const buildDocumentRepository = buildRepositoryBuilder<documentType, customDocum
       return document || undefined;
     },
 
+    async findAllBySource({ source, limit }) {
+      const documents = await collection.find({ source }).limit(limit).toArray();
+      return documents;
+    },
+
     async findOneByExternalId(externalId) {
       const document = await collection.findOne({ externalId });
       return document || undefined;

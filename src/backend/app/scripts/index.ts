@@ -11,6 +11,7 @@ import { purgeDb } from './purgeDb';
 import { renewCache } from './renewCache';
 import { setIndexesOnAllCollections } from './setIndexesOnAllCollections';
 import { clearDb } from './clearDb';
+import { deleteDocumentsBySource } from './deleteDocumentsBySource';
 
 export {
   cleanDocuments,
@@ -26,4 +27,5 @@ export {
   resetUntreatedDocumentsForTest,
   setIndexesOnAllCollections,
   clearDb,
+  deleteDocumentsBySource,
 };
