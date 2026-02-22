@@ -137,13 +137,10 @@ export class SamlService {
       signRequest: true,
       signatureAlgorithm: process.env.SSO_SIGNATURE_ALGORITHM,
     });
-    console.log('Generated Logout Request Context:', context);
     const urlLogoutRequest = new URL(context);
 
     // Nécessaire pour le logout de pages blanches
     urlLogoutRequest.searchParams.append('logout', '1');
-    console.log('Generated Logout URL:', urlLogoutRequest.toString());
-    // return urlLogoutRequest.toString();
-    return process.env.SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION as string;
+    return urlLogoutRequest.toString();
   }
 }
