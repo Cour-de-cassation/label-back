@@ -261,12 +261,12 @@ function computePriority(
   publicationCategory: documentType['publicationCategory'],
   NACCode: Deprecated.DecisionDTO['NACCode'],
   importer: documentType['importer'],
-  interetParticulier: documentType['decisionMetadata']['raisonInteretParticulier'],
+  raisonInteretParticulier: documentType['decisionMetadata']['raisonInteretParticulier'],
 ): documentType['priority'] {
   if (documentModule.lib.publicationHandler.mustBePublished(publicationCategory, NACCode)) {
     return 4;
   }
-  if (interetParticulier != null) {
+  if (raisonInteretParticulier != null) {
     return 2;
   }
   switch (importer) {
