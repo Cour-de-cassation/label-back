@@ -68,7 +68,7 @@ async function mapCourtDecisionToDocument(
     publicationCategory,
     NACCode,
     importer,
-    sderCourtDecision.selection,
+    sderCourtDecision.raisonInteretParticulier,
   );
 
   let moyens = undefined;
@@ -160,7 +160,7 @@ async function mapCourtDecisionToDocument(
       session,
       solution,
       motivationOccultation: sderCourtDecision.occultation.motivationOccultation ?? undefined,
-      selection: sderCourtDecision.selection ?? undefined,
+      raisonInteretParticulier: sderCourtDecision.raisonInteretParticulier ?? undefined,
       sommaire: sderCourtDecision.sommaire ?? '',
     },
     documentNumber: sderCourtDecision.sourceId,
@@ -261,12 +261,12 @@ function computePriority(
   publicationCategory: documentType['publicationCategory'],
   NACCode: Deprecated.DecisionDTO['NACCode'],
   importer: documentType['importer'],
-  selection: documentType['decisionMetadata']['selection'],
+  raisonInteretParticulier: documentType['decisionMetadata']['raisonInteretParticulier'],
 ): documentType['priority'] {
   if (documentModule.lib.publicationHandler.mustBePublished(publicationCategory, NACCode)) {
     return 4;
   }
-  if (selection === true) {
+  if (raisonInteretParticulier != null) {
     return 2;
   }
   switch (importer) {

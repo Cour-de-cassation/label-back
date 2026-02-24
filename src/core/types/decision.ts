@@ -297,6 +297,7 @@ export namespace Deprecated {
     pubCategory?: string;
     selection: boolean;
     sommaire?: string;
+    raisonInteretParticulier?: string;
   }
 
   export interface DecisionTJDTO extends DecisionDTO {
