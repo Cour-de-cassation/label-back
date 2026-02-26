@@ -134,14 +134,15 @@ export class SamlService {
       id: user.sessionIndex,
       nameIDFormat: process.env.SSO_NAME_ID_FORMAT,
       sessionIndex: user.sessionIndex,
-      // signRequest: true,
-      // signatureAlgorithm: process.env.SSO_SIGNATURE_ALGORITHM,
-    });
-    // const urlLogoutRequest = new URL(context);
+      signRequest: true,
+      signatureAlgorithm: process.env.SSO_SIGNATURE_ALGORITHM,
+    },
+      process.env.SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION,
+    );
+    const urlLogoutRequest = new URL(context);
 
     // Nécessaire pour le logout de pages blanches
-    // urlLogoutRequest.searchParams.append('logout', '1');
-    // return urlLogoutRequest.toString();
-    return context;
+    urlLogoutRequest.searchParams.append('logout', '1');
+    return urlLogoutRequest.toString();
   }
 }
