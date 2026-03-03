@@ -141,13 +141,6 @@ function buildConnector(connectorConfig: connectorConfigType) {
     });
 
     for (const source of Object.values(Deprecated.Sources)) {
-      if (source === Deprecated.Sources.TCOM) {
-        logger.log({
-          operationName: 'importNewDocuments',
-          msg: `Skipping ${source} decisions (excluded from import).`,
-        });
-        continue;
-      }
       logger.log({
         operationName: 'importNewDocuments',
         msg: `Fetching ${source} decisions...`,
