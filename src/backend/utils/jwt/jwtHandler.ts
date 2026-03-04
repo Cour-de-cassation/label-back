@@ -34,6 +34,7 @@ function generateToken(user: userType, sessionIndex: string): string {
 
   return jwt.sign(payload, JWT_SECRET, {
     expiresIn: JWT_EXPIRATION as string | number,
+    algorithm: 'HS256',
   } as jwt.SignOptions);
 }
 
@@ -43,7 +44,7 @@ function verifyToken(token: string): JwtPayload {
   }
 
   try {
-    return jwt.verify(token, JWT_SECRET) as JwtPayload;
+    return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as JwtPayload;
   } catch (error) {
     throw new Error(`Invalid or expired token: ${error}`);
   }
