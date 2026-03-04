@@ -3,7 +3,11 @@ import { userType } from '@src/core';
 
 export { jwtHandler };
 
-const JWT_SECRET = process.env.JWT_SECRET || 'test';
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET is not defined in environment variables. Aborting.');
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
 
 interface JwtPayload {
@@ -20,10 +24,6 @@ const jwtHandler = {
 };
 
 function generateToken(user: userType, sessionIndex: string): string {
-  if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET is not defined in environment variables');
-  }
-
   const payload: JwtPayload = {
     _id: user._id.toString(),
     name: user.name as string,
@@ -39,10 +39,6 @@ function generateToken(user: userType, sessionIndex: string): string {
 }
 
 function verifyToken(token: string): JwtPayload {
-  if (!JWT_SECRET) {
-    throw new Error('JWT_SECRET is not defined in environment variables');
-  }
-
   try {
     return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as JwtPayload;
   } catch (error) {

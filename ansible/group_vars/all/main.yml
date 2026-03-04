@@ -10,7 +10,8 @@ dbsder_api_url: "http://api-service.dbsder:3000" # url not tested
 label_db_name: "labelDb"
 label_client_url: "https://label.cour-de-cassation.justice.fr:55432" # strange url
 label_kube_namespace: "label"
-session_duration: "518400000"
+
+jwt_expiration: "6d"
 
 nlp_api_url: "http://nlp-api-service.nlp.svc.cluster.local:8081"
 

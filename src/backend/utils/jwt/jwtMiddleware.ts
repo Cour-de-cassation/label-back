@@ -27,12 +27,6 @@ function jwtMiddleware(req: Request, res: Response, next: NextFunction) {
       email: decoded.email,
       sessionIndex: decoded.sessionIndex,
     };
-
-    logger.log({
-      operationName: 'JWT Middleware',
-      msg: `User authenticated: ${decoded.email} (role: ${decoded.role})`,
-    });
-
     next();
   } catch (error) {
     logger.error({

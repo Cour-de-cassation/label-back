@@ -31,7 +31,6 @@
         SSO_SP_PRIVATE_KEY: "{{ sso_sp_private_key }}"
         SSO_NAME_ID_FORMAT: "{{ sso_name_id_format }}"
         SSO_SIGNATURE_ALGORITHM: "{{ sso_signature_algorithm }}"
-        SESSION_DURATION: "{{ session_duration }}"
         SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL: "{{ sso_front_success_connexion_annotator_url }}"
         SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL: "{{ sso_front_success_connexion_admin_scrutator_url }}"
         SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL: "{{ sso_front_success_connexion_publicator_url }}"
@@ -41,3 +40,4 @@
         SSO_ATTRIBUTE_ROLE: "{{ sso_attribute_role }}"
         SSO_APP_NAME: "{{ sso_app_name }}"
         SSO_APP_ROLES: "{{ sso_app_roles }}"
+        JWT_EXPIRATION: "{{ jwt_expiration }}"

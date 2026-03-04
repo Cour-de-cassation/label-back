@@ -3,7 +3,6 @@ git_branch: prod
 label_mongodb_url: "{{ vault_label_mongodb_url }}"
 dbsder_api_key: "{{ vault_dbsder_api_key }}"
 
-cookie_private_key: "{{ vault_cookie_private_key }}"
 sso_sp_assertion_consumer_service_location: "{{ vault_sso_sp_assertion_consumer_service_location }}"
 sso_sp_entity_id: "{{ vault_sso_sp_entity_id }}"
 sso_idp_single_sign_on_service_location: "{{ vault_sso_idp_single_sign_on_service_location }}"
@@ -25,3 +24,5 @@ sso_attribute_role: "roles"
 
 s3_access_key: "{{ vault_s3_access_key }}"
 s3_secret_key: "{{ vault_s3_secret_key }}"
+
+jwt_secret: "{{ vault_jwt_secret }}"
