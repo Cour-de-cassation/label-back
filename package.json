@@ -19,7 +19,6 @@
     "cors": "2.8.5",
     "dotenv": "17.2.1",
     "express": "5.1.0",
-    "express-session": "^1.18.2",
     "joi": "18.0.1",
     "jsonwebtoken": "^9.0.3",
     "lodash": "4.17.21",
@@ -30,7 +29,6 @@
   "devDependencies": {
     "@types/cors": "2.8.19",
     "@types/express": "5.0.3",
-    "@types/express-session": "^1.18.2",
     "@types/jest": "30.0.0",
     "@types/lodash": "4.17.20",
     "@types/mongodb": "4.0.7",
