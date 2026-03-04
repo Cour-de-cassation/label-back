@@ -128,25 +128,8 @@ export class SamlService {
     };
   }
 
-  createLogoutRequestUrl(user: { nameID: string; sessionIndex: string }) {
-    const { context } = this.sp.createLogoutRequest(this.idp, 'redirect', {
-      // logoutNameID: user.nameID,
-      // id: user.sessionIndex,
-      // nameIDFormat: process.env.SSO_NAME_ID_FORMAT,
-      // sessionIndex: user.sessionIndex,
-      // signRequest: true,
-      // signatureAlgorithm: process.env.SSO_SIGNATURE_ALGORITHM,
-      logoutNameID: user.nameID,
-      nameIDFormat: process.env.SSO_NAME_ID_FORMAT,
-      sessionIndex: user.sessionIndex,
-      signRequest: false,
-    },
-      process.env.SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION,
-    );
-    // const urlLogoutRequest = new URL(context);
-
-    // // Nécessaire pour le logout de pages blanches
-    // urlLogoutRequest.searchParams.append('logout', '1');
-    return context;
+  createLogoutRequestUrl() {
+    // more simple to logout
+    return process.env.SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION;
   }
 }
