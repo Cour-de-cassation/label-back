@@ -32,7 +32,6 @@ function buildRunServer(settings: settingsType) {
     app.use(bodyParser.json({ limit: '1mb' }));
     app.use(bodyParser.urlencoded({ extended: true }));
 
-    // Use JWT middleware instead of express-session
     app.use(jwtMiddleware);
 
     buildApi(app);

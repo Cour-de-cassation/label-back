@@ -32,15 +32,7 @@ export async function getMetadata() {
 }
 
 export async function login() {
-  logger.log({
-    operationName: 'SSO Login',
-    msg: 'Initiating SAML login request',
-  });
   const loginUrl = await samlService.createLoginRequestUrl();
-  logger.log({
-    operationName: 'SSO Login',
-    msg: `Redirecting to IdP: ${loginUrl}`,
-  });
   return loginUrl;
 }
 
@@ -49,40 +41,20 @@ export async function logout(user: { nameID: string; sessionIndex: string }) {
 }
 
 export async function acs(req: any) {
-  logger.log({
-    operationName: 'SSO ACS',
-    msg: 'Received SAML response from IdP',
-  });
-
   const response = (await samlService.parseResponse(req)) as ParseResponseResult;
   const { extract } = response;
-
-  logger.log({
-    operationName: 'SSO ACS',
-    msg: `SAML response extracted - NameID: ${extract?.nameID}`,
-  });
 
   const userSSO = getUserFromSSO(extract);
 
   try {
     const userDB = (await getUserByEmail(extract?.nameID)) as userType;
     if (!userDB) {
-      logger.log({
-        operationName: 'SSO ACS',
-        msg: `No matching user for email ${extract?.nameID}, creatin a new user`,
-      });
-
       await userService.createUser({
         name: userSSO.name,
         email: userSSO.email,
         role: userSSO.role,
       });
       const createdUser = (await getUserByEmail(userSSO.email)) as userType;
-
-      logger.log({
-        operationName: `SSO ACS`,
-        msg: `Successfully created user ${createdUser.email}`,
-      });
 
       return setUserSessionAndReturnRedirectUrl(req, createdUser, extract?.sessionIndex);
     }
@@ -115,18 +87,7 @@ export async function getUserByEmail(email: string) {
 }
 
 export function setUserSessionAndReturnRedirectUrl(req: Request | any, user: userType, sessionIndex: string) {
-  logger.log({
-    operationName: 'SSO Set Session',
-    msg: `Generating JWT for user: ${user.email} (role: ${user.role})`,
-  });
-
-  // Generate JWT token instead of using session
   const token = jwtHandler.generateToken(user, sessionIndex);
-
-  logger.log({
-    operationName: 'SSO Set Session',
-    msg: `JWT generated successfully (length: ${token.length})`,
-  });
 
   const roleToUrlMap: Record<string, string> = {
     annotator: process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL as string,
@@ -142,11 +103,6 @@ export function setUserSessionAndReturnRedirectUrl(req: Request | any, user: use
   // Return URL with token as query parameter
   const redirectUrl = roleToUrlMap[user.role];
   const finalUrl = `${redirectUrl}?token=${token}`;
-
-  logger.log({
-    operationName: 'SSO Set Session',
-    msg: `Redirecting to: ${redirectUrl} (with JWT token)`,
-  });
 
   return finalUrl;
 }

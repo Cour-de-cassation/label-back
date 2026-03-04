@@ -102,16 +102,8 @@ function buildApiSso(app: Express) {
   });
 
   app.get(`${API_BASE_URL}/sso/login`, async (req, res) => {
-    logger.log({
-      operationName: 'SSO Login Endpoint',
-      msg: 'Login endpoint called',
-    });
     try {
       const context = await ssoService.login();
-      logger.log({
-        operationName: 'SSO Login Endpoint',
-        msg: `Redirecting user to IdP`,
-      });
       res.redirect(context);
     } catch (err) {
       logger.error({
@@ -145,42 +137,18 @@ function buildApiSso(app: Express) {
   });
 
   app.get(`${API_BASE_URL}/sso/whoami`, (req, res) => {
-    logger.log({
-      operationName: 'SSO Whoami',
-      msg: `Whoami endpoint called - User present: ${!!req.user}`,
-    });
     const user = req.user ?? null;
     if (!user) {
-      logger.log({
-        operationName: 'SSO Whoami',
-        msg: 'No authenticated user found, returning 401',
-      });
       return res.status(401).send({ status: 401, message: `Token invalid or expired` });
     }
-    logger.log({
-      operationName: 'SSO Whoami',
-      msg: `Authenticated user: ${user.email}`,
-    });
     res.type('application/json').send(user);
   });
 
   app.post(`${API_BASE_URL}/sso/acs`, async (req, res) => {
-    logger.log({
-      operationName: 'SSO ACS Endpoint',
-      msg: 'ACS endpoint called - Processing SAML response',
-    });
     try {
       const url = await ssoService.acs(req);
-      logger.log({
-        operationName: 'SSO ACS Endpoint',
-        msg: `ACS successful, redirecting to: ${url}`,
-      });
       res.redirect(url);
     } catch (err) {
-      logger.error({
-        operationName: 'SSO ACS Endpoint',
-        msg: `ACS error: ${err}`,
-      });
       res.status(500);
       res.redirect(`${API_BASE_URL}/sso/logout`);
     }

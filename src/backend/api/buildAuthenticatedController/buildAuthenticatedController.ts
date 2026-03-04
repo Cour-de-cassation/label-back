@@ -32,11 +32,6 @@ function buildAuthenticatedController<inT, outT>({
       throw error;
     }
 
-    logger.log({
-      operationName: 'Authenticated Controller',
-      msg: `Authenticated request for ${req.path} by ${currentUser.email}`,
-    });
-
     const resolvedUser = {
       _id: idModule.lib.buildId(currentUser._id) as userType['_id'],
       name: currentUser.name,
