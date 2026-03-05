@@ -35,8 +35,8 @@ export async function login() {
   return samlService.createLoginRequestUrl();
 }
 
-export async function logout(user: { nameID: string; sessionIndex: string }) {
-  return samlService.createLogoutRequestUrl(user);
+export async function logout() {
+  return samlService.createLogoutRequestUrl();
 }
 
 export async function acs(req: any) {

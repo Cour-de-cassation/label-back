@@ -125,7 +125,7 @@ function buildApiSso(app: Express) {
         res.status(500);
       }
       try {
-        const context = await ssoService.logout({ nameID, sessionIndex });
+        const context = await ssoService.logout();
         res.redirect(context);
       } catch (err) {
         logger.error({

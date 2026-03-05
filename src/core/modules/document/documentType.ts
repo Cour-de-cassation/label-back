@@ -365,10 +365,10 @@ const documentModelCommonFields = {
           { kind: 'primitive', content: 'undefined' },
         ],
       },
-      selection: {
+      raisonInteretParticulier: {
         kind: 'or',
         content: [
-          { kind: 'primitive', content: 'boolean' },
+          { kind: 'primitive', content: 'string' },
           { kind: 'primitive', content: 'undefined' },
         ],
       },
