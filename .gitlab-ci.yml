@@ -31,7 +31,7 @@ build_and_push_label_backend:
       -t $docker_image .
     - docker push $docker_image
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "feature/adapt-codenac"'
     - if: '$CI_COMMIT_TAG'
   tags:
     - docker
@@ -55,7 +55,7 @@ deploy_dev_backend:
     ENV: dev
   extends: .backend_deploy_template
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG || $CI_COMMIT_BRANCH == "feature/adapt-codenac"'
       when: on_success
   needs:
     - build_and_push_label_backend
@@ -65,7 +65,7 @@ deploy_preprod_backend:
     ENV: preprod
   extends: .backend_deploy_template
   rules:
-    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH == "feature/adapt-codenac"'
       when: manual
   needs:
     - deploy_dev_backend
