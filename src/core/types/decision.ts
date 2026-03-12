@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import { CodeNac } from 'dbsder-api-types';
 
 export namespace Deprecated {
   export enum LabelStatus {
@@ -338,20 +339,7 @@ export namespace Deprecated {
     libelle: string;
   }
 
-  export interface CodeNAC {
-    codeNAC: string;
-    libelleNAC: string;
-    blocOccultationCA?: number;
-    blocOccultationTJ?: number;
-    indicateurDecisionRenduePubliquement?: boolean;
-    indicateurDebatsPublics?: boolean;
-    indicateurAffaireSignalee?: boolean;
-    categoriesToOmitTJ: Record<Occultation, Categories[]>;
-    categoriesToOmitCA: Record<Occultation, Categories[]>;
-    niveau1NAC: CategorieCodeNAC;
-    niveau2NAC: CategorieCodeNAC;
-    routeRelecture?: LabelRoute;
-  }
+  export type CodeNAC = CodeNac;
 
   export interface CodeDecision {
     codeDecision: string;

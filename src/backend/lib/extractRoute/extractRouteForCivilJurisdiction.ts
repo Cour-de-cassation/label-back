@@ -1,8 +1,8 @@
-import { documentType } from '@src/core';
-import { Deprecated } from '@src/core';
+import { Deprecated, documentType } from '@src/core';
 import axios, { AxiosResponse, Method } from 'axios';
 import { documentService } from '../../modules/document';
 import { logger } from '../../utils';
+import { CodeNac } from 'dbsder-api-types';
 
 export { extractRouteForCivilJurisdiction };
 
@@ -136,12 +136,12 @@ async function fetchApi<T>({
 
 async function getDecisionRoute(code: string): Promise<string | undefined> {
   try {
-    const codenac = await fetchApi<Deprecated.CodeNAC>({
+    const codenac = await fetchApi<CodeNac>({
       method: 'get',
       path: `codenacs/${code}`,
     });
 
-    return codenac.routeRelecture;
+    return codenac.routeRelecture?.toString();
   } catch (error) {
     logger.error({
       operationName: 'getDecisionRoute',
