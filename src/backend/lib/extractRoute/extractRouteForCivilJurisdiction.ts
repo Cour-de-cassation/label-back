@@ -1,23 +1,18 @@
-import { documentType } from '@src/core';
-import { Deprecated } from '@src/core';
+import { Deprecated, documentType } from '@src/core';
 import axios, { AxiosResponse, Method } from 'axios';
 import { documentService } from '../../modules/document';
 import { logger } from '../../utils';
+import { CodeNac } from 'dbsder-api-types';
 
 export { extractRouteForCivilJurisdiction };
 
 async function extractRouteForCivilJurisdiction(document: documentType): Promise<documentType['route']> {
-  const selection = document.decisionMetadata.selection;
-  // const sommaire = document.decisionMetadata.sommaire;
+  const raisonInteretParticulier = document.decisionMetadata.raisonInteretParticulier;
   const NACCode = document.decisionMetadata.NACCode;
   const source = document.source;
   const additionalTermsToAnnotate = document.decisionMetadata.additionalTermsToAnnotate;
   const checklist = document.checklist;
-
-  // En attente de stabilisation du flux avant d'implémenter les règles spécifiques
-  if (source === Deprecated.Sources.TCOM) {
-    return 'default';
-  }
+  const categoriesToOmit = document.decisionMetadata.categoriesToOmit;
 
   if (
     checklist.length > 0 &&
@@ -28,7 +23,7 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
   }
 
   // Relecture exhaustive pour les décisions présentant un intéret particulier
-  if (selection === true /* && sommaire != '' */) {
+  if (raisonInteretParticulier != null) {
     return 'exhaustive';
   }
 
@@ -37,24 +32,24 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
     return 'exhaustive';
   }
 
+  const freeDocuments = await documentService.countFreeDocuments();
+  const targetFreeDocuments = 15000;
+  const nonSensibleMinimumRatio = 0.01;
+  const sensibleMinimumRatio = 0.1;
+
+  const ratio = Math.max(0, (targetFreeDocuments - freeDocuments) / targetFreeDocuments);
+
+  // nonSensibleRatio est toujours supérieur a sa limite minimum
+  const nonSensibleRatio = ratio < nonSensibleMinimumRatio ? nonSensibleMinimumRatio : ratio;
+
+  // sensibleRatio est 10 fois plus élevé que nonSensibleRatio, toujours supérieur a sa limite minimale, dans la limite logique de 100%
+  const sensibleRatio = Math.min(
+    1,
+    nonSensibleRatio * 10 < sensibleMinimumRatio ? sensibleMinimumRatio : nonSensibleRatio * 10,
+  );
+
   if (source === Deprecated.Sources.CA || source === Deprecated.Sources.TJ) {
     const routeFromDb = await getDecisionRoute(NACCode);
-
-    const freeDocuments = await documentService.countFreeDocuments();
-    const targetFreeDocuments = 15000;
-    const nonSensibleMinimumRatio = 0.01;
-    const sensibleMinimumRatio = 0.1;
-
-    const ratio = Math.max(0, (targetFreeDocuments - freeDocuments) / targetFreeDocuments);
-
-    // nonSensibleRatio est toujours supérieur a sa limite minimum
-    const nonSensibleRatio = ratio < nonSensibleMinimumRatio ? nonSensibleMinimumRatio : ratio;
-
-    // sensibleRatio est 10 fois plus élevé que nonSensibleRatio, toujours supérieur a sa limite minimale, dans la limite logique de 100%
-    const sensibleRatio = Math.min(
-      1,
-      nonSensibleRatio * 10 < sensibleMinimumRatio ? sensibleMinimumRatio : nonSensibleRatio * 10,
-    );
 
     switch (routeFromDb) {
       case 'systematique': {
@@ -85,6 +80,24 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
       }
       default:
         throw new Error('Route non trouvée en base');
+    }
+  } else if (source === Deprecated.Sources.TCOM) {
+    if (!categoriesToOmit.includes(Deprecated.Categories.PERSONNEMORALE)) {
+      const routeRelecture = Math.random() < sensibleRatio ? 'exhaustive' : 'automatic';
+      logger.log({
+        operationName: 'computeRouteForTcom',
+        msg: `Occultation personneMorale demandée, décision sensible, relecture ${routeRelecture} appliquée`,
+        data: { routeRelecture },
+      });
+      return routeRelecture;
+    } else {
+      const routeRelecture = Math.random() < nonSensibleRatio ? 'exhaustive' : 'automatic';
+      logger.log({
+        operationName: 'computeRouteForTcom',
+        msg: `Occultation personneMorale NON demandée, décision non sensible, relecture ${routeRelecture} appliquée`,
+        data: { routeRelecture },
+      });
+      return routeRelecture;
     }
   }
 
@@ -123,12 +136,12 @@ async function fetchApi<T>({
 
 async function getDecisionRoute(code: string): Promise<string | undefined> {
   try {
-    const codenac = await fetchApi<Deprecated.CodeNAC>({
+    const codenac = await fetchApi<CodeNac>({
       method: 'get',
       path: `codenacs/${code}`,
     });
 
-    return codenac.routeRelecture;
+    return codenac.routeRelecture?.toString();
   } catch (error) {
     logger.error({
       operationName: 'getDecisionRoute',
