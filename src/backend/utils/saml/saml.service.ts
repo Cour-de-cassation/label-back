@@ -128,7 +128,22 @@ export class SamlService {
     };
   }
 
-  createLogoutRequestUrl() {
-    return process.env.SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION!;
+  createLogoutRequestUrl(user: { nameID: string; sessionIndex: string }) {
+    if (process.env.NODE_ENV !== 'development') {
+      return process.env.SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION!;
+    }
+
+    const { context } = this.sp.createLogoutRequest(this.idp, 'redirect', {
+      logoutNameID: user.nameID,
+      id: user.sessionIndex,
+      nameIDFormat: process.env.SSO_NAME_ID_FORMAT,
+      sessionIndex: user.sessionIndex,
+      signRequest: true,
+      signatureAlgorithm: process.env.SSO_SIGNATURE_ALGORITHM,
+    });
+
+    const urlLogoutRequest = new URL(context);
+
+    return urlLogoutRequest.toString();
   }
 }

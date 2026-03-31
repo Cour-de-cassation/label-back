@@ -118,11 +118,11 @@ function buildApiSso(app: Express) {
   });
 
   app.get(`${API_BASE_URL}/sso/logout`, async (req, res) => {
-    const nameID = String(req.user?.email);
-    const sessionIndex = String(req.user?.sessionIndex);
+    const nameID = req.query.email ? String(req.query.email) : req.user?.email;
+    const sessionIndex = req.query.sessionIndex ? String(req.query.sessionIndex) : req.user?.sessionIndex;
 
     try {
-      const context = await ssoService.logout({ nameID, sessionIndex });
+      const context = await ssoService.logout(nameID, sessionIndex);
       res.redirect(context);
     } catch (err) {
       logger.error({
