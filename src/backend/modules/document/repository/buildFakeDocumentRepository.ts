@@ -104,6 +104,10 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
       return collection.find((document) => document.source === source && document.documentNumber === documentNumber);
     },
 
+    async findAllBySource({ source, limit }) {
+      return collection.filter((document) => document.source === source).slice(0, limit);
+    },
+
     async findOneByExternalId(externalId) {
       const document = collection.find((document) => document.externalId === externalId);
       return document || undefined;

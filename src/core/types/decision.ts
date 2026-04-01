@@ -1,3 +1,6 @@
+import { ObjectId } from 'mongodb';
+import { CodeNac } from 'dbsder-api-types';
+
 export namespace Deprecated {
   export enum LabelStatus {
     TOBETREATED = 'toBeTreated',
@@ -294,6 +297,7 @@ export namespace Deprecated {
     pubCategory?: string;
     selection: boolean;
     sommaire?: string;
+    raisonInteretParticulier?: string;
   }
 
   export interface DecisionTJDTO extends DecisionDTO {
@@ -334,20 +338,7 @@ export namespace Deprecated {
     libelle: string;
   }
 
-  export interface CodeNAC {
-    codeNAC: string;
-    libelleNAC: string;
-    blocOccultationCA?: number;
-    blocOccultationTJ?: number;
-    indicateurDecisionRenduePubliquement?: boolean;
-    indicateurDebatsPublics?: boolean;
-    indicateurAffaireSignalee?: boolean;
-    categoriesToOmitTJ: Record<Occultation, Categories[]>;
-    categoriesToOmitCA: Record<Occultation, Categories[]>;
-    niveau1NAC: CategorieCodeNAC;
-    niveau2NAC: CategorieCodeNAC;
-    routeRelecture?: LabelRoute;
-  }
+  export type CodeNAC = CodeNac;
 
   export interface CodeDecision {
     codeDecision: string;
@@ -358,4 +349,51 @@ export namespace Deprecated {
     routeCA?: LabelRoute;
     routeTJ?: LabelRoute;
   }
+
+  export enum Category {
+    ADRESSE = 'adresse',
+    CADASTRE = 'cadastre',
+    PERSONNEMORALE = 'personneMorale',
+    PERSONNEPHYSIQUE = 'personnePhysique',
+    PROFESSIONNELAVOCAT = 'professionnelAvocat',
+    PROFESSIONNELMAGISTRATGREFFIER = 'professionnelMagistratGreffier',
+    DATENAISSANCE = 'dateNaissance',
+    DATEDECES = 'dateDeces',
+    DATEMARIAGE = 'dateMariage',
+    INSEE = 'insee',
+    NUMEROIDENTIFIANT = 'numeroIdentifiant',
+    PLAQUEIMMATRICULATION = 'plaqueImmatriculation',
+    COMPTEBANCAIRE = 'compteBancaire',
+    LOCALITE = 'localite',
+    NUMEROSIRETSIREN = 'numeroSiretSiren',
+    SITEWEBSENSIBLE = 'siteWebSensible',
+    ETABLISSEMENT = 'etablissement',
+    TELEPHONEFAX = 'telephoneFax',
+    EMAIL = 'email',
+    MOTIVATIONS = 'motivations',
+    ANNOTATIONSUPPLEMENTAIRE = 'annotationSupplementaire',
+    PERSONNEPHYSIQUENOM = 'personnePhysiqueNom',
+    PERSONNEPHYSIQUEPRENOM = 'personnePhysiquePrenom',
+    PROFESSIONNELNOM = 'professionnelNom',
+    PROFESSIONNELPRENOM = 'professionnelPrenom',
+    PERSONNEPHYSICOMORALE = 'personnePhysicoMorale',
+    PERSONNEGEOMORALE = 'personneGeoMorale',
+    CUSTOM = 'custom',
+  }
+
+  export type Affaire = {
+    _id: ObjectId;
+    replacementTerms: replacementTerms[];
+    decisionIds: ObjectId[];
+    documentAssocieIds: ObjectId[];
+  };
+
+  export type replacementTerms = {
+    entityId: string;
+    replacementTerm: string;
+    originalTextInstances: string[];
+    category: Category;
+  };
+
+  export type UnIdentifiedAffaire = Omit<Affaire, '_id'>;
 }

@@ -126,10 +126,7 @@ describe('SSO CNX functions', () => {
 
   describe('logoutSso', () => {
     it('should return logout URL', async () => {
-      const logoutUrl = await logout({
-        nameID: 'test-user-id',
-        sessionIndex: '63e7d8764f1a0a2f6c123431',
-      });
+      const logoutUrl = await logout();
       expect(logoutUrl).toBe('logout-url');
     });
   });

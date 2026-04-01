@@ -5,9 +5,8 @@ export type { exporterConfigType };
 
 type exporterConfigType = {
   name: string;
-  updateDecisionPseudonymisation: (param: {
+  patchDecisionInSder: (param: {
     externalId: documentType['externalId'];
-    pseudoText: string;
     labelTreatments: Deprecated.LabelTreatment[];
     labelStatus: Deprecated.LabelStatus;
     publishStatus: Deprecated.PublishStatus;

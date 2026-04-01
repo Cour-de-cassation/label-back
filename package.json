@@ -4,7 +4,7 @@
   "private": true,
   "description": "Cour de cassation annotation tool.",
   "scripts": {
-    "compile": "tsc && tsc-alias",
+    "compile": "tsc && tsc-alias && cp -r src/courDeCassation/settings dist/courDeCassation/settings",
     "start:dev": "nodemon",
     "start:docker": "docker compose up -d",
     "test": "RUN_MODE=TEST jest --passWithNoTests --verbose --runInBand",
@@ -16,6 +16,7 @@
     "axios": "1.11.0",
     "bcryptjs": "3.0.2",
     "cors": "2.8.5",
+    "dbsder-api-types": "2.1.46",
     "dotenv": "17.2.1",
     "express": "5.1.0",
     "express-session": "^1.18.2",

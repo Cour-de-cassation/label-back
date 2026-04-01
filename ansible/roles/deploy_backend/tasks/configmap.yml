@@ -21,6 +21,7 @@
         LABEL_API_PORT: "{{ label_api_port }}"
         LABEL_DB_NAME: "{{ label_db_name }}"
         LABEL_CLIENT_URL: "{{ label_client_url }}"
+        NLP_API_URL: "{{ nlp_api_url }}"
         SSO_SP_ENTITY_ID: "{{ sso_sp_entity_id }}"
         SSO_SP_ASSERTION_CONSUMER_SERVICE_LOCATION: "{{ sso_sp_assertion_consumer_service_location }}"
         SSO_IDP_METADATA: "{{ sso_idp_metadata }}"

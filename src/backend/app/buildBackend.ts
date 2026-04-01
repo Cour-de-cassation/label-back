@@ -4,6 +4,7 @@ import { buildRunServer } from './buildRunServer';
 import {
   cleanDocuments,
   deleteDocument,
+  deleteDocumentsBySource,
   displayMultipleAssignatedDocuments,
   dumpDocument,
   freePendingDocuments,
@@ -31,6 +32,10 @@ function buildBackend(settings: settingsType) {
       },
       deleteDocument: {
         run: deleteDocument,
+        option: { shouldLoadDb: true, shouldExit: false },
+      },
+      deleteDocumentsBySource: {
+        run: deleteDocumentsBySource,
         option: { shouldLoadDb: true, shouldExit: false },
       },
       displayMultipleAssignatedDocuments: {
