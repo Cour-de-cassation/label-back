@@ -5,7 +5,6 @@ import { buildFakePreAssignationRepository } from './buildFakePreAssignationRepo
 export { buildRepository as buildPreAssignationRepository };
 
 const buildRepository = dependencyManager.inject({
-  forLocal: buildPreAssignationRepository,
   forProd: buildPreAssignationRepository,
   forTest: buildFakePreAssignationRepository,
 });

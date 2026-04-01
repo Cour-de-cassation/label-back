@@ -1,6 +1,7 @@
 import { documentType } from '@src/core';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { Deprecated } from '@src/core';
+import { NLP_API_URL } from '@src/backend/utils/env';
 
 export const nlpApi = {
   async getPseudo(
@@ -12,7 +13,7 @@ export const nlpApi = {
   ): Promise<Deprecated.replacementTerms[]> {
     return await axios({
       method: 'post',
-      baseURL: `${process.env.NLP_API_URL}`,
+      baseURL: `${NLP_API_URL}`,
       url: `/pseudo`,
       data: { externalId, affaireId, labelTreatments, replacementTerms, categoriesToOccult },
     })

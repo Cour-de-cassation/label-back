@@ -1,11 +1,7 @@
 import yargs from 'yargs';
 import { buildBackend } from '@src/backend';
 import { parametersHandler } from '../lib/parametersHandler';
-import * as dotenv from 'dotenv';
 (async () => {
-  if (process.env.RUN_MODE === 'LOCAL') {
-    dotenv.config();
-  }
   const { settings } = await parametersHandler.getParameters();
   const { beforeMinutes } = parseArgv();
   const backend = buildBackend(settings);

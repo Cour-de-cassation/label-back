@@ -1,14 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { userType } from '@src/core';
+import { JWT_SECRET, JWT_EXPIRATION } from '../env';
 
 export { jwtHandler };
-
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET is not defined in environment variables. Aborting.');
-}
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
 
 interface JwtPayload {
   _id: string;

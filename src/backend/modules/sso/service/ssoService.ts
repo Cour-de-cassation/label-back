@@ -2,10 +2,20 @@ import { SamlService } from '../../../utils/saml';
 import { buildUserRepository, userService } from '../../user';
 import { logger, jwtHandler } from '../../../utils';
 import every from 'lodash/every';
-
 import includes from 'lodash/includes';
 import { idModule, userType } from '@src/core';
 import { Request } from 'express';
+import {
+  SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL,
+  SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL,
+  SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL,
+  SSO_ATTRIBUTE_ROLE,
+  SSO_APP_ROLES,
+  SSO_APP_NAME,
+  SSO_ATTRIBUTE_NAME,
+  SSO_ATTRIBUTE_FIRSTNAME,
+  SSO_ATTRIBUTE_MAIL,
+} from '../../../utils/env';
 
 export interface BindingContext {
   context: string;
@@ -93,10 +103,10 @@ export function setUserSessionAndReturnRedirectUrl(req: Request | any, user: use
   const token = jwtHandler.generateToken(user, sessionIndex);
 
   const roleToUrlMap: Record<string, string> = {
-    annotator: process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL as string,
-    admin: process.env.SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL as string,
-    scrutator: process.env.SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL as string,
-    publicator: process.env.SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL as string,
+    annotator: SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL,
+    admin: SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL,
+    scrutator: SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL,
+    publicator: SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL,
   };
 
   if (!roleToUrlMap[user.role]) {
@@ -112,24 +122,20 @@ export function setUserSessionAndReturnRedirectUrl(req: Request | any, user: use
 
 export function getUserFromSSO(extract: ParseResponseResult['extract']): userType {
   const { attributes } = extract;
-  const roles = (attributes[`${process.env.SSO_ATTRIBUTE_ROLE}`] as string[]).map((item: string) =>
-    item.toLowerCase(),
-  ) as string[];
+  const roles = (attributes[`${SSO_ATTRIBUTE_ROLE}`] as string[]).map((item: string) => item.toLowerCase()) as string[];
 
-  const appRoles = (process.env.SSO_APP_ROLES as string).toLowerCase().split(',');
+  const appRoles = SSO_APP_ROLES.toLowerCase().split(',');
   const userRolesInAppRoles = every(roles, (element) => includes(appRoles, element));
 
   if (!roles.length || !userRolesInAppRoles) {
-    const errorMsg = `User ${extract.nameID}, role ${roles} doesn't exist in application ${process.env.SSO_APP_NAME}`;
+    const errorMsg = `User ${extract.nameID}, role ${roles} doesn't exist in application ${SSO_APP_NAME}`;
     logger.error({ operationName: 'getUserFromSSO', msg: errorMsg });
     throw new Error(errorMsg);
   }
 
   return {
-    name: `${attributes[`${process.env.SSO_ATTRIBUTE_NAME}`] as string} ${
-      attributes[`${process.env.SSO_ATTRIBUTE_FIRSTNAME}`] as string
-    }`,
-    email: attributes[`${process.env.SSO_ATTRIBUTE_MAIL}`] as string,
+    name: `${attributes[`${SSO_ATTRIBUTE_NAME}`] as string} ${attributes[`${SSO_ATTRIBUTE_FIRSTNAME}`] as string}`,
+    email: attributes[`${SSO_ATTRIBUTE_MAIL}`] as string,
     role: roles[0] as 'annotator' | 'scrutator' | 'admin' | 'publicator',
     _id: idModule.lib.buildId(),
   };
