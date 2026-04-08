@@ -23,9 +23,6 @@ if (!isTest && process.env.SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION == null)
   throw new Error('process.env.SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION is missing');
 if (!isTest && process.env.SSO_CERTIFICAT == null) throw new Error('process.env.SSO_CERTIFICAT is missing');
 if (!isTest && process.env.SSO_SP_PRIVATE_KEY == null) throw new Error('process.env.SSO_SP_PRIVATE_KEY is missing');
-if (!isTest && process.env.SSO_NAME_ID_FORMAT == null) throw new Error('process.env.SSO_NAME_ID_FORMAT is missing');
-if (!isTest && process.env.SSO_SIGNATURE_ALGORITHM == null)
-  throw new Error('process.env.SSO_SIGNATURE_ALGORITHM is missing');
 if (!isTest && process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL == null)
   throw new Error('process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL is missing');
 if (!isTest && process.env.SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL == null)
@@ -44,7 +41,6 @@ export const NODE_ENV = process.env.NODE_ENV as string;
 export const LABEL_DB_URL = process.env.LABEL_DB_URL as string;
 export const LABEL_DB_NAME = process.env.LABEL_DB_NAME as string;
 export const LABEL_CLIENT_URL = process.env.LABEL_CLIENT_URL as string;
-export const LABEL_CLIENT_PORT = process.env.LABEL_CLIENT_PORT as string;
 export const LABEL_API_PORT = process.env.LABEL_API_PORT as string;
 export const DBSDER_API_URL = process.env.DBSDER_API_URL as string;
 export const DBSDER_API_KEY = process.env.DBSDER_API_KEY as string;
@@ -59,8 +55,6 @@ export const SSO_IDP_SINGLE_SIGN_ON_SERVICE_LOCATION = process.env.SSO_IDP_SINGL
 export const SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION = process.env.SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION as string;
 export const SSO_CERTIFICAT = process.env.SSO_CERTIFICAT as string;
 export const SSO_SP_PRIVATE_KEY = process.env.SSO_SP_PRIVATE_KEY as string;
-export const SSO_NAME_ID_FORMAT = process.env.SSO_NAME_ID_FORMAT as string;
-export const SSO_SIGNATURE_ALGORITHM = process.env.SSO_SIGNATURE_ALGORITHM as string;
 export const SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL = process.env
   .SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL as string;
 export const SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL = process.env
