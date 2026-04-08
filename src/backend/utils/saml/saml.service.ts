@@ -10,9 +10,6 @@ import {
   SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION,
   SSO_ATTRIBUTE_ROLE,
   SSO_APP_NAME,
-  SSO_NAME_ID_FORMAT,
-  SSO_SIGNATURE_ALGORITHM,
-  NODE_ENV,
 } from '../env';
 
 // import * as validator from '@authenio/samlify-node-xmllint';
@@ -142,22 +139,7 @@ export class SamlService {
     };
   }
 
-  createLogoutRequestUrl(user: { nameID: string; sessionIndex: string }) {
-    if (NODE_ENV !== 'development') {
-      return SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION;
-    }
-
-    const { context } = this.sp.createLogoutRequest(this.idp, 'redirect', {
-      logoutNameID: user.nameID,
-      id: user.sessionIndex,
-      nameIDFormat: SSO_NAME_ID_FORMAT,
-      sessionIndex: user.sessionIndex,
-      signRequest: true,
-      signatureAlgorithm: SSO_SIGNATURE_ALGORITHM,
-    });
-
-    const urlLogoutRequest = new URL(context);
-
-    return urlLogoutRequest.toString();
+  createLogoutRequestUrl() {
+    return SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION;
   }
 }

@@ -2,6 +2,7 @@ import { Express } from 'express';
 import { mapValues } from 'lodash';
 import { apiSchema, apiSchemaMethodNameType } from '@src/core';
 import { logger } from '../utils';
+import { NODE_ENV } from '../utils/env';
 import { controllers } from './controllers';
 import { ssoService } from '../modules/sso';
 
@@ -118,11 +119,8 @@ function buildApiSso(app: Express) {
   });
 
   app.get(`${API_BASE_URL}/sso/logout`, async (req, res) => {
-    const nameID = req.query.email ? String(req.query.email) : req.user?.email;
-    const sessionIndex = req.query.sessionIndex ? String(req.query.sessionIndex) : req.user?.sessionIndex;
-
     try {
-      const context = await ssoService.logout(nameID, sessionIndex);
+      const context = await ssoService.logout();
       res.redirect(context);
     } catch (err) {
       logger.error({
@@ -153,4 +151,19 @@ function buildApiSso(app: Express) {
       res.redirect(`${API_BASE_URL}/sso/logout`);
     }
   });
+
+  if (NODE_ENV === 'development') {
+    app.get(`${API_BASE_URL}/sso/dev-login`, async (req, res) => {
+      const email = String(req.query.email || '');
+      try {
+        const user = await ssoService.getUserByEmail(email);
+        if (!user) return res.status(404).send(`Utilisateur introuvable : ${email}`);
+        const url = ssoService.setUserSessionAndReturnRedirectUrl(req, user, 'dev-session');
+        res.redirect(url);
+      } catch (err) {
+        logger.error({ operationName: 'SSO Dev Login', msg: `${err}` });
+        res.status(500).send(String(err));
+      }
+    });
+  }
 }
