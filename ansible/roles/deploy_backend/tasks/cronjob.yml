@@ -16,5 +16,5 @@
     active_deadline_seconds: "{{ job.active_deadline_seconds }}"
     name: "{{ job.name }}"
     command: "{{ job.command }}"
-    suspend: "{{ 'true' if git_branch == 'dev' else 'false' }}"
+    suspend: "{{ 'true' if node_env == 'development' else 'false' }}"
 ...

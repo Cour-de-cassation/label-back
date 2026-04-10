@@ -13,7 +13,7 @@
         labels:
           app: '{{ label_back_app_id }}'
       data:
-        GIT_BRANCH: '{{ git_branch }}'
+        NODE_ENV: '{{ node_env }}'
         APP_ID: '{{ label_back_app_id }}'
         KUBE_NAMESPACE: '{{ label_kube_namespace }}'
         ROOT_PATH: '{{ label_back_root_path }}'
