@@ -12,10 +12,6 @@ import {
   SSO_APP_NAME,
 } from '../env';
 
-// import * as validator from '@authenio/samlify-node-xmllint';
-
-// samlify.setSchemaValidator(validator);
-
 export class SamlService {
   private sp;
   private idp;
