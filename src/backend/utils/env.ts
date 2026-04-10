@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 
 if (!process.env.NODE_ENV) dotenv.config();
 
-const isTest = process.env.NODE_ENV === 'TEST';
+const isTest = process.env.NODE_ENV?.toUpperCase() === 'TEST';
 
 if (!isTest && process.env.NODE_ENV == null) throw new Error('process.env.NODE_ENV is missing');
 if (!isTest && process.env.LABEL_DB_URL == null) throw new Error('process.env.LABEL_DB_URL is missing');

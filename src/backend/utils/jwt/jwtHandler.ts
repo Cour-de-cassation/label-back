@@ -27,7 +27,7 @@ function generateToken(user: userType, sessionIndex: string): string {
   };
 
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRATION as string | number,
+    expiresIn: JWT_EXPIRATION || '24h',
     algorithm: 'HS256',
   } as jwt.SignOptions);
 }
