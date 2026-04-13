@@ -33,6 +33,15 @@ jest.mock('../../../utils/logger', () => ({
     error: jest.fn(),
   },
 }));
+jest.mock('../../../utils', () => ({
+  logger: {
+    log: jest.fn(),
+    error: jest.fn(),
+  },
+  jwtHandler: {
+    generateToken: jest.fn().mockReturnValue('mock-token'),
+  },
+}));
 jest.mock('../../user', () => ({
   buildUserRepository: jest.fn().mockImplementation(() => ({
     findByEmail: jest.fn().mockResolvedValueOnce({
@@ -48,12 +57,17 @@ jest.mock('../../user', () => ({
   },
 }));
 
-process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL = 'http://localhost:55432/label/annotation';
-process.env.SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL = 'http://localhost:55432/label/admin/main/summary';
-process.env.SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL = 'http://localhost:55432/label/publishable-documents';
-process.env.SSO_ATTRIBUTE_ROLE = 'role';
-process.env.SSO_APP_ROLES = 'admin,annotator,publicator,scrutator';
-process.env.SSO_APP_NAME = 'LABEL';
+jest.mock('../../../utils/env', () => ({
+  SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL: 'http://localhost:55432/label/annotation',
+  SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL: 'http://localhost:55432/label/admin/main/summary',
+  SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL: 'http://localhost:55432/label/publishable-documents',
+  SSO_ATTRIBUTE_ROLE: 'role',
+  SSO_APP_ROLES: 'admin,annotator,publicator,scrutator',
+  SSO_APP_NAME: 'LABEL',
+  SSO_ATTRIBUTE_NAME: 'name',
+  SSO_ATTRIBUTE_FIRSTNAME: 'firstname',
+  SSO_ATTRIBUTE_MAIL: 'email',
+}));
 
 describe('SSO CNX functions', () => {
   describe('getMetadataSso', () => {
@@ -71,7 +85,7 @@ describe('SSO CNX functions', () => {
       };
       const result = await acs(mockReq);
 
-      expect(result).toContain(process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL);
+      expect(result).toContain('http://localhost:55432/label/annotation');
     });
   });
 

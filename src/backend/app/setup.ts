@@ -2,13 +2,9 @@ import { settingsType } from '@src/core';
 import { settingsLoader } from '../lib/settingsLoader';
 import { logger, mongo } from '../utils';
 import { setIndexesOnAllCollections } from './scripts';
-import * as dotenv from 'dotenv';
+import { LABEL_DB_URL, LABEL_DB_NAME } from '../utils/env';
 
 export { setup, setupMongo };
-
-if (process.env.RUN_MODE === 'LOCAL') {
-  dotenv.config();
-}
 
 async function setup(settings: settingsType) {
   setupSettings(settings);
@@ -21,18 +17,16 @@ function setupSettings(settings: settingsType) {
 }
 
 async function setupMongo() {
-  const labelDbUrl = process.env.LABEL_DB_URL;
-  const labelDbName = process.env.LABEL_DB_NAME;
   logger.log({
     operationName: 'setupMongo',
-    msg: `Loading the Mongo database : ${labelDbName}`,
+    msg: `Loading the Mongo database : ${LABEL_DB_NAME}`,
   });
-  if (labelDbUrl == undefined || labelDbName == undefined) {
+  if (LABEL_DB_URL == undefined || LABEL_DB_NAME == undefined) {
     throw new Error('You must provide a valid database URL and name.');
   }
   await mongo.initialize({
-    dbName: labelDbName,
-    url: labelDbUrl,
+    dbName: LABEL_DB_NAME,
+    url: LABEL_DB_URL,
   });
   logger.log({ operationName: 'setupMongo', msg: `MongoDB ready!` });
 

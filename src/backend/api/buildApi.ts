@@ -2,6 +2,7 @@ import { Express } from 'express';
 import { mapValues } from 'lodash';
 import { apiSchema, apiSchemaMethodNameType } from '@src/core';
 import { logger } from '../utils';
+import { NODE_ENV } from '../utils/env';
 import { controllers } from './controllers';
 import { ssoService } from '../modules/sso';
 
@@ -47,7 +48,7 @@ function buildPostRoutes(app: Express) {
 
 function buildController(
   method: apiSchemaMethodNameType,
-  controller: (param: { headers: any; args: any; session: any; path: string }) => Promise<any>,
+  controller: (param: { headers: any; args: any; user?: any; path: string }) => Promise<any>,
 ) {
   return async (req: any, res: any, next: any) => {
     try {
@@ -71,7 +72,7 @@ function buildController(
             data: await controller({
               headers: req.headers,
               args: sanitizedQuery,
-              session: req.session,
+              user: req.user,
               path: req.path,
             }),
             statusCode: 200,
@@ -81,7 +82,7 @@ function buildController(
             data: await controller({
               headers: req.headers,
               args: req.body,
-              session: req.session,
+              user: req.user,
               path: req.path,
             }),
             statusCode: 201,
@@ -107,8 +108,8 @@ function buildApiSso(app: Express) {
       res.redirect(context);
     } catch (err) {
       logger.error({
-        operationName: 'login SSO ',
-        msg: `${err}`,
+        operationName: 'SSO Login Endpoint',
+        msg: `Login error: ${err}`,
       });
       res.status(401).json({
         status: 401,
@@ -117,33 +118,26 @@ function buildApiSso(app: Express) {
     }
   });
 
-  app.get(`${API_BASE_URL}/sso/logout`, (req, res) => {
-    const nameID = String(req.session.user?.email);
-    const sessionIndex = String(req.session.user?.sessionIndex);
-    req.session.destroy(async (err) => {
-      if (err) {
-        res.status(500);
-      }
-      try {
-        const context = await ssoService.logout();
-        res.redirect(context);
-      } catch (err) {
-        logger.error({
-          operationName: 'logoutSso',
-          msg: `${err}`,
-        });
-        res.status(500).json({
-          status: 500,
-          message: err instanceof Error ? err.message : `${err}`,
-        });
-      }
-    });
+  app.get(`${API_BASE_URL}/sso/logout`, async (req, res) => {
+    try {
+      const context = await ssoService.logout();
+      res.redirect(context);
+    } catch (err) {
+      logger.error({
+        operationName: 'logoutSso',
+        msg: `${err}`,
+      });
+      res.status(500).json({
+        status: 500,
+        message: err instanceof Error ? err.message : `${err}`,
+      });
+    }
   });
 
   app.get(`${API_BASE_URL}/sso/whoami`, (req, res) => {
-    const user = req.session?.user ?? null;
+    const user = req.user ?? null;
     if (!user) {
-      return res.status(401).send({ status: 401, message: `Session invalid or expired` });
+      return res.status(401).send({ status: 401, message: `Token invalid or expired` });
     }
     res.type('application/json').send(user);
   });
@@ -157,4 +151,19 @@ function buildApiSso(app: Express) {
       res.redirect(`${API_BASE_URL}/sso/logout`);
     }
   });
+
+  if (NODE_ENV === 'development') {
+    app.get(`${API_BASE_URL}/sso/dev-login`, async (req, res) => {
+      const email = String(req.query.email || '');
+      try {
+        const user = await ssoService.getUserByEmail(email);
+        if (!user) return res.status(404).send(`Utilisateur introuvable : ${email}`);
+        const url = ssoService.setUserSessionAndReturnRedirectUrl(req, user, 'dev-session');
+        res.redirect(url);
+      } catch (err) {
+        logger.error({ operationName: 'SSO Dev Login', msg: `${err}` });
+        res.status(500).send(String(err));
+      }
+    });
+  }
 }

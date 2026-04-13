@@ -1,11 +1,21 @@
 import { SamlService } from '../../../utils/saml';
 import { buildUserRepository, userService } from '../../user';
-import { logger } from '../../../utils';
+import { logger, jwtHandler } from '../../../utils';
 import every from 'lodash/every';
-
 import includes from 'lodash/includes';
 import { idModule, userType } from '@src/core';
 import { Request } from 'express';
+import {
+  SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL,
+  SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL,
+  SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL,
+  SSO_ATTRIBUTE_ROLE,
+  SSO_APP_ROLES,
+  SSO_APP_NAME,
+  SSO_ATTRIBUTE_NAME,
+  SSO_ATTRIBUTE_FIRSTNAME,
+  SSO_ATTRIBUTE_MAIL,
+} from '../../../utils/env';
 
 export interface BindingContext {
   context: string;
@@ -32,7 +42,8 @@ export async function getMetadata() {
 }
 
 export async function login() {
-  return samlService.createLoginRequestUrl();
+  const loginUrl = await samlService.createLoginRequestUrl();
+  return loginUrl;
 }
 
 export async function logout() {
@@ -48,22 +59,12 @@ export async function acs(req: any) {
   try {
     const userDB = (await getUserByEmail(extract?.nameID)) as userType;
     if (!userDB) {
-      logger.log({
-        operationName: 'SSO ACS',
-        msg: `No matching user for email ${extract?.nameID}, creatin a new user`,
-      });
-
       await userService.createUser({
         name: userSSO.name,
         email: userSSO.email,
         role: userSSO.role,
       });
       const createdUser = (await getUserByEmail(userSSO.email)) as userType;
-
-      logger.log({
-        operationName: `SSO ACS`,
-        msg: `Successfully created user ${createdUser.email}`,
-      });
 
       return setUserSessionAndReturnRedirectUrl(req, createdUser, extract?.sessionIndex);
     }
@@ -96,50 +97,42 @@ export async function getUserByEmail(email: string) {
 }
 
 export function setUserSessionAndReturnRedirectUrl(req: Request | any, user: userType, sessionIndex: string) {
-  if (req.session) {
-    req.session.user = {
-      _id: idModule.lib.convertToString(user._id),
-      name: user.name as string,
-      role: user.role as string,
-      email: user.email as string,
-      sessionIndex: sessionIndex,
-    };
-  }
+  const token = jwtHandler.generateToken(user, sessionIndex);
 
   const roleToUrlMap: Record<string, string> = {
-    annotator: process.env.SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL as string,
-    admin: process.env.SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL as string,
-    scrutator: process.env.SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL as string,
-    publicator: process.env.SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL as string,
+    annotator: SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL,
+    admin: SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL,
+    scrutator: SSO_FRONT_SUCCESS_CONNEXION_ADMIN_SCRUTATOR_URL,
+    publicator: SSO_FRONT_SUCCESS_CONNEXION_PUBLICATOR_URL,
   };
 
   if (!roleToUrlMap[user.role]) {
     throw new Error(`Role doesn't exist in label`);
   }
 
-  return roleToUrlMap[user.role];
+  // Return URL with token as query parameter
+  const redirectUrl = roleToUrlMap[user.role];
+  const finalUrl = `${redirectUrl}?token=${token}`;
+
+  return finalUrl;
 }
 
 export function getUserFromSSO(extract: ParseResponseResult['extract']): userType {
   const { attributes } = extract;
-  const roles = (attributes[`${process.env.SSO_ATTRIBUTE_ROLE}`] as string[]).map((item: string) =>
-    item.toLowerCase(),
-  ) as string[];
+  const roles = (attributes[`${SSO_ATTRIBUTE_ROLE}`] as string[]).map((item: string) => item.toLowerCase()) as string[];
 
-  const appRoles = (process.env.SSO_APP_ROLES as string).toLowerCase().split(',');
+  const appRoles = SSO_APP_ROLES.toLowerCase().split(',');
   const userRolesInAppRoles = every(roles, (element) => includes(appRoles, element));
 
   if (!roles.length || !userRolesInAppRoles) {
-    const errorMsg = `User ${extract.nameID}, role ${roles} doesn't exist in application ${process.env.SSO_APP_NAME}`;
+    const errorMsg = `User ${extract.nameID}, role ${roles} doesn't exist in application ${SSO_APP_NAME}`;
     logger.error({ operationName: 'getUserFromSSO', msg: errorMsg });
     throw new Error(errorMsg);
   }
 
   return {
-    name: `${attributes[`${process.env.SSO_ATTRIBUTE_NAME}`] as string} ${
-      attributes[`${process.env.SSO_ATTRIBUTE_FIRSTNAME}`] as string
-    }`,
-    email: attributes[`${process.env.SSO_ATTRIBUTE_MAIL}`] as string,
+    name: `${attributes[`${SSO_ATTRIBUTE_NAME}`] as string} ${attributes[`${SSO_ATTRIBUTE_FIRSTNAME}`] as string}`,
+    email: attributes[`${SSO_ATTRIBUTE_MAIL}`] as string,
     role: roles[0] as 'annotator' | 'scrutator' | 'admin' | 'publicator',
     _id: idModule.lib.buildId(),
   };
