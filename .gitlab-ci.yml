@@ -1,81 +1,9 @@
-image: docker:20.10.22
-services:
-  - docker:20.10.22-dind
+# Template de .gitlab-ci.yml qui provient d'ops-automation
+include:
+  - project: 'cour-de-cassation/ops-automation'
+    file: 'template/gitlab-ci-template.yml'
+    ref: 'master'
 
+# Configuration spécifique liée au Dockerfile de label
 variables:
-  docker_image: '$CI_REGISTRY/cour-de-cassation/label-back:$CI_COMMIT_SHORT_SHA'
-
-stages:
-  - build
-  - deploy
-
-build_and_push_label_backend:
-  stage: build
-  variables:
-    HTTP_PROXY: $HTTP_PROXY_DEV
-    HTTPS_PROXY: $HTTPS_PROXY_DEV
-  script:
-    - echo $CI_JOB_TOKEN | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-
-    # To avoid rebuild existing image when adding tag to a commit
-    - |
-      if docker pull "$docker_image"; then
-        echo "Docker image $docker_image already exist, skiping build and push."
-        exit 0
-      fi
-
-    - docker build
-      --build-arg http_proxy=$HTTP_PROXY
-      --build-arg https_proxy=$HTTPS_PROXY
-      --target label-back
-      -t $docker_image .
-    - docker push $docker_image
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-    - if: '$CI_COMMIT_TAG'
-  tags:
-    - docker
-
-.backend_deploy_template:
-  stage: deploy
-  environment: $ENV
-  image: alpine/ansible:2.16.1
-  script:
-    - mkdir /root/.ssh
-    - cat $SSH_KEY > /root/.ssh/id_rsa
-    - cat $KNOWN_HOSTS > /root/.ssh/known_hosts
-    - chmod 600 /root/.ssh/id_rsa
-    - chmod 600 /root/.ssh/known_hosts
-    - ansible-playbook -e label_backend_image=$docker_image -i ansible/inventories/$ENV.yml ansible/deploy_label_backend.yml --vault-password-file=$ANSIBLE_VAULT_PASS
-  tags:
-    - docker
-
-deploy_dev_backend:
-  variables:
-    ENV: dev
-  extends: .backend_deploy_template
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG'
-      when: on_success
-  needs:
-    - build_and_push_label_backend
-
-deploy_preprod_backend:
-  variables:
-    ENV: preprod
-  extends: .backend_deploy_template
-  rules:
-    - if: '$CI_COMMIT_TAG'
-      when: manual
-  needs:
-    - deploy_dev_backend
-
-deploy_prod_backend:
-  variables:
-    ENV: prod
-  extends: .backend_deploy_template
-  rules:
-    - if: '$CI_COMMIT_TAG'
-      when: manual
-  needs:
-    - deploy_preprod_backend
+  DOCKER_BUILD_ARGS: '--target=label-back'

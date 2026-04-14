@@ -8,22 +8,22 @@
       apiVersion: apps/v1
       kind: Deployment
       metadata:
-        name: "{{ label_back_app_id }}-deployment"
-        namespace: "{{ label_kube_namespace }}"
+        name: '{{ label_back_app_id }}-deployment'
+        namespace: '{{ label_kube_namespace }}'
         labels:
-          app: "{{ label_back_app_id }}"
+          app: '{{ label_back_app_id }}'
       spec:
         replicas: 1
         selector:
           matchLabels:
-            app: "{{ label_back_app_id }}"
+            app: '{{ label_back_app_id }}'
         template:
           metadata:
             labels:
-              app: "{{ label_back_app_id }}"
+              app: '{{ label_back_app_id }}'
           spec:
             initContainers:
-              - name: "{{ rclone_app_id }}"
+              - name: '{{ rclone_app_id }}'
                 image: rclone/rclone:latest
                 command:
                   - /bin/sh
@@ -34,24 +34,24 @@
                     chmod -R 755 /sso-files
                 envFrom:
                   - secretRef:
-                      name: "{{ rclone_app_id }}-secret"
+                      name: '{{ rclone_app_id }}-secret'
                 volumeMounts:
-                  - name: "{{ rclone_app_id }}-pvc-sso"
+                  - name: '{{ rclone_app_id }}-pvc-sso'
                     mountPath: /sso-files
             containers:
-              - name: "{{ label_back_app_id }}"
-                image: "{{ label_backend_image }}"
+              - name: '{{ label_back_app_id }}'
+                image: '{{ app_image }}'
                 ports:
                   - containerPort: 55430
                 envFrom:
                   - configMapRef:
-                      name: "{{ label_back_app_id }}-config"
+                      name: '{{ label_back_app_id }}-config'
                   - secretRef:
-                      name: "{{ label_back_app_id }}-secret"
+                      name: '{{ label_back_app_id }}-secret'
                 volumeMounts:
-                  - name: "{{ rclone_app_id }}-pvc-sso"
+                  - name: '{{ rclone_app_id }}-pvc-sso'
                     mountPath: /home/node/sso-files
             volumes:
-              - name: "{{ rclone_app_id }}-pvc-sso"
+              - name: '{{ rclone_app_id }}-pvc-sso'
                 persistentVolumeClaim:
-                  claimName: "{{ rclone_app_id }}-pvc-sso"
+                  claimName: '{{ rclone_app_id }}-pvc-sso'
