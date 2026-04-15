@@ -7,7 +7,7 @@ function buildDateBuilder(now: () => Date) {
     daysAgo(days: number): number {
       const dateInSeveralDaysInThePast = now();
       dateInSeveralDaysInThePast.setDate(dateInSeveralDaysInThePast.getDate() - days);
-      dateInSeveralDaysInThePast.setHours(0, 0, 0, 0);
+      dateInSeveralDaysInThePast.setUTCHours(0, 0, 0, 0);
 
       return dateInSeveralDaysInThePast.getTime();
     },

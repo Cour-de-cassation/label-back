@@ -4,12 +4,12 @@ describe('dateBuilder', () => {
   const dateBuilder = buildDateBuilder(() => new Date('2012-07-14T14:00:00.000Z'));
 
   describe('daysAgo', () => {
-    it('should return the date in the given days ago', () => {
+    it('should return the date in the given days ago at midnight UTC', () => {
       const days = 15;
 
       const dateAgo = dateBuilder.daysAgo(days);
 
-      expect(dateAgo).toEqual(new Date('2012-06-29T14:00:00.000Z').getTime());
+      expect(dateAgo).toEqual(new Date('2012-06-29T00:00:00.000Z').getTime());
     });
   });
 
