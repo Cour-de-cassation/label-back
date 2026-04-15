@@ -1,4 +1,4 @@
-import { acs, getMetadata, getUserByEmail, login, logout } from './ssoService';
+import { acs, getMetadata, getUserByEmail, login, logout, setUserSessionAndReturnRedirectUrl } from './ssoService';
 
 function buildSsoService() {
   return {
@@ -7,6 +7,7 @@ function buildSsoService() {
     login,
     logout,
     getUserByEmail,
+    setUserSessionAndReturnRedirectUrl,
   };
 }
 

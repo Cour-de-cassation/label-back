@@ -1,9 +1,16 @@
 import * as samlify from 'samlify';
 import * as fs from 'fs';
-
-// import * as validator from '@authenio/samlify-node-xmllint';
-
-// samlify.setSchemaValidator(validator);
+import {
+  SSO_SP_ENTITY_ID,
+  SSO_SP_ASSERTION_CONSUMER_SERVICE_LOCATION,
+  SSO_SP_PRIVATE_KEY,
+  SSO_CERTIFICAT,
+  SSO_IDP_METADATA,
+  SSO_IDP_SINGLE_SIGN_ON_SERVICE_LOCATION,
+  SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION,
+  SSO_ATTRIBUTE_ROLE,
+  SSO_APP_NAME,
+} from '../env';
 
 export class SamlService {
   private sp;
@@ -12,20 +19,20 @@ export class SamlService {
   constructor() {
     // Initialiser le Service Provider (SP)
     const spProps = {
-      entityID: process.env.SSO_SP_ENTITY_ID,
+      entityID: SSO_SP_ENTITY_ID,
       assertionConsumerService: [
         {
           Binding: samlify.Constants.namespace.binding.post,
-          Location: process.env.SSO_SP_ASSERTION_CONSUMER_SERVICE_LOCATION,
+          Location: SSO_SP_ASSERTION_CONSUMER_SERVICE_LOCATION,
         },
       ],
       authnRequestsSigned: true,
       wantAssertionsSigned: true,
       isAssertionEncrypted: true,
 
-      privateKey: fs.readFileSync(String(process.env.SSO_SP_PRIVATE_KEY), 'utf8'),
-      encPrivateKey: fs.readFileSync(String(process.env.SSO_SP_PRIVATE_KEY), 'utf8'),
-      signingCert: fs.readFileSync(String(process.env.SSO_CERTIFICAT), 'utf8'),
+      privateKey: fs.readFileSync(SSO_SP_PRIVATE_KEY, 'utf8'),
+      encPrivateKey: fs.readFileSync(SSO_SP_PRIVATE_KEY, 'utf8'),
+      signingCert: fs.readFileSync(SSO_CERTIFICAT, 'utf8'),
       signatureConfig: {
         prefix: 'ds',
         location: {
@@ -40,20 +47,20 @@ export class SamlService {
     this.sp = samlify.ServiceProvider(spProps);
     // Initialiser l'Identity Provider (IdP)
     const idpProps = {
-      metadata: fs.readFileSync(String(process.env.SSO_IDP_METADATA), 'utf8'),
-      encCert: fs.readFileSync(String(process.env.SSO_CERTIFICAT), 'utf8'),
-      signingCert: fs.readFileSync(String(process.env.SSO_CERTIFICAT), 'utf8'),
+      metadata: fs.readFileSync(SSO_IDP_METADATA, 'utf8'),
+      encCert: fs.readFileSync(SSO_CERTIFICAT, 'utf8'),
+      signingCert: fs.readFileSync(SSO_CERTIFICAT, 'utf8'),
       wantAuthnRequestsSigned: true,
       singleSignOnService: [
         {
           Binding: samlify.Constants.namespace.binding.redirect,
-          Location: process.env.SSO_IDP_SINGLE_SIGN_ON_SERVICE_LOCATION,
+          Location: SSO_IDP_SINGLE_SIGN_ON_SERVICE_LOCATION,
         },
       ],
       singleLogoutService: [
         {
           Binding: samlify.Constants.namespace.binding.redirect,
-          Location: process.env.SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION,
+          Location: SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION,
         },
       ],
       wantLogoutRequestSigned: true,
@@ -109,8 +116,8 @@ export class SamlService {
       attributes?: Record<string, string[] | string | null>;
     };
 
-    const roleKey = process.env.SSO_ATTRIBUTE_ROLE || 'role';
-    const appName = process.env.SSO_APP_NAME || '';
+    const roleKey = SSO_ATTRIBUTE_ROLE;
+    const appName = SSO_APP_NAME;
 
     if (extract.attributes) {
       const roleKeyValue = extract.attributes[roleKey];
@@ -129,6 +136,6 @@ export class SamlService {
   }
 
   createLogoutRequestUrl() {
-    return process.env.SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION!;
+    return SSO_IDP_SINGLE_LOGOUT_SERVICE_LOCATION;
   }
 }

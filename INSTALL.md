@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- NodeJs v16, you can use `nvm` to use the version specify in the `.nvmrc` file.
+- Node 22, you can use `nvm` to use the version specify in the `.nvmrc` file.
 
 ## Configuration
 
@@ -14,9 +14,7 @@ Copy and rename `.env.example`.
 
 Label depends on one other service from the Cour de cassation : [dbsder-api](https://github.com/cour-de-cassation/dbsder-api) You can lauch this API locally to simulate operation close to production.
 
-Label use also a keycloack to emulate login flow in local.
-
-You should take a look at [juridependencies](https://github.com/Cour-de-cassation/juridependencies) to install this service.
+You should take a look at [juridependencies](https://github.com/Cour-de-cassation/juridependencies) to get fake datas.
 
 ## Installation and lauch
 
@@ -33,7 +31,7 @@ npm i
 Start the backend with:
 
 ```sh
-npm run start:docker
+docker compose up
 ```
 
 #### Without docker:

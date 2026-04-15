@@ -2,6 +2,7 @@ import { Express, Request, Response, NextFunction } from 'express';
 import { mapValues } from 'lodash';
 import { userType } from '@src/core';
 import { logger } from '../utils';
+import { NODE_ENV } from '../utils/env';
 import { ssoService } from '../modules/sso';
 import { settingsLoader } from '../lib/settingsLoader';
 import { assignationService } from '../modules/assignation';
@@ -455,8 +456,8 @@ function buildApi(app: Express) {
       res.redirect(context);
     } catch (err) {
       logger.error({
-        operationName: 'login SSO ',
-        msg: `${err}`,
+        operationName: 'SSO Login Endpoint',
+        msg: `Login error: ${err}`,
       });
       res.status(401).json({
         status: 401,
@@ -465,33 +466,26 @@ function buildApi(app: Express) {
     }
   });
 
-  app.get(`${API_BASE_URL}/sso/logout`, (req, res) => {
-    const nameID = String(req.session.user?.email);
-    const sessionIndex = String(req.session.user?.sessionIndex);
-    req.session.destroy(async (err) => {
-      if (err) {
-        res.status(500);
-      }
-      try {
-        const context = await ssoService.logout();
-        res.redirect(context);
-      } catch (err) {
-        logger.error({
-          operationName: 'logoutSso',
-          msg: `${err}`,
-        });
-        res.status(500).json({
-          status: 500,
-          message: err instanceof Error ? err.message : `${err}`,
-        });
-      }
-    });
+  app.get(`${API_BASE_URL}/sso/logout`, async (req, res) => {
+    try {
+      const context = await ssoService.logout();
+      res.redirect(context);
+    } catch (err) {
+      logger.error({
+        operationName: 'logoutSso',
+        msg: `${err}`,
+      });
+      res.status(500).json({
+        status: 500,
+        message: err instanceof Error ? err.message : `${err}`,
+      });
+    }
   });
 
   app.get(`${API_BASE_URL}/sso/whoami`, (req, res) => {
-    const user = req.session?.user ?? null;
+    const user = req.user ?? null;
     if (!user) {
-      return res.status(401).send({ status: 401, message: `Session invalid or expired` });
+      return res.status(401).send({ status: 401, message: `Token invalid or expired` });
     }
     res.type('application/json').send(user);
   });
@@ -506,7 +500,20 @@ function buildApi(app: Express) {
     }
   });
 
-  // ===================================================
+  if (NODE_ENV === 'development') {
+    app.get(`${API_BASE_URL}/sso/dev-login`, async (req, res) => {
+      const email = String(req.query.email || '');
+      try {
+        const user = await ssoService.getUserByEmail(email);
+        if (!user) return res.status(404).send(`Utilisateur introuvable : ${email}`);
+        const url = ssoService.setUserSessionAndReturnRedirectUrl(req, user, 'dev-session');
+        res.redirect(url);
+      } catch (err) {
+        logger.error({ operationName: 'SSO Dev Login', msg: `${err}` });
+        res.status(500).send(String(err));
+      }
+    });
+  }
 }
 
 function withAuth(

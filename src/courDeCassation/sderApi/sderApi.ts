@@ -2,6 +2,7 @@ import { documentType } from '@src/core';
 import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 import { Deprecated } from '@src/core';
 import QueryString from 'qs';
+import { DBSDER_API_URL, DBSDER_API_KEY } from '@src/backend/utils/env';
 
 export { sderApi };
 
@@ -18,11 +19,11 @@ async function fetchApi<T = Record<string, unknown>>({
 }) {
   return await axios({
     method: method,
-    baseURL: `${process.env.DBSDER_API_URL}`,
+    baseURL: `${DBSDER_API_URL}`,
     url: query ? `/${path}?${QueryString.stringify(query)}` : `/${path}`,
     data: body,
     headers: {
-      'x-api-key': process.env.DBSDER_API_KEY ?? '',
+      'x-api-key': DBSDER_API_KEY,
     },
   })
     .then((response: AxiosResponse<T>) => {

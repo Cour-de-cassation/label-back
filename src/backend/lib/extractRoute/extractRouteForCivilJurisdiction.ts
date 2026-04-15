@@ -3,6 +3,7 @@ import axios, { AxiosResponse, Method } from 'axios';
 import { documentService } from '../../modules/document';
 import { logger } from '../../utils';
 import { CodeNac } from 'dbsder-api-types';
+import { DBSDER_API_URL, DBSDER_API_KEY } from '../../utils/env';
 
 export { extractRouteForCivilJurisdiction };
 
@@ -116,11 +117,11 @@ async function fetchApi<T>({
   try {
     const response: AxiosResponse = await axios({
       method,
-      baseURL: `${process.env.DBSDER_API_URL}`,
+      baseURL: `${DBSDER_API_URL}`,
       url: `/${path}`,
       data: body,
       headers: {
-        'x-api-key': process.env.DBSDER_API_KEY ?? '',
+        'x-api-key': DBSDER_API_KEY,
       },
     });
 

@@ -34,7 +34,7 @@ spec:
                   mountPath: /sso-files
           containers:
             - name: "label-backend-{{ name }}"
-              image: "{{ label_backend_image }}"
+              image: "{{ app_image }}"
               volumeMounts:
                 - name: "{{ rclone_app_id }}-pvc-sso"
                   mountPath: /home/node/sso-files

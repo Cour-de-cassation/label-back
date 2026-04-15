@@ -1,27 +1,28 @@
 ---
 ansible_user: iliasaaguida
-ansible_python_interpreter: "/home/{{ ansible_user }}/ansible_venv/bin/python"
+ansible_python_interpreter: '/home/{{ ansible_user }}/ansible_venv/bin/python'
 
-label_api_port: "55430" # pas encore utilisé, a utiliser dans le dockerfile du backend
-label_client_app_id: "label-client"
-label_back_app_id: "label-backend"
-label_back_root_path: "label/api"
-dbsder_api_url: "http://api-service.dbsder:3000" # url not tested
-label_db_name: "labelDb"
-label_client_url: "https://label.cour-de-cassation.justice.fr:55432" # strange url
-label_kube_namespace: "label"
-session_duration: "518400000"
+node_env: 'production'
 
-nlp_api_url: "http://nlp-api-service.nlp.svc.cluster.local:8081"
+label_api_port: '55430' # pas encore utilisé, a utiliser dans le dockerfile du backend
+label_client_app_id: 'label-client'
+label_back_app_id: 'label-backend'
+label_back_root_path: 'label/api'
+dbsder_api_url: 'http://api-service.dbsder:3000' # url not tested
+label_db_name: 'labelDb'
+label_client_url: 'https://label.cour-de-cassation.justice.fr:55432' # strange url
+label_kube_namespace: 'label'
 
-# SSO 
-sso_name_id_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
-sso_signature_algorithm: "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
-sso_app_name: "LABEL"
-sso_app_roles: "admin,annotator,publicator,scrutator"
+jwt_expiration: '6d'
 
-sso_bucket: "sso-files"
-s3_type: "s3"
-s3_provider: "Minio"
-s3_endpoint: "http://bucket-service.bucket.svc.cluster.local:9000"
-rclone_app_id: "rclone"
+nlp_api_url: 'http://nlp-api-service.nlp.svc.cluster.local:8081'
+
+# SSO
+sso_app_name: 'LABEL'
+sso_app_roles: 'admin,annotator,publicator,scrutator'
+
+sso_bucket: 'sso-files'
+s3_type: 's3'
+s3_provider: 'Minio'
+s3_endpoint: 'http://bucket-service.bucket.svc.cluster.local:9000'
+rclone_app_id: 'rclone'

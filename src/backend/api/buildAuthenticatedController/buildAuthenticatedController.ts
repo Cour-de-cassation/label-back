@@ -1,4 +1,5 @@
 import { userModule, userType } from '@src/core';
+import { logger } from '../../utils';
 import { ObjectId } from 'mongodb';
 
 export { buildAuthenticatedController };
@@ -8,25 +9,28 @@ function buildAuthenticatedController<inT, outT>({
   controllerWithUser,
 }: {
   permissions: Array<userType['role']>;
-  controllerWithUser: (user: userType, req: { args: inT; headers: any; session?: any; path?: string }) => Promise<outT>;
-}): (req: { args: inT; headers: any; session?: any; path?: string }) => Promise<outT> {
+  controllerWithUser: (user: userType, req: { args: inT; headers: any; path?: string }) => Promise<outT>;
+}): (req: { args: inT; headers: any; user?: any; path?: string }) => Promise<outT> {
   return async (req: {
     args: inT;
     headers: any;
-    session?: {
-      user: {
-        _id: string;
-        name: string;
-        role: string;
-        email: string;
-        sessionIndex: string;
-      };
+    user?: {
+      _id: string;
+      name: string;
+      role: string;
+      email: string;
+      sessionIndex: string;
     };
     path?: string;
   }) => {
-    const currentUser = req.session?.user ?? null;
+    const currentUser = req.user ?? null;
     if (!currentUser) {
-      throw new Error(`user session has expired or is invalid`);
+      const error = new Error(`user session has expired or is invalid`);
+      logger.error({
+        operationName: 'Authenticated Controller',
+        msg: `No authenticated user found for ${req.path}`,
+      });
+      throw error;
     }
 
     const resolvedUser = {
