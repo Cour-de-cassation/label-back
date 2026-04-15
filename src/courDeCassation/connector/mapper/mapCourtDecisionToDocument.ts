@@ -5,12 +5,12 @@ import {
   extractAppealRegisterRoleGeneralNumber,
 } from './extractors';
 import { categoriesMapper } from './categoriesMapper';
-import { Deprecated } from '@src/core';
+import { Decision } from 'dbsder-api-types';
 
 export { mapCourtDecisionToDocument };
 
 async function mapCourtDecisionToDocument(
-  sderCourtDecision: Deprecated.DecisionDTO,
+  sderCourtDecision: Decision,
   importer: documentType['importer'],
 ): Promise<documentType> {
   const readableChamberName = extractReadableChamberName({
@@ -151,18 +151,18 @@ function computeTitleFromParsedCourtDecision({
 }) {
   const prefixedNumber = getPrefixedNumber(appealNumber, source, readableJurisdictionName);
 
-  if (source === Deprecated.Sources.TJ) {
+  if (source === 'juritj') {
     readableJurisdictionName = `TJ de ${readableJurisdictionName}`;
   }
 
-  if (source === Deprecated.Sources.TCOM) {
+  if (source === 'juritcom') {
     readableJurisdictionName = `TCOM de ${readableJurisdictionName}`;
   }
 
   const nomenclatureNumber =
-    source === Deprecated.Sources.CC && NAOCode
+    source === 'jurinet' && NAOCode
       ? `NAO ${NAOCode}`
-      : (source === Deprecated.Sources.TJ || source === Deprecated.Sources.CA) && NACCode
+      : (source === 'juritj' || source === 'jurica') && NACCode
         ? `NAC ${NACCode}`
         : undefined;
 

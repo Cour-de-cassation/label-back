@@ -4,7 +4,6 @@ import { logger } from '../../utils';
 import { connectorConfigType } from './connectorConfigType';
 import { treatmentService } from '../../modules/treatment';
 import { buildPreAssignator } from '../preAssignator';
-import { Deprecated } from '@src/core';
 import { assignationService } from '../../modules/assignation';
 import { preAssignationService } from '../../modules/preAssignation';
 import { statisticService } from '../../modules/statistic';
@@ -14,6 +13,8 @@ import { updateDocumentStatus } from '../../modules/document/service/documentSer
 import { getNextStatus } from '@src/core/modules/document/lib';
 
 export { buildConnector };
+
+const SOURCES = ['jurinet', 'jurica', 'juritj', 'juritcom'];
 
 function buildConnector(connectorConfig: connectorConfigType) {
   const preAssignator = buildPreAssignator();
@@ -140,7 +141,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
       msg: `Starting importNewDocuments...`,
     });
 
-    for (const source of Object.values(Deprecated.Sources)) {
+    for (const source of SOURCES) {
       logger.log({
         operationName: 'importNewDocuments',
         msg: `Fetching ${source} decisions...`,

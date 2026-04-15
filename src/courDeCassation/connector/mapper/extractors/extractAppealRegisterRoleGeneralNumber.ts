@@ -1,5 +1,3 @@
-import { Deprecated } from '@src/core';
-
 export { extractAppealRegisterRoleGeneralNumber };
 
 function extractAppealRegisterRoleGeneralNumber(
@@ -10,9 +8,9 @@ function extractAppealRegisterRoleGeneralNumber(
   registerNumber?: string,
   numeroRoleGeneral?: string,
 ) {
-  if (source === Deprecated.Sources.CA && registerNumber != undefined) {
+  if (source === 'jurica' && registerNumber != undefined) {
     return registerNumber?.split(' ')[0];
-  } else if (source === Deprecated.Sources.CC) {
+  } else if (source === 'jurinet') {
     const verifappeal = /^[A-Za-z]\d+$/;
     if (jurisdictionName?.includes('cassation') && appeal != undefined && verifappeal.test(appeal)) {
       appeal = appeal?.replace(/[A-Za-z]/g, '');
@@ -21,9 +19,9 @@ function extractAppealRegisterRoleGeneralNumber(
     } else {
       return appeal;
     }
-  } else if (source === Deprecated.Sources.TJ && numeroRoleGeneral != undefined) {
+  } else if (source === 'juritj' && numeroRoleGeneral != undefined) {
     return numeroRoleGeneral;
-  } else if (source === Deprecated.Sources.TCOM && registerNumber) {
+  } else if (source === 'juritcom' && registerNumber) {
     return registerNumber;
   } else {
     return regexExtractAppealNumber(text);

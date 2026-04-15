@@ -13,9 +13,9 @@ function buildAnnotation({
   category: string;
   start: number;
   text: string;
-  score: number;
+  score: number | null | undefined;
   entityId?: string;
-  source: string;
+  source: string | null | undefined;
 }) {
   return {
     category,

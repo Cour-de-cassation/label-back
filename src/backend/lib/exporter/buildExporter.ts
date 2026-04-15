@@ -1,4 +1,4 @@
-import { Deprecated, documentType, settingsModule, settingsType, treatmentModule } from '@src/core';
+import { documentType, settingsModule, settingsType, treatmentModule } from '@src/core';
 import { documentService } from '../../modules/document';
 import { statisticService } from '../../modules/statistic';
 import { treatmentService } from '../../modules/treatment';
@@ -6,6 +6,7 @@ import { logger } from '../../utils';
 import { exporterConfigType } from './exporterConfigType';
 import { sderApi } from '@src/courDeCassation/sderApi';
 import { nlpApi } from '@src/courDeCassation/nlpApi';
+import { Category, LabelStatus, PublishStatus } from 'dbsder-api-types';
 
 export { buildExporter };
 
@@ -166,9 +167,7 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
     try {
       const currentDecision = await exporterConfig.fetchDecisionByExternalId(document.externalId);
       const publishStatus =
-        currentDecision?.publishStatus === Deprecated.PublishStatus.BLOCKED
-          ? Deprecated.PublishStatus.BLOCKED
-          : Deprecated.PublishStatus.TOBEPUBLISHED;
+        currentDecision?.publishStatus === PublishStatus.BLOCKED ? PublishStatus.BLOCKED : PublishStatus.TOBEPUBLISHED;
 
       const labelTreatments = treatmentModule.lib.concat(treatments, document.nlpVersions, document.checklist);
       const currentDecisionTreatments = currentDecision?.labelTreatments ?? [];
@@ -187,21 +186,16 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
       const categoriesToOccult = (
         Object.entries(settingsForDocument)
           .filter(([_, categorySetting]) => categorySetting.status == 'annotable')
-          .map(([category]) => category) as Deprecated.Category[]
+          .map(([category]) => category) as Category[]
       )
         // MOTIVATIONS NOT SEND TO GETPSEUDO:
-        .filter((_) => _ !== Deprecated.Category.MOTIVATIONS);
-
-      // if (document.externalId === "69427fdd62345a940dcc7d49") {
-      //   console.dir({ labelTreatments, updatedLabelTreatments }, { depth: null })
-      //   process.exit(1)
-      // }
+        .filter((_) => _ !== Category.MOTIVATIONS);
 
       const replacementTerms = await nlpApi.getPseudo(
         document.externalId,
         currentAffaire._id.toString(),
         updatedLabelTreatments // MOTIVATIONS NOT SEND TO GETPSEUDO:
-          .map((_) => ({ ..._, annotations: _.annotations.filter((_) => _.category !== 'motivations') })),
+          .map((_) => ({ ..._, annotations: _.annotations.filter((_) => _.category !== Category.MOTIVATIONS) })),
         currentAffaire.replacementTerms,
         categoriesToOccult,
       );
@@ -211,7 +205,7 @@ function buildExporter(exporterConfig: exporterConfigType, settings: settingsTyp
       await exporterConfig.patchDecisionInSder({
         externalId: document.externalId,
         labelTreatments: updatedLabelTreatments,
-        labelStatus: Deprecated.LabelStatus.DONE,
+        labelStatus: LabelStatus.DONE,
         publishStatus: publishStatus,
       });
       logger.log({

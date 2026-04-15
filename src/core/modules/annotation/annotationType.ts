@@ -3,6 +3,6 @@ export type annotationType = {
   entityId: string;
   start: number;
   text: string;
-  score: number;
-  source: string;
+  score: number | null | undefined;
+  source: string | null | undefined;
 };
