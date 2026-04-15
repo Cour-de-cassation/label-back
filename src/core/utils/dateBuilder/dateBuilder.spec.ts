@@ -9,7 +9,9 @@ describe('dateBuilder', () => {
 
       const dateAgo = dateBuilder.daysAgo(days);
 
-      expect(dateAgo).toEqual(new Date('2012-06-29T00:00:00.000Z').getTime());
+      const expectedDate = new Date('2012-06-29T00:00:00.000Z').setHours(0, 0, 0, 0);
+
+      expect(dateAgo).toEqual(expectedDate);
     });
   });
 
