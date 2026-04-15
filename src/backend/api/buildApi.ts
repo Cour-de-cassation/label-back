@@ -440,7 +440,6 @@ function buildApi(app: Express) {
 
   // ===================================================
   // SSO ENDPOINTS
-
   app.get(`${API_BASE_URL}/sso/metadata`, async (req, res) => {
     try {
       const xml = await ssoService.getMetadata();
@@ -522,7 +521,7 @@ function withAuth(
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const currentUser = req.session?.user ?? null;
+      const currentUser = req.user ?? null;
       if (!currentUser) {
         throw new Error(`user session has expired or is invalid`);
       }
