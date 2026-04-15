@@ -1,4 +1,4 @@
-import { assignationType, idModule, indexer } from '@src/core';
+import { assignationType, indexer } from '@src/core';
 import { buildUserRepository } from '../../repository';
 
 export { fetchUsersByAssignations };
@@ -10,12 +10,12 @@ async function fetchUsersByAssignations(assignations: assignationType[]) {
 
   const usersByAssignationId = indexer.mapIndexBy(
     assignations,
-    (assignation) => idModule.lib.convertToString(assignation._id),
-    (assignation) => usersById[idModule.lib.convertToString(assignation.userId)],
+    (assignation) => assignation._id.toHexString(),
+    (assignation) => usersById[assignation.userId.toHexString()],
   );
 
   indexer.assertEveryIdIsDefined(
-    assignations.map((assignation) => idModule.lib.convertToString(assignation._id)),
+    assignations.map((assignation) => assignation._id.toHexString()),
     usersByAssignationId,
     (_id) => `The assignation ${_id} has no matching user`,
   );

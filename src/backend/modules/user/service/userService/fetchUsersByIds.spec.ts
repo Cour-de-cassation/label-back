@@ -1,4 +1,4 @@
-import { idModule, userModule } from '@src/core';
+import { userModule } from '@src/core';
 import { buildUserRepository } from '../../repository';
 import { buildUserService } from './index';
 
@@ -12,7 +12,7 @@ describe('fetchUsersByIds', () => {
     await userRepository.insert(user2);
 
     const userNamesByUsersId = await userService.fetchUsersByIds([user1._id, user2._id]);
-    expect(userNamesByUsersId[idModule.lib.convertToString(user1._id)].name).toEqual('Nicolas');
-    expect(userNamesByUsersId[idModule.lib.convertToString(user2._id)].name).toEqual('Benoit');
+    expect(userNamesByUsersId[user1._id.toHexString()].name).toEqual('Nicolas');
+    expect(userNamesByUsersId[user2._id.toHexString()].name).toEqual('Benoit');
   });
 });

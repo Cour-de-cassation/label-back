@@ -1,4 +1,3 @@
-import { idModule } from '../../id';
 import { treatmentType } from '../treatmentType';
 import { computeTreatmentIdsText } from './computeTreatmentIdsText';
 
@@ -11,7 +10,7 @@ function assertTreatmentsSameDocumentId(treatments: treatmentType[]) {
 
   const documentId = treatments[0].documentId;
   for (let i = 1, l = treatments.length; i < l; i++) {
-    if (!idModule.lib.equalId(documentId, treatments[i].documentId)) {
+    if (!documentId.equals(treatments[i].documentId)) {
       throw new Error(`The treatments ${computeTreatmentIdsText(treatments)} are not on the same document`);
     }
   }

@@ -1,10 +1,11 @@
-import { assignationModule, documentModule, idModule, treatmentModule, userModule } from '@src/core';
+import { assignationModule, documentModule, treatmentModule, userModule } from '@src/core';
 import { range } from 'lodash';
 import { buildDocumentRepository } from '../../document';
 import { buildTreatmentRepository } from '../../treatment';
 import { buildUserRepository } from '../../user';
 import { buildAssignationRepository } from '../repository';
 import { findOrCreateByDocumentIdAndUserId } from './findOrCreateByDocumentIdAndUserId';
+import { ObjectId } from 'mongodb';
 
 describe('findOrCreateByDocumentIdAndUserId', () => {
   const user = userModule.generator.generate();
@@ -49,8 +50,8 @@ describe('findOrCreateByDocumentIdAndUserId', () => {
 
     const assignations = await assignationRepository.findAll();
     expect(assignations.length).toEqual(1);
-    expect(idModule.lib.equalId(assignations[0].documentId, documentId)).toBeTruthy();
-    expect(idModule.lib.equalId(assignations[0].userId, userId)).toBeTruthy();
+    expect(assignations[0].documentId.equals(documentId)).toBeTruthy();
+    expect(assignations[0].userId.equals(userId)).toBeTruthy();
   });
 
   it('should create a new assignation if the last assignation does not match the userId', async () => {
@@ -58,7 +59,7 @@ describe('findOrCreateByDocumentIdAndUserId', () => {
     const treatmentRepository = buildTreatmentRepository();
     const assignationRepository = buildAssignationRepository();
     const users = range(2).map(() => userModule.generator.generate());
-    const documentId = idModule.lib.buildId();
+    const documentId = new ObjectId();
     const treatments = [0, 1, 2].map((order) => treatmentModule.generator.generate({ order, documentId }));
     const assignation1 = assignationModule.generator.generate({
       documentId,
@@ -80,7 +81,7 @@ describe('findOrCreateByDocumentIdAndUserId', () => {
     });
 
     const assignations = await assignationRepository.findAll();
-    expect(idModule.lib.convertToString(assignation._id)).not.toBe(idModule.lib.convertToString(assignation1._id));
+    expect(assignation._id.toHexString()).not.toBe(assignation1._id.toHexString());
     expect(assignations.length).toBe(3);
   });
 });

@@ -1,15 +1,16 @@
-import { assignationType, documentModule, documentType, idModule, idType, userType } from '@src/core';
+import { assignationType, documentModule, documentType, userType } from '@src/core';
 import { logger } from '../../../../utils';
 import { assignationService } from '../../../assignation';
 import { treatmentService } from '../../../treatment';
 import { buildDocumentRepository } from '../../repository';
+import { ObjectId } from 'mongodb';
 
 export { buildFetchDocumentsForUser };
 
 function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => void) {
   return fetchDocumentsForUser;
 
-  async function fetchDocumentsForUser(userId: idType, documentsMaxCount: number) {
+  async function fetchDocumentsForUser(userId: ObjectId, documentsMaxCount: number) {
     const documents: Array<{
       document: documentType;
       assignationId: assignationType['_id'];
@@ -19,9 +20,9 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
     const documentIdsWithAnnotations = await treatmentService.fetchTreatedDocumentIds();
 
     // Documents already assignated to the user are fetched
-    const alreadyAssignatedDocuments = await fetchAlreadyAssignatedDocuments(idModule.lib.buildId(userId));
+    const alreadyAssignatedDocuments = await fetchAlreadyAssignatedDocuments(new ObjectId(userId));
     for (let i = 0; i < alreadyAssignatedDocuments.length && i < documentsMaxCount; i++) {
-      checkCallAttempts(idModule.lib.convertToString(userId));
+      checkCallAttempts(userId.toHexString());
       const alreadyAssignatedDocument = alreadyAssignatedDocuments[i];
       documents.push(alreadyAssignatedDocument);
     }
@@ -34,7 +35,7 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
     // We fill the pool of assignated documents with new ones
     for (let i = documents.length; i < documentsMaxCount; i++) {
       try {
-        const assignatedDocument = await fetchDocumentForUser(idModule.lib.buildId(userId), documentIdsWithAnnotations);
+        const assignatedDocument = await fetchDocumentForUser(new ObjectId(userId), documentIdsWithAnnotations);
         documents.push(assignatedDocument);
       } catch (error) {
         logger.log({
@@ -48,13 +49,13 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
   }
 
   async function fetchDocumentForUser(
-    userId: idType,
+    userId: ObjectId,
     documentIdsToSearchIn: documentType['_id'][],
   ): Promise<{
     document: documentType;
     assignationId: assignationType['_id'];
   }> {
-    checkCallAttempts(idModule.lib.convertToString(userId));
+    checkCallAttempts(userId.toHexString());
 
     return assignNewDocument(documentIdsToSearchIn);
 
@@ -136,7 +137,7 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
     );
     return documentIdsAssignated
       .map(({ documentId, assignationId }) => ({
-        document: documentsById[idModule.lib.convertToString(documentId)],
+        document: documentsById[documentId.toHexString()],
         assignationId,
       }))
       .filter(({ document }) => document.status === 'pending' || document.status === 'saved')

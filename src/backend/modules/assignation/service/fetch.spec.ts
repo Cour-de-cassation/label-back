@@ -1,15 +1,16 @@
 import { range } from 'lodash';
-import { assignationModule, documentModule, idModule } from '@src/core';
+import { assignationModule, documentModule } from '@src/core';
 import { buildDocumentRepository } from '../../document';
 import { buildAssignationRepository } from '../repository';
 import { fetchAssignationId, fetchDocumentIdsAssignatedToUserId, fetchAssignationsByDocumentIds } from './fetch';
+import { ObjectId } from 'mongodb';
 
 describe('fetch', () => {
   describe('fetchAssignationId', () => {
     const assignationRepository = buildAssignationRepository();
 
-    const userId = idModule.lib.buildId();
-    const documentId = idModule.lib.buildId();
+    const userId = new ObjectId();
+    const documentId = new ObjectId();
 
     it('should fetch the assignation id corresponding to the given user id and document id', async () => {
       const assignation = assignationModule.generator.generate({
@@ -52,8 +53,8 @@ describe('fetch', () => {
       });
 
       expect(assignationsByDocumentIds).toEqual({
-        [idModule.lib.convertToString(documents[0]._id)]: [assignations[0]],
-        [idModule.lib.convertToString(documents[1]._id)]: [assignations[1]],
+        [documents[0]._id.toHexString()]: [assignations[0]],
+        [documents[1]._id.toHexString()]: [assignations[1]],
       });
     });
 
@@ -65,15 +66,15 @@ describe('fetch', () => {
         fetchAssignationsByDocumentIds([documents[0]._id, documents[1]._id], {
           assertEveryDocumentIsAssigned: true,
         }),
-      ).rejects.toThrow(`The document ${idModule.lib.convertToString(documents[1]._id)} has no matching assignations`);
+      ).rejects.toThrow(`The document ${documents[1]._id.toHexString()} has no matching assignations`);
     });
   });
 
   describe('fetchDocumentIdsAssignatedToUserId', () => {
     const assignationRepository = buildAssignationRepository();
 
-    const userId1 = idModule.lib.buildId();
-    const userId2 = idModule.lib.buildId();
+    const userId1 = new ObjectId();
+    const userId2 = new ObjectId();
 
     it('should fetch all the document id assignated to the given userId', async () => {
       const assignations = ([{ userId: userId1 }, { userId: userId1 }, { userId: userId2 }] as const).map(

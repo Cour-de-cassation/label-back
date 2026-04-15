@@ -1,8 +1,9 @@
-import { documentType, idModule } from '@src/core';
+import { documentType } from '@src/core';
 import { logger } from '../../utils';
 import { preAssignationService } from '../../modules/preAssignation';
 import { assignationService } from '../../modules/assignation';
 import { documentService } from '../../modules/document';
+import { ObjectId } from 'mongodb';
 
 export { buildPreAssignator };
 
@@ -34,14 +35,14 @@ function buildPreAssignator() {
           msg: `Pre-assignation found for document ${document.source} ${document.documentNumber}. Matching pre-assignation number : ${preAssignationForDocument.number}. Creating assignation...`,
         });
         await assignationService.createAssignation({
-          documentId: idModule.lib.buildId(document._id),
-          userId: idModule.lib.buildId(preAssignationForDocument.userId),
+          documentId: new ObjectId(document._id),
+          userId: new ObjectId(preAssignationForDocument.userId),
         });
         await preAssignationService.deletePreAssignation(preAssignationForDocument._id);
         if (document.route === 'automatic' || document.route === 'simple') {
-          await documentService.updateDocumentRoute(idModule.lib.buildId(document._id), 'exhaustive');
+          await documentService.updateDocumentRoute(new ObjectId(document._id), 'exhaustive');
         }
-        await documentService.updateDocumentStatus(idModule.lib.buildId(document._id), 'saved');
+        await documentService.updateDocumentStatus(new ObjectId(document._id), 'saved');
 
         logger.log({
           operationName: 'preAssignation',

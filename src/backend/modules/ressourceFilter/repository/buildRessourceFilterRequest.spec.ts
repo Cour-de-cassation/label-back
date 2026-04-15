@@ -1,5 +1,6 @@
-import { dateBuilder, idModule, ressourceFilterModule } from '@src/core';
+import { dateBuilder, ressourceFilterModule } from '@src/core';
 import { buildRessourceFilterRequest } from './buildRessourceFilterRequest';
+import { ObjectId } from 'mongodb';
 
 describe('buildRessourceFilterRequest', () => {
   it('should build a mongo request according to the given ressource filter', async () => {
@@ -9,7 +10,7 @@ describe('buildRessourceFilterRequest', () => {
     const route = 'simple';
     const startDate = dateBuilder.daysAgo(0);
     const endDate = dateBuilder.daysAgo(1);
-    const userId = idModule.lib.buildId();
+    const userId = new ObjectId();
     const ressourceFilter = ressourceFilterModule.generator.generate({
       mustHaveSurAnnotations: true,
       mustHaveSubAnnotations: true,

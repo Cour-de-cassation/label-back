@@ -1,11 +1,11 @@
-import { idModule, omitIdType } from '../../id';
 import { preAssignationType } from '../preAssignationType';
+import { ObjectId } from 'mongodb';
 
 export { buildPreAssignation };
 
-function buildPreAssignation(preAssignationFields: omitIdType<preAssignationType>): preAssignationType {
+function buildPreAssignation(preAssignationFields: Omit<preAssignationType, '_id'>): preAssignationType {
   return {
     ...preAssignationFields,
-    _id: idModule.lib.buildId(),
+    _id: new ObjectId(),
   };
 }

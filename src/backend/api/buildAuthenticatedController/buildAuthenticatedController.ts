@@ -1,5 +1,6 @@
-import { idModule, userModule, userType } from '@src/core';
+import { userModule, userType } from '@src/core';
 import { logger } from '../../utils';
+import { ObjectId } from 'mongodb';
 
 export { buildAuthenticatedController };
 
@@ -33,7 +34,7 @@ function buildAuthenticatedController<inT, outT>({
     }
 
     const resolvedUser = {
-      _id: idModule.lib.buildId(currentUser._id) as userType['_id'],
+      _id: new ObjectId(currentUser._id) as userType['_id'],
       name: currentUser.name,
       role: currentUser.role as 'admin' | 'annotator' | 'publicator' | 'scrutator',
       email: currentUser.email,

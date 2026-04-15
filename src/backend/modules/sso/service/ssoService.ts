@@ -2,8 +2,10 @@ import { SamlService } from '../../../utils/saml';
 import { buildUserRepository, userService } from '../../user';
 import { logger, jwtHandler } from '../../../utils';
 import every from 'lodash/every';
+import { ObjectId } from 'mongodb';
+
 import includes from 'lodash/includes';
-import { idModule, userType } from '@src/core';
+import { userType } from '@src/core';
 import { Request } from 'express';
 import {
   SSO_FRONT_SUCCESS_CONNEXION_ANNOTATOR_URL,
@@ -79,7 +81,7 @@ export async function acs(req: any) {
       });
 
       await userService.updateUser({
-        userId: idModule.lib.buildId(userDB._id),
+        userId: new ObjectId(userDB._id),
         name: userSSO.name,
         role: userSSO.role,
       });
@@ -134,7 +136,7 @@ export function getUserFromSSO(extract: ParseResponseResult['extract']): userTyp
     name: `${attributes[`${SSO_ATTRIBUTE_NAME}`] as string} ${attributes[`${SSO_ATTRIBUTE_FIRSTNAME}`] as string}`,
     email: attributes[`${SSO_ATTRIBUTE_MAIL}`] as string,
     role: roles[0] as 'annotator' | 'scrutator' | 'admin' | 'publicator',
-    _id: idModule.lib.buildId(),
+    _id: new ObjectId(),
   };
 }
 

@@ -1,102 +1,32 @@
-import { documentModel, checklistModel } from '../document/documentType';
-import { idType } from '../id';
-import { buildModel, buildType } from '../modelType';
+import { checklistItemType, documentImporterType, documentRouteType } from '../document';
+import { ObjectId } from 'mongodb';
 
-export { statisticModel };
-
-export type { statisticType };
-
-const statisticModel = buildModel({
-  kind: 'object',
-  content: {
-    _id: { kind: 'custom', content: 'id' },
-    annotationsCount: { kind: 'primitive', content: 'number' },
-    appealNumber: {
-      kind: 'or',
-      content: [
-        { kind: 'primitive', content: 'string' },
-        { kind: 'primitive', content: 'undefined' },
-      ],
-    },
-    documentNumber: documentModel.content.documentNumber,
-    decisionDate: documentModel.content.decisionMetadata.content.date,
-    documentExternalId: { kind: 'primitive', content: 'string' },
-    chamberName: {
-      kind: 'or',
-      content: [
-        { kind: 'primitive', content: 'string' },
-        { kind: 'primitive', content: 'undefined' },
-      ],
-    },
-    importer: documentModel.content.importer,
-    jurisdiction: {
-      kind: 'or',
-      content: [
-        { kind: 'primitive', content: 'string' },
-        { kind: 'primitive', content: 'undefined' },
-      ],
-    },
-    linkedEntitiesCount: { kind: 'primitive', content: 'number' },
-    publicationCategory: {
-      kind: 'array',
-      content: { kind: 'primitive', content: 'string' },
-    },
-    session: {
-      kind: 'or',
-      content: [
-        { kind: 'primitive', content: 'string' },
-        { kind: 'primitive', content: 'undefined' },
-      ],
-    },
-    endCaseCode: {
-      kind: 'or',
-      content: [
-        { kind: 'primitive', content: 'string' },
-        { kind: 'primitive', content: 'undefined' },
-      ],
-    },
-    NACCode: {
-      kind: 'or',
-      content: [
-        { kind: 'primitive', content: 'string' },
-        { kind: 'primitive', content: 'undefined' },
-      ],
-    },
-    route: documentModel.content.route,
-    source: { kind: 'primitive', content: 'string' },
-    surAnnotationsCount: {
-      kind: 'primitive',
-      content: 'number',
-    },
-    subAnnotationsSensitiveCount: {
-      kind: 'primitive',
-      content: 'number',
-    },
-    subAnnotationsNonSensitiveCount: {
-      kind: 'primitive',
-      content: 'number',
-    },
-    treatmentDate: { kind: 'primitive', content: 'number' },
-    treatmentsSummary: {
-      kind: 'array',
-      content: {
-        kind: 'object',
-        content: {
-          userId: { kind: 'custom', content: 'id' },
-          treatmentDuration: { kind: 'primitive', content: 'number' },
-        },
-      },
-    },
-    wordsCount: { kind: 'primitive', content: 'number' },
-    checklist: checklistModel,
-    comment: {
-      kind: 'or',
-      content: [
-        { kind: 'primitive', content: 'string' },
-        { kind: 'primitive', content: 'undefined' },
-      ],
-    },
-  },
-} as const);
-
-type statisticType = buildType<typeof statisticModel, { id: idType }>;
+export type statisticType = {
+  _id: ObjectId;
+  annotationsCount: number;
+  appealNumber?: string;
+  documentNumber: number;
+  decisionDate?: number;
+  documentExternalId: string;
+  chamberName?: string;
+  importer: documentImporterType;
+  jurisdiction: string;
+  linkedEntitiesCount: number;
+  publicationCategory: string[];
+  session?: string;
+  endCaseCode?: string;
+  NACCode?: string;
+  route: documentRouteType;
+  source: string;
+  surAnnotationsCount: number;
+  subAnnotationsSensitiveCount: number;
+  subAnnotationsNonSensitiveCount: number;
+  treatmentDate: number;
+  treatmentsSummary: Array<{
+    userId: ObjectId;
+    treatmentDuration: number;
+  }>;
+  wordsCount: number;
+  checklist: checklistItemType[];
+  comment?: string;
+};

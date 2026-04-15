@@ -1,6 +1,7 @@
-import { annotationsDiffType, idType, settingsType } from '@src/core';
+import { annotationsDiffType, settingsType } from '@src/core';
 import { assignationService } from '../../assignation';
 import { updateTreatment } from './updateTreatment';
+import { ObjectId } from 'mongodb';
 
 export { updateTreatmentForDocumentIdAndUserId };
 
@@ -11,8 +12,8 @@ async function updateTreatmentForDocumentIdAndUserId(
     userId,
   }: {
     annotationsDiff: annotationsDiffType;
-    documentId: idType;
-    userId: idType;
+    documentId: ObjectId;
+    userId: ObjectId;
   },
   settings: settingsType,
 ) {

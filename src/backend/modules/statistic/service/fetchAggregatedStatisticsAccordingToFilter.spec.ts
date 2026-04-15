@@ -1,6 +1,5 @@
 import {
   documentModule,
-  idModule,
   ressourceFilterModule,
   statisticModule,
   treatmentModule,
@@ -14,6 +13,7 @@ import { buildDocumentRepository } from '../../document';
 import { buildTreatmentRepository } from '../../treatment';
 import { buildStatisticRepository } from '../repository';
 import { fetchAggregatedStatisticsAccordingToFilter } from './fetchAggregatedStatisticsAccordingToFilter';
+import { ObjectId } from 'mongodb';
 
 describe('fetchAggregatedStatisticsAccordingToFilter', () => {
   const assignationRepository = buildAssignationRepository();
@@ -28,8 +28,8 @@ describe('fetchAggregatedStatisticsAccordingToFilter', () => {
 
   describe('statistics', () => {
     it('should fetch all the statistics according to filter', async () => {
-      const userId1 = idModule.lib.buildId();
-      const userId2 = idModule.lib.buildId();
+      const userId1 = new ObjectId();
+      const userId2 = new ObjectId();
       const ressourceFilter = ressourceFilterModule.generator.generate({
         userId: userId1,
       });
@@ -77,8 +77,8 @@ describe('fetchAggregatedStatisticsAccordingToFilter', () => {
 
   describe('done documents', () => {
     it('should fetch all the statistics from the done documents according to filter', async () => {
-      const userId1 = idModule.lib.buildId();
-      const userId2 = idModule.lib.buildId();
+      const userId1 = new ObjectId();
+      const userId2 = new ObjectId();
       const ressourceFilter = ressourceFilterModule.generator.generate({
         source: 'SOURCE1',
         userId: userId1,

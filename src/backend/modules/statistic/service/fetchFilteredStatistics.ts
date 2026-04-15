@@ -1,7 +1,6 @@
 import { flatten } from 'lodash';
 import {
   assignationType,
-  idModule,
   ressourceFilterModule,
   ressourceFilterType,
   settingsType,
@@ -35,8 +34,8 @@ async function fetchFilteredStatistics(filter: ressourceFilterType, settings: se
     const treatmentsByDocumentId = await treatmentService.fetchTreatmentsByDocumentIds(documentIds);
 
     const treatedDocuments = allDocuments.map((document) => {
-      const assignations = assignationsByDocumentId[idModule.lib.convertToString(document._id)];
-      const treatments = treatmentsByDocumentId[idModule.lib.convertToString(document._id)];
+      const assignations = assignationsByDocumentId[document._id.toHexString()];
+      const treatments = treatmentsByDocumentId[document._id.toHexString()];
       const humanTreatments = assignations ? treatmentModule.lib.extractHumanTreatments(treatments, assignations) : [];
 
       return {

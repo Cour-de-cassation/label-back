@@ -1,5 +1,5 @@
 import { buildStatisticRepository } from '../repository';
-import { idModule, statisticType } from '@src/core';
+import { statisticType } from '@src/core';
 import { userService } from '../../user';
 import { ObjectId } from 'mongodb';
 
@@ -39,7 +39,7 @@ async function getUsersAndDuration(
   const users = await userService.fetchUsersByIds(userIds);
   return userTreatments.map((userTreatment) => {
     if (userTreatment.userId != undefined) {
-      const userIdString = idModule.lib.convertToString(userTreatment.userId);
+      const userIdString = userTreatment.userId.toHexString();
       const { name, _id } = users[userIdString];
       return {
         name: name,

@@ -1,5 +1,5 @@
 import { sumBy } from 'lodash';
-import { assignationType, idModule, treatmentModule } from '@src/core';
+import { assignationType, treatmentModule } from '@src/core';
 import { assignationService } from '../../../assignation';
 import { treatmentService } from '../../../treatment';
 import { userService } from '../../../user';
@@ -25,7 +25,7 @@ async function fetchToBeConfirmedDocuments() {
   const treatmentsByDocumentId = await treatmentService.fetchTreatmentsByDocumentIds(documentIds);
 
   return toBeConfirmedDocuments.map((toBeConfirmedDocument) => {
-    const documentIdString = idModule.lib.convertToString(toBeConfirmedDocument._id);
+    const documentIdString = toBeConfirmedDocument._id.toHexString();
     const assignations = assignationsByDocumentId[documentIdString];
     let totalTreatmentDuration: number | undefined, lastTreatmentDate: number | undefined;
     let userNames: string[] = [];
@@ -33,7 +33,7 @@ async function fetchToBeConfirmedDocuments() {
       const treatments = treatmentsByDocumentId[documentIdString];
       const humanTreatments = treatmentModule.lib.extractHumanTreatments(treatments, assignations);
 
-      userNames = humanTreatments.map(({ userId }) => usersByIds[idModule.lib.convertToString(userId)].name);
+      userNames = humanTreatments.map(({ userId }) => usersByIds[userId.toHexString()].name);
       totalTreatmentDuration = sumBy(humanTreatments, ({ treatment }) => treatment.duration);
 
       lastTreatmentDate = humanTreatments[humanTreatments.length - 1].treatment.lastUpdateDate;

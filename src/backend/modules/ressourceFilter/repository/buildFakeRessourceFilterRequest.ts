@@ -1,4 +1,4 @@
-import { idModule, ressourceFilterType, statisticType } from '@src/core';
+import { ressourceFilterType, statisticType } from '@src/core';
 
 export { buildFakeRessourceFilterRequest };
 
@@ -52,8 +52,7 @@ function buildFakeRessourceFilterRequest(ressourceFilter: ressourceFilterType) {
     if (ressourceFilter.userId) {
       const { userId: userIdToFilter } = ressourceFilter;
       isValidAccordingToFilter =
-        isValidAccordingToFilter &&
-        item.treatmentsSummary.some(({ userId }) => idModule.lib.equalId(userId, userIdToFilter));
+        isValidAccordingToFilter && item.treatmentsSummary.some(({ userId }) => userId.equals(userIdToFilter));
     }
 
     return isValidAccordingToFilter;

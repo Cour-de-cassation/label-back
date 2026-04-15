@@ -1,6 +1,6 @@
 import { generatorType } from '../../../types';
-import { idModule } from '../../id';
 import { documentType } from '../documentType';
+import { ObjectId } from 'mongodb';
 
 export { documentGenerator, decisionMetadataGenerator, checklistGenerator };
 
@@ -49,7 +49,6 @@ const decisionMetadataGenerator: generatorType<documentType['decisionMetadata']>
     NACCode,
     endCaseCode,
     occultationBlock,
-    parties,
     session,
     solution,
     motivationOccultation,
@@ -71,7 +70,6 @@ const decisionMetadataGenerator: generatorType<documentType['decisionMetadata']>
     NACCode: NACCode ?? '',
     endCaseCode: endCaseCode ?? '',
     occultationBlock: occultationBlock ?? 0,
-    parties: parties ?? [],
     session: session ?? '',
     solution: solution ?? '',
     motivationOccultation: motivationOccultation ?? undefined,
@@ -98,7 +96,6 @@ const documentGenerator: generatorType<documentType> = {
     title,
     text,
     updateDate,
-    zoning,
     nlpVersions,
     checklist,
   } = {}) => ({
@@ -106,7 +103,7 @@ const documentGenerator: generatorType<documentType> = {
     decisionMetadata: decisionMetadata ? decisionMetadata : decisionMetadataGenerator.generate(),
     documentNumber: documentNumber ?? Math.floor(Math.random() * 1000000),
     externalId: externalId ?? `EXTERNAL_ID_${Math.random()}`,
-    _id: _id ? idModule.lib.buildId(_id) : idModule.lib.buildId(),
+    _id: _id ? new ObjectId(_id) : new ObjectId(),
     importer: importer ?? 'default',
     loss: loss,
     priority: priority !== undefined ? priority : 0,
@@ -118,7 +115,6 @@ const documentGenerator: generatorType<documentType> = {
     title: title ?? `TITLE_${Math.random()}`,
     text: text ?? `TEXT_${Math.random()}`,
     updateDate: updateDate ?? new Date().getTime(),
-    zoning: zoning ?? undefined,
     nlpVersions: nlpVersions ?? undefined,
     checklist: checklist ?? checklistGenerator.generate(Math.floor(Math.random() * (10 - 0 + 1) + 0)),
   }),

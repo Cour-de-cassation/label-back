@@ -1,5 +1,6 @@
-import { assignationType, documentType, idModule, idType, indexer, userType } from '@src/core';
+import { assignationType, documentType, indexer, userType } from '@src/core';
 import { buildAssignationRepository } from '../repository';
+import { ObjectId } from 'mongodb';
 
 export {
   fetchAllAssignationsById,
@@ -23,7 +24,7 @@ async function fetchAllAssignationsById(assignationIds?: assignationType['_id'][
 
   if (assignationIds) {
     indexer.assertEveryIdIsDefined(
-      assignationIds.map((assignationId) => idModule.lib.convertToString(assignationId)),
+      assignationIds.map((assignationId) => assignationId.toHexString()),
       assignationsById,
       (_id) => `The assignation id ${_id} has no matching assignation`,
     );
@@ -32,16 +33,16 @@ async function fetchAllAssignationsById(assignationIds?: assignationType['_id'][
   return assignationsById;
 }
 
-async function fetchAssignationId({ userId, documentId }: { userId: idType; documentId: idType }) {
+async function fetchAssignationId({ userId, documentId }: { userId: ObjectId; documentId: ObjectId }) {
   const assignationRepository = buildAssignationRepository();
   const assignations = await assignationRepository.findAllByUserId(userId);
-  const assignation = assignations.find((assignation) => idModule.lib.equalId(assignation.documentId, documentId));
+  const assignation = assignations.find((assignation) => assignation.documentId.equals(documentId));
 
   return assignation?._id;
 }
 
 async function fetchAssignationsByDocumentIds(
-  documentIdsToSearchIn: idType[],
+  documentIdsToSearchIn: ObjectId[],
   options: { assertEveryDocumentIsAssigned: boolean },
 ) {
   const assignationRepository = buildAssignationRepository();
@@ -50,7 +51,7 @@ async function fetchAssignationsByDocumentIds(
 
   if (options?.assertEveryDocumentIsAssigned) {
     indexer.assertEveryIdIsDefined(
-      documentIdsToSearchIn.map(idModule.lib.convertToString),
+      documentIdsToSearchIn.map((documentId) => documentId.toHexString()),
       assignationsByDocumentIds,
       (_id) => `The document ${_id} has no matching assignations`,
     );
@@ -58,7 +59,7 @@ async function fetchAssignationsByDocumentIds(
   return assignationsByDocumentIds;
 }
 
-async function fetchAssignationsOfDocumentId(documentId: idType): Promise<assignationType[]> {
+async function fetchAssignationsOfDocumentId(documentId: ObjectId): Promise<assignationType[]> {
   const assignationRepository = buildAssignationRepository();
 
   return assignationRepository.findAllByDocumentId(documentId);

@@ -2,7 +2,6 @@ import {
   annotationsDiffModule,
   annotationsDiffType,
   assignationType,
-  idModule,
   settingsModule,
   settingsType,
   treatmentModule,
@@ -43,7 +42,7 @@ async function updateTreatment({
     document.decisionMetadata.motivationOccultation,
   );
 
-  const actionToPerform = `update treatment for documentId ${idModule.lib.convertToString(assignation.documentId)}`;
+  const actionToPerform = `update treatment for documentId ${assignation.documentId.toHexString()}`;
   const previousAnnotations = treatmentModule.lib.computeAnnotations(sortedTreatments);
   const treatment = await treatmentRepository.findById(assignation.treatmentId);
   annotationsDiffModule.lib.assertAnnotationsDiffAreConsistent(

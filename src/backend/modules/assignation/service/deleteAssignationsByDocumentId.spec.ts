@@ -1,15 +1,16 @@
-import { assignationModule, idModule, problemReportModule, treatmentModule } from '@src/core';
+import { assignationModule, problemReportModule, treatmentModule } from '@src/core';
 import { buildProblemReportRepository } from '../../problemReport';
 import { buildTreatmentRepository } from '../../treatment';
 import { buildAssignationRepository } from '../repository';
 import { deleteAssignationsByDocumentId } from './deleteAssignationsByDocumentId';
+import { ObjectId } from 'mongodb';
 
 describe('deleteAssignationsByDocumentId', () => {
   it('should delete treatments and assignations', async () => {
     const assignationRepository = buildAssignationRepository();
     const problemReportRepository = buildProblemReportRepository();
     const treatmentRepository = buildTreatmentRepository();
-    const documentId = idModule.lib.buildId();
+    const documentId = new ObjectId();
     const treatment = treatmentModule.generator.generate();
     const assignation = assignationModule.generator.generate({
       treatmentId: treatment._id,

@@ -1,4 +1,4 @@
-import { documentType, documentModule, idModule, timeOperator } from '@src/core';
+import { documentType, documentModule, timeOperator } from '@src/core';
 import {
   extractReadableChamberName,
   extractReadableJurisdictionName,
@@ -71,64 +71,6 @@ async function mapCourtDecisionToDocument(
     sderCourtDecision.raisonInteretParticulier,
   );
 
-  let moyens = undefined;
-  if (sderCourtDecision.originalTextZoning?.zones?.moyens) {
-    if (Array.isArray(sderCourtDecision.originalTextZoning.zones.moyens)) {
-      moyens = sderCourtDecision.originalTextZoning.zones.moyens;
-    } else {
-      moyens = [sderCourtDecision.originalTextZoning.zones.moyens];
-    }
-  }
-
-  let expose_du_litige = undefined;
-  if (sderCourtDecision.originalTextZoning?.zones?.['expose du litige']) {
-    if (Array.isArray(sderCourtDecision.originalTextZoning.zones['expose du litige'])) {
-      expose_du_litige = sderCourtDecision.originalTextZoning.zones['expose du litige'];
-    } else {
-      expose_du_litige = [sderCourtDecision.originalTextZoning.zones['expose du litige']];
-    }
-  }
-
-  let motivations = undefined;
-  if (sderCourtDecision.originalTextZoning?.zones?.motivations) {
-    if (Array.isArray(sderCourtDecision.originalTextZoning.zones.motivations)) {
-      motivations = sderCourtDecision.originalTextZoning.zones.motivations;
-    } else {
-      motivations = [sderCourtDecision.originalTextZoning.zones.motivations];
-    }
-  }
-
-  const zoningZones = {
-    introduction: sderCourtDecision.originalTextZoning?.zones?.introduction || undefined,
-    moyens: moyens,
-    'expose du litige': expose_du_litige,
-    motivations: motivations,
-    dispositif: sderCourtDecision.originalTextZoning?.zones?.dispositif || undefined,
-    'moyens annexes': sderCourtDecision.originalTextZoning?.zones?.['moyens annexes'] || undefined,
-  };
-
-  const introduction_subzonage = {
-    n_arret: sderCourtDecision.originalTextZoning?.introduction_subzonage?.n_arret || undefined,
-    formation: sderCourtDecision.originalTextZoning?.introduction_subzonage?.formation || undefined,
-    publication: sderCourtDecision.originalTextZoning?.introduction_subzonage?.publication || undefined,
-    juridiction: sderCourtDecision.originalTextZoning?.introduction_subzonage?.juridiction || undefined,
-    chambre: sderCourtDecision.originalTextZoning?.introduction_subzonage?.chambre || undefined,
-    pourvoi: sderCourtDecision.originalTextZoning?.introduction_subzonage?.pourvoi || undefined,
-    composition: sderCourtDecision.originalTextZoning?.introduction_subzonage?.composition || undefined,
-  };
-
-  let zoning = undefined;
-  if (sderCourtDecision.originalTextZoning) {
-    zoning = {
-      zones: zoningZones || undefined,
-      introduction_subzonage: introduction_subzonage || undefined,
-      visa: sderCourtDecision.originalTextZoning?.visa || undefined,
-      is_public: sderCourtDecision.originalTextZoning?.is_public || undefined,
-      is_public_text: sderCourtDecision.originalTextZoning?.is_public_text || undefined,
-      arret_id: sderCourtDecision.originalTextZoning?.arret_id,
-    };
-  }
-
   const nlpTreatment = sderCourtDecision.labelTreatments
     ?.filter((treatment) => treatment.source === 'NLP')
     .sort((a, b) => b.order - a.order)[0];
@@ -155,7 +97,6 @@ async function mapCourtDecisionToDocument(
       jurisdiction: readableJurisdictionName,
       NACCode,
       endCaseCode,
-      parties: sderCourtDecision.parties ? sderCourtDecision.parties : [],
       occultationBlock: sderCourtDecision.blocOccultation || undefined,
       session,
       solution,
@@ -164,7 +105,7 @@ async function mapCourtDecisionToDocument(
       sommaire: sderCourtDecision.sommaire ?? '',
     },
     documentNumber: sderCourtDecision.sourceId,
-    externalId: idModule.lib.convertToString(sderCourtDecision._id ?? ''),
+    externalId: sderCourtDecision._id ?? '',
     loss: undefined,
     priority,
     publicationCategory,
@@ -173,7 +114,6 @@ async function mapCourtDecisionToDocument(
     source,
     title,
     text: sderCourtDecision.originalText,
-    zoning: zoning,
     nlpVersions: nlpTreatment?.version,
     checklist: nlpTreatment?.checklist ?? [],
   });

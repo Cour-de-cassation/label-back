@@ -1,9 +1,10 @@
-import { preAssignationModule, idType } from '@src/core';
+import { preAssignationModule } from '@src/core';
 import { buildPreAssignationRepository } from '..';
+import { ObjectId } from 'mongodb';
 
 export { createPreAssignation };
 
-async function createPreAssignation({ userId, source, number }: { userId: idType; source: string; number: string }) {
+async function createPreAssignation({ userId, source, number }: { userId: ObjectId; source: string; number: string }) {
   const preAssignationRepository = buildPreAssignationRepository();
 
   const preAssignation = preAssignationModule.lib.buildPreAssignation({

@@ -1,23 +1,12 @@
 import { stringComparisonSensitivityType } from '../../lib';
-import { buildModel } from '../modelType';
 
-export { categoryIconNames, constantColors, settingsModel, shadeColors };
+export { categoryIconNames, constantColors, shadeColors };
 
-export type {
-  categoryIconNameType,
-  categorySettingType,
-  colorType,
-  constantColorType,
-  displayModeType,
-  settingsType,
-  shadeColorType,
-};
-
-type settingsType = {
+export type settingsType = {
   [category: string]: categorySettingType;
 };
 
-type categorySettingType = {
+export type categorySettingType = {
   anonymization: string;
   color: { [displayMode in displayModeType]: colorType };
   iconName: categoryIconNameType;
@@ -30,7 +19,7 @@ type categorySettingType = {
   canBeAnnotatedBy: 'both' | 'NLP' | 'human';
 };
 
-type displayModeType = 'lightMode' | 'darkMode';
+export type displayModeType = 'lightMode' | 'darkMode';
 
 const categoryIconNames = [
   'bank',
@@ -55,7 +44,7 @@ const categoryIconNames = [
   'eyeoff',
 ] as const;
 
-type categoryIconNameType = (typeof categoryIconNames)[number];
+export type categoryIconNameType = (typeof categoryIconNames)[number];
 
 const constantColors = ['black', 'white'] as const;
 
@@ -80,16 +69,8 @@ const shadeColors = [
   'yellow',
 ] as const;
 
-type constantColorType = (typeof constantColors)[number];
+export type constantColorType = (typeof constantColors)[number];
 
-type shadeColorType = [(typeof shadeColors)[number], string];
+export type shadeColorType = [(typeof shadeColors)[number], string];
 
-type colorType = constantColorType | shadeColorType;
-
-// The settings are passed as a JSON string to parse
-const settingsModel = buildModel({
-  kind: 'object',
-  content: {
-    json: { kind: 'primitive', content: 'string' },
-  },
-} as const);
+export type colorType = constantColorType | shadeColorType;

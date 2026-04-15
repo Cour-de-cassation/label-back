@@ -1,4 +1,4 @@
-import { annotationModule, annotationType, assignationType, documentType, idModule, settingsType } from '@src/core';
+import { annotationModule, annotationType, assignationType, documentType, settingsType } from '@src/core';
 import { buildDocumentRepository, documentService } from '../../modules/document';
 import { logger } from '../../utils';
 import { connectorConfigType } from './connectorConfigType';

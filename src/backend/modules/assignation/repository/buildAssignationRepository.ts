@@ -1,4 +1,4 @@
-import { assignationType, idModule, indexer } from '@src/core';
+import { assignationType, indexer } from '@src/core';
 import { buildRepositoryBuilder } from '../../../repository';
 import { customAssignationRepositoryType } from './customAssignationRepositoryType';
 
@@ -26,7 +26,7 @@ const buildAssignationRepository = buildRepositoryBuilder<assignationType, custo
     async findAllByDocumentIds(documentIdsToSearchIn) {
       const assignations = await collection.find({ documentId: { $in: documentIdsToSearchIn } }).toArray();
 
-      return indexer.indexManyBy(assignations, (assignation) => idModule.lib.convertToString(assignation.documentId));
+      return indexer.indexManyBy(assignations, (assignation) => assignation.documentId.toHexString());
     },
 
     async findByDocumentIdAndUserId({ documentId, userId }) {

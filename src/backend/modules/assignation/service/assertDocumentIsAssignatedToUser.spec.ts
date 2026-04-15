@@ -1,13 +1,14 @@
-import { assignationModule, idModule } from '@src/core';
+import { assignationModule } from '@src/core';
+import { ObjectId } from 'mongodb';
 import { buildAssignationRepository } from '../repository';
 import { assertDocumentIsAssignatedToUser } from './assertDocumentIsAssignatedToUser';
 
 describe('assertDocumentIsAssignatedToUser', () => {
   it('should throw one error', async () => {
     const assignationRepository = buildAssignationRepository();
-    const userId = idModule.lib.buildId();
-    const documentId = idModule.lib.buildId();
-    const otherDocumentId = idModule.lib.buildId();
+    const userId = new ObjectId();
+    const documentId = new ObjectId();
+    const otherDocumentId = new ObjectId();
     const assignation = assignationModule.generator.generate({
       userId,
       documentId,

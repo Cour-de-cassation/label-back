@@ -1,8 +1,8 @@
 import { annotationModule } from '../../annotation';
 import { annotationsDiffModule } from '../../annotationsDiff';
-import { idModule } from '../../id';
 import { settingsModule } from '../../settings';
 import { build } from './build';
+import { ObjectId } from 'mongodb';
 
 describe('build', () => {
   it('should build a new treatment with the appropriate fields', () => {
@@ -28,7 +28,7 @@ describe('build', () => {
           { start: 90, text: 'Gaston', category: 'personnePhysiquePrenom' },
         ].map(annotationModule.generator.generate),
       ),
-      documentId: idModule.lib.buildId(),
+      documentId: new ObjectId(),
       order: 3,
       source: 'annotator' as const,
     };

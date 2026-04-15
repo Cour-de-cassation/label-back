@@ -1,4 +1,4 @@
-import { cacheType, dateBuilder, idModule, indexer } from '@src/core';
+import { cacheType, dateBuilder, indexer } from '@src/core';
 import { buildCacheRepository } from '../repository';
 
 export { fetchCache, fetchAllById, fetchAllByKey, fetchAllOlderThan };
@@ -16,7 +16,7 @@ async function fetchAllById(cacheIds?: cacheType['_id'][]) {
 
   if (cacheIds) {
     indexer.assertEveryIdIsDefined(
-      cacheIds.map((cacheId) => idModule.lib.convertToString(cacheId)),
+      cacheIds.map((cacheId) => cacheId.toHexString()),
       cachesById,
       (_id: string) => `The cache id ${_id} has no matching cache`,
     );
