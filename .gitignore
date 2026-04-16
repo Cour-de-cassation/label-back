@@ -18,3 +18,5 @@ k8s*
 *coverage
 .ash_history
 .npm
+.vscode
+.vscode/*
