@@ -72,6 +72,14 @@ function buildApi(app: Express) {
       res.status(200).json(result);
     } catch (error) {
       handleError(error, res, next);
+      logger.error({
+        operations: ['other', `buildController`],
+        path: `./src/backend/api/buildApi.ts`,
+        message: error instanceof Error ? error.message : `${error}`,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      res.status((error as any).statusCode || 500);
+      next(error);
     }
   });
 
@@ -455,8 +463,10 @@ function buildApi(app: Express) {
       res.redirect(context);
     } catch (err) {
       logger.error({
-        operationName: 'SSO Login Endpoint',
-        msg: `Login error: ${err}`,
+        operations: ['other', 'buildApiSso.login'],
+        path: './src/backend/api/buildApi.ts',
+        message: `Login error: ${err}`,
+        stack: err instanceof Error ? err.stack : undefined,
       });
       res.status(401).json({
         status: 401,
@@ -471,8 +481,10 @@ function buildApi(app: Express) {
       res.redirect(context);
     } catch (err) {
       logger.error({
-        operationName: 'logoutSso',
-        msg: `${err}`,
+        operations: ['other', 'buildApiSso.logout'],
+        path: './src/backend/api/buildApi.ts',
+        message: err instanceof Error ? err.message : `${err}`,
+        stack: err instanceof Error ? err.stack : undefined,
       });
       res.status(500).json({
         status: 500,
@@ -508,7 +520,12 @@ function buildApi(app: Express) {
         const url = ssoService.setUserSessionAndReturnRedirectUrl(req, user, 'dev-session');
         res.redirect(url);
       } catch (err) {
-        logger.error({ operationName: 'SSO Dev Login', msg: `${err}` });
+        logger.error({
+          operations: ['other', 'SSO Dev Login'],
+          path: './src/backend/api/buildApi.ts',
+          message: `${err}`,
+          stack: err instanceof Error ? err.stack : undefined,
+        });
         res.status(500).send(String(err));
       }
     });
@@ -564,7 +581,12 @@ function parseQuery(query: any): any {
 }
 
 function handleError(error: any, res: Response, next: NextFunction) {
-  logger.error({ operationName: 'apiError', msg: `${error}` });
+  logger.error({
+    operations: ['other', 'apiError'],
+    path: './src/backend/api/buildApi.ts',
+    message: `${error}`,
+    stack: error instanceof Error ? error.stack : undefined,
+  });
   res.status(error.statusCode || 500);
   next(error);
 }

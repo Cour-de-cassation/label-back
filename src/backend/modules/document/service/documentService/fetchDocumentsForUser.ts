@@ -38,10 +38,11 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
         const assignatedDocument = await fetchDocumentForUser(new ObjectId(userId), documentIdsWithAnnotations);
         documents.push(assignatedDocument);
       } catch (error) {
-        logger.log({
-          operationName: 'fetchDocumentsForUser',
-          msg: 'Error',
-          data: error as Record<string, unknown>,
+        logger.error({
+          operations: ['other', 'fetchDocumentsForUser'],
+          path: 'src/backend/modules/document/service/documentService/fetchDocumentsForUser.ts',
+          message: 'Error',
+          stack: error instanceof Error ? error.stack : undefined,
         });
       }
     }

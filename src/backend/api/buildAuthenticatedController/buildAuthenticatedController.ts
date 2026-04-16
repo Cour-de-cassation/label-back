@@ -27,8 +27,9 @@ function buildAuthenticatedController<inT, outT>({
     if (!currentUser) {
       const error = new Error(`user session has expired or is invalid`);
       logger.error({
-        operationName: 'Authenticated Controller',
-        msg: `No authenticated user found for ${req.path}`,
+        operations: ['other', 'buildAuthenticatedController'],
+        path: './src/backend/api/buildAuthenticatedController/buildAuthenticatedController.ts',
+        message: `No authenticated user found for ${req.path}`,
       });
       throw error;
     }

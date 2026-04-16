@@ -3,10 +3,13 @@ import { loggerType } from './loggerType';
 export { testLogger };
 
 const testLogger: loggerType = {
-  async log() {
+  async info() {
     return;
   },
   async error() {
+    return;
+  },
+  async warn() {
     return;
   },
 };

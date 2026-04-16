@@ -2,14 +2,17 @@ import { logger } from '../../utils';
 import { assignationService } from '../../modules/assignation';
 import { buildDocumentRepository } from '../../modules/document';
 import { userService } from '../../modules/user';
+import { TechLog } from '@src/backend/utils/logger/loggerType';
 
 export { displayMultipleAssignatedDocuments };
 
 async function displayMultipleAssignatedDocuments() {
-  logger.log({
-    operationName: 'displayMultipleAssignatedDocuments',
-    msg: 'START',
-  });
+  const loggerTech: TechLog = {
+    operations: ['other', 'displayMultipleAssignatedDocuments'],
+    path: './src/backend/app/scripts/displayMultipleAssignatedDocuments.ts',
+    message: 'displayMultipleAssignatedDocuments',
+  };
+  logger.info({ ...loggerTech, message: 'START' });
   const documentRepository = buildDocumentRepository();
   const documents = await documentRepository.findAll();
 
@@ -22,20 +25,20 @@ async function displayMultipleAssignatedDocuments() {
       : [];
     if (userNames.length > 1) {
       documentCount++;
-      logger.log({
-        operationName: 'displayMultipleAssignatedDocuments',
-        msg: `${document.documentNumber} (${document.source}) has ${
+      logger.info({
+        ...loggerTech,
+        message: `${document.documentNumber} (${document.source}) has ${
           userNames.length
         } assignated: [${userNames.join(', ')}]`,
       });
     }
   }
-  logger.log({
-    operationName: 'displayMultipleAssignatedDocuments',
-    msg: `${documentCount} documents found`,
+  logger.info({
+    ...loggerTech,
+    message: `${documentCount} documents found`,
   });
-  logger.log({
-    operationName: 'displayMultipleAssignatedDocuments',
-    msg: 'DONE',
+  logger.info({
+    ...loggerTech,
+    message: 'DONE',
   });
 }

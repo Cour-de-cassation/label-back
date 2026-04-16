@@ -1,6 +1,7 @@
 import { annotationModule, annotationType, assignationType, documentType, settingsType } from '@src/core';
 import { buildDocumentRepository, documentService } from '../../modules/document';
 import { logger } from '../../utils';
+import { DecisionLog, TechLog } from '@src/backend/utils/logger/loggerType';
 import { connectorConfigType } from './connectorConfigType';
 import { treatmentService } from '../../modules/treatment';
 import { buildPreAssignator } from '../preAssignator';
@@ -34,39 +35,44 @@ function buildConnector(connectorConfig: connectorConfigType) {
     lowPriority: boolean;
     settings: settingsType;
   }) {
-    logger.log({
-      operationName: 'importSpecificDocument',
-      msg: `START: ${documentNumber} - ${source}, lowPriority: ${lowPriority}`,
+    const logerTech: TechLog = {
+      operations: ['other', 'importSpecificDocument'],
+      path: 'src/backend/lib/connector/buildConnector.ts',
+      message: 'importSpecificDocument',
+    };
+    logger.info({
+      ...logerTech,
+      message: `START: ${documentNumber} - ${source}, lowPriority: ${lowPriority}`,
     });
 
     try {
       const courtDecision = await connectorConfig.fetchCourtDecisionBySourceIdAndSourceName(documentNumber, source);
 
       if (!courtDecision) {
-        logger.log({
-          operationName: 'importSpecificDocument',
-          msg: 'No court decision found for specified documentNumber and source',
+        logger.info({
+          ...logerTech,
+          message: 'No court decision found for specified documentNumber and source',
         });
         return;
       }
 
       if (!courtDecision.originalText || !courtDecision.labelTreatments || courtDecision.labelTreatments.length === 0) {
-        logger.log({
-          operationName: 'importSpecificDocument',
-          msg: 'Court decision must have an original text and labelTreatments, skipping.',
+        logger.info({
+          ...logerTech,
+          message: 'Court decision must have an original text and labelTreatments, skipping.',
         });
         return;
       }
 
-      logger.log({
-        operationName: 'importSpecificDocument',
-        msg: `Court decision found. labelStatus: ${courtDecision.labelStatus}`,
+      logger.info({
+        ...logerTech,
+        message: `Court decision found. labelStatus: ${courtDecision.labelStatus}`,
       });
       const document = await connectorConfig.mapCourtDecisionToDocument(courtDecision, 'manual');
 
-      logger.log({
-        operationName: 'importSpecificDocument',
-        msg: 'Court decision converted. Inserting document into database...',
+      logger.info({
+        ...logerTech,
+        message: 'Court decision converted. Inserting document into database...',
       });
 
       if (lowPriority) {
@@ -74,9 +80,9 @@ function buildConnector(connectorConfig: connectorConfigType) {
       } else {
         await insertDocument({ ...document, route: 'request', priority: 4, status: 'toBeConfirmed' }, settings);
       }
-      logger.log({
-        operationName: 'importSpecificDocument',
-        msg: 'Insertion done',
+      logger.info({
+        ...logerTech,
+        message: 'Insertion done',
       });
 
       const lastLabelTreatment = courtDecision.labelTreatments.sort((a, b) => b.order - a.order)[0];
@@ -119,36 +125,40 @@ function buildConnector(connectorConfig: connectorConfigType) {
         }
       }
 
-      logger.log({
-        operationName: 'importSpecificDocument',
-        msg: 'Selected document has been inserted in label database.',
+      logger.info({
+        ...logerTech,
+        message: 'Selected document has been inserted in label database.',
       });
       await connectorConfig.updateDocumentLabelStatusToLoaded(document.externalId);
-      logger.log({ operationName: 'importSpecificDocument', msg: 'DONE' });
+      logger.info({ ...logerTech, message: 'DONE' });
     } catch (error) {
       logger.error({
-        operationName: 'importSpecificDocument',
-        msg: `${error}`,
-        data: error as Record<string, unknown>,
+        ...logerTech,
+        message: `${error}`,
       });
     }
   }
 
   async function importNewDocuments(settings: settingsType) {
-    logger.log({
-      operationName: 'importNewDocuments',
-      msg: `Starting importNewDocuments...`,
+    const logerDoc: TechLog = {
+      operations: ['other', 'importNewDocuments'],
+      path: 'src/backend/lib/connector/buildConnector.ts',
+      message: 'importNewDocuments',
+    };
+    logger.info({
+      ...logerDoc,
+      message: `Starting importNewDocuments...`,
     });
 
     for (const source of Object.values(Deprecated.Sources)) {
-      logger.log({
-        operationName: 'importNewDocuments',
-        msg: `Fetching ${source} decisions...`,
+      logger.info({
+        ...logerDoc,
+        message: `Fetching ${source} decisions...`,
       });
       const newDecisionForSource = await connectorConfig.fetchDecisionsToPseudonymise(source);
-      logger.log({
-        operationName: 'importNewDocuments',
-        msg: `${newDecisionForSource.length} ${source} decisions to pseudonymise found.`,
+      logger.info({
+        ...logerDoc,
+        message: `${newDecisionForSource.length} ${source} decisions to pseudonymise found.`,
       });
 
       for (
@@ -207,8 +217,8 @@ function buildConnector(connectorConfig: connectorConfigType) {
           await connectorConfig.updateDocumentLabelStatusToLoaded(converted.externalId);
         } catch (err) {
           logger.error({
-            operationName: 'importNewDocuments',
-            msg: `${err}`,
+            ...logerDoc,
+            message: `${err}`,
           });
         }
       }
@@ -217,14 +227,24 @@ function buildConnector(connectorConfig: connectorConfigType) {
 }
 
 async function insertDocument(document: documentType, settings: settingsType) {
+  const loggerDecision: DecisionLog = {
+    operations: ['other', 'insertDocument'],
+    path: 'src/backend/lib/connector/buildConnector.ts',
+    message: 'insert document',
+    decision: {
+      sourceId: document.documentNumber.toString(),
+      sourceName: document.source,
+      labelStatus: document.status,
+    },
+  };
   const documentRepository = buildDocumentRepository();
   let assignations: assignationType[] = [];
 
   const sameDocument = await documentRepository.findOneByExternalId(document.externalId);
   if (sameDocument) {
-    logger.log({
-      operationName: 'documentInsertion',
-      msg: `Document ${document.source}:${document.documentNumber} is already in label database, deleting old one.`,
+    logger.info({
+      ...loggerDecision,
+      message: `Document ${document.source}:${document.documentNumber} is already in label database, deleting old one.`,
     });
 
     await statisticService.saveStatisticsOfDocument(sameDocument, settings, 'deleted because new reception');
@@ -237,27 +257,15 @@ async function insertDocument(document: documentType, settings: settingsType) {
 
   try {
     const insertedDocument = documentRepository.insert(document);
-    logger.log({
-      operationName: 'documentInsertion',
-      msg: `Document ${document.source}:${document.documentNumber} has been inserted in database imported by ${document.importer}`,
-      data: {
-        decision: {
-          sourceId: document.documentNumber,
-          sourceName: document.source,
-        },
-      },
+    logger.info({
+      ...loggerDecision,
+      message: `Document ${document.source}:${document.documentNumber} has been inserted in database imported by ${document.importer}`,
     });
 
     if (assignations.length > 0) {
-      logger.log({
-        operationName: 'documentInsertion',
-        msg: `Document ${document.source}:${document.documentNumber} previously had an assignation, pre-assigning it.`,
-        data: {
-          decision: {
-            sourceId: document.documentNumber,
-            sourceName: document.source,
-          },
-        },
+      logger.info({
+        ...loggerDecision,
+        message: `Document ${document.source}:${document.documentNumber} previously had an assignation, pre-assigning it.`,
       });
       preAssignationService.createPreAssignation({
         userId: assignations[0].userId,
@@ -268,14 +276,9 @@ async function insertDocument(document: documentType, settings: settingsType) {
     return insertedDocument;
   } catch (error) {
     logger.error({
-      operationName: 'documentInsertion',
-      msg: `Failed to import ${document.source}:${document.documentNumber} document. ${error}`,
-      data: {
-        decision: {
-          sourceId: document.documentNumber,
-          sourceName: document.source,
-        },
-      },
+      ...loggerDecision,
+      message: `Failed to import ${document.source}:${document.documentNumber} document. ${error}`,
+      stack: error instanceof Error ? error.stack : undefined,
     });
   }
 }

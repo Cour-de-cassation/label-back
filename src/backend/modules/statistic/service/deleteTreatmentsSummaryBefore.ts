@@ -12,9 +12,10 @@ async function deleteTreatmentsSummaryBefore({ since, unit }: { since: number; u
 
   const count = await statisticRepository.deleteTreatmentsSummaryByIds(treatmentsSummaryToDeleteIds);
 
-  logger.log({
-    operationName: 'deleteTreatmentsSummaryBefore',
-    msg: `START: ${since} ${unit}: ${count} treatments sumary deleted`,
+  logger.info({
+    operations: ['other', 'deleteTreatmentsSummaryBefore'],
+    path: 'src/backend/modules/statistic/service/deleteTreatmentsSummaryBefore.ts',
+    message: `START: ${since} ${unit}: ${count} treatments summary deleted`,
   });
 
   function computeExpirationDate() {

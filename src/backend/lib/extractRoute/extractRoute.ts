@@ -24,27 +24,26 @@ async function extractRoute(document: documentType): Promise<documentType['route
     }
   } catch (e) {
     logger.error({
-      operationName: `extractRouteFor ${document.source}`,
-      msg: `Error extracting route for ${document.source}:${document.documentNumber}: ${e}`,
-      data: {
+      operations: ['other', `extractRouteFor ${document.source}`],
+      path: `src/backend/lib/extractRoute/extractRoute.ts`,
+      message: `Error extracting route for ${JSON.stringify({
         decision: {
           sourceId: document.documentNumber,
           sourceName: document.source,
         },
-      },
+      })}`,
+      stack: e instanceof Error ? e.stack : undefined,
     });
     route = 'default';
   }
 
-  logger.log({
-    operationName: `extractRoute`,
-    msg: `Applied route: ${route}`,
-    data: {
-      appliedRoute: route,
-      decision: {
-        sourceId: document.documentNumber,
-        sourceName: document.source,
-      },
+  logger.info({
+    operations: ['other', `extractRouteFor ${document.source}`],
+    path: `src/backend/lib/extractRoute/extractRoute.ts`,
+    message: `Applied route: ${route}`,
+    decision: {
+      sourceId: document.documentNumber.toString(),
+      sourceName: document.source,
     },
   });
 

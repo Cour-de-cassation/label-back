@@ -1,22 +1,31 @@
-import { loggerType } from './loggerType';
-import { prettyLogFormatter } from './prettyLogFormatter';
-
 export { localLogger };
+import { TechLog, DecisionLog } from './loggerType';
 
-const localLogger: loggerType = {
-  async log({ operationName, msg, data }: { operationName: string; msg: string; data?: Record<string, unknown> }) {
-    // eslint-disable-next-line no-console
-    console.log(prettyLogFormatter.formatLog({ level: 'info', operationName, msg, data }));
+const localLogger = {
+  info(log: TechLog | DecisionLog) {
+    console.log({
+      level: 'info',
+      operations: log.operations,
+      path: log.path,
+      message: log.message ?? '',
+      decision: 'decision' in log ? { decision: log.decision } : undefined,
+    });
   },
-  async error({ operationName, msg, data }: { operationName: string; msg: string; data?: Record<string, unknown> }) {
-    // eslint-disable-next-line no-console
-    console.error(
-      prettyLogFormatter.formatLog({
-        level: 'error',
-        operationName,
-        msg,
-        data,
-      }),
-    );
+  warn(log: TechLog) {
+    console.warn({
+      level: 'warn',
+      operations: log.operations,
+      path: log.path,
+      message: log.message ?? '',
+    });
+  },
+  error(log: TechLog & { stack?: string }) {
+    console.error({
+      level: 'error',
+      operations: log.operations,
+      path: log.path,
+      message: log.message ?? '',
+      stack: log.stack ? { stack: log.stack } : undefined,
+    });
   },
 };

@@ -7,7 +7,11 @@ import { cleanOrphansTreatments } from './cleanOrphansTreatments';
 export { cleanDocuments };
 
 async function cleanDocuments() {
-  logger.log({ operationName: 'cleanDocuments', msg: 'START' });
+  logger.info({
+    operations: ['other', 'cleanDocuments'],
+    path: 'src/backend/app/scripts/cleanDocuments/cleanDocuments.ts',
+    message: 'START',
+  });
 
   await cleanAssignedDocuments();
 
@@ -17,5 +21,9 @@ async function cleanDocuments() {
 
   await cleanOrphansTreatments();
 
-  logger.log({ operationName: 'cleanDocuments', msg: 'DONE' });
+  logger.info({
+    operations: ['other', 'cleanDocuments'],
+    path: 'src/backend/app/scripts/cleanDocuments/cleanDocuments.ts',
+    message: 'DONE',
+  });
 }
