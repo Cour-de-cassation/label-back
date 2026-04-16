@@ -27,6 +27,6 @@ export type statisticType = {
     treatmentDuration: number;
   }>;
   wordsCount: number;
-  checklist: checklistItemType[];
+  checklist: checklistItemType[] | undefined;
   comment?: string;
 };

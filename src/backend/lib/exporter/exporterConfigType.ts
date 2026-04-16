@@ -1,5 +1,5 @@
-import { documentType } from '@src/core';
-import { Decision, LabelStatus, LabelTreatments, PublishStatus } from 'dbsder-api-types';
+import { AcceptedDocumentTypes, documentType } from '@src/core';
+import { LabelStatus, LabelTreatments, PublishStatus } from 'dbsder-api-types';
 
 export type { exporterConfigType };
 
@@ -11,5 +11,5 @@ type exporterConfigType = {
     labelStatus: LabelStatus;
     publishStatus: PublishStatus;
   }) => Promise<void>;
-  fetchDecisionByExternalId: (externalId: documentType['externalId']) => Promise<Decision | undefined>;
+  fetchDecisionByExternalId: (externalId: documentType['externalId']) => Promise<AcceptedDocumentTypes | undefined>;
 };

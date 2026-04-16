@@ -5,7 +5,6 @@ import { buildExporter } from './buildExporter';
 import { exporterConfigType } from './exporterConfigType';
 import { sderApi } from '@src/courDeCassation/sderApi';
 import { nlpApi } from '@src/courDeCassation/nlpApi';
-import { ObjectId } from 'mongodb';
 import { Affaire, LabelTreatments } from 'dbsder-api-types';
 
 jest.mock('@src/courDeCassation/sderApi');

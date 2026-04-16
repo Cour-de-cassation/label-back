@@ -1,15 +1,16 @@
-import { documentType } from '@src/core';
-import { Decision } from 'dbsder-api-types';
+import { AcceptedDocumentTypes } from '@src/core';
 
 export type { connectorConfigType };
 
 type connectorConfigType = {
   name: string;
-  fetchCourtDecisionBySourceIdAndSourceName(sourceId: number, sourceName: string): Promise<Decision | undefined>;
+  fetchCourtDecisionBySourceIdAndSourceName(
+    sourceId: number,
+    sourceName: string,
+  ): Promise<AcceptedDocumentTypes | undefined>;
   fetchDecisionsToPseudonymise(sourceName: string): Promise<{
-    next: () => Promise<Decision | undefined>;
+    next: () => Promise<AcceptedDocumentTypes | undefined>;
     length: number;
   }>;
   updateDocumentLabelStatusToLoaded: (externalId: string) => Promise<void>;
-  mapCourtDecisionToDocument: (courtDecision: Decision, importer: documentType['importer']) => Promise<documentType>;
 };

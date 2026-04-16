@@ -11,6 +11,7 @@ import { extractRoute } from '../extractRoute';
 import { updateDocumentRoute } from '../../modules/document/service/documentService/updateDocumentRoute';
 import { updateDocumentStatus } from '../../modules/document/service/documentService/updateDocumentStatus';
 import { getNextStatus } from '@src/core/modules/document/lib';
+import { mapCourtDecisionToDocument } from '@src/courDeCassation/connector/mapper/mapCourtDecisionToDocument';
 
 export { buildConnector };
 
@@ -63,7 +64,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
         operationName: 'importSpecificDocument',
         msg: `Court decision found. labelStatus: ${courtDecision.labelStatus}`,
       });
-      const document = await connectorConfig.mapCourtDecisionToDocument(courtDecision, 'manual');
+      const document = await mapCourtDecisionToDocument(courtDecision, 'manual');
 
       logger.log({
         operationName: 'importSpecificDocument',
@@ -161,7 +162,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
           if (!decision.originalText || !decision.labelTreatments || decision.labelTreatments.length === 0) {
             throw new Error('Court decision must have an original text and labelTreatments, can not be imported.');
           }
-          const converted = await connectorConfig.mapCourtDecisionToDocument(decision, 'recent');
+          const converted = await mapCourtDecisionToDocument(decision, 'recent');
           await insertDocument(converted, settings);
 
           const lastLabelTreatment = decision.labelTreatments.sort((a, b) => b.order - a.order)[0];

@@ -28,7 +28,7 @@ function extractRouteForJurinet(document: documentType): documentType['route'] {
   /*
     Relecture exhaustive en cas de mises en doute
   */
-  if (checklist.length > 0) {
+  if (checklist && checklist.length > 0) {
     return 'exhaustive';
   }
 

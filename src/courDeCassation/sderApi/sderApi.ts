@@ -1,8 +1,8 @@
-import { documentType } from '@src/core';
+import { AcceptedDocumentTypes, documentType } from '@src/core';
 import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 import QueryString from 'qs';
 import { DBSDER_API_URL, DBSDER_API_KEY } from '@src/backend/utils/env';
-import { Affaire, Decision, LabelStatus, LabelTreatments, PublishStatus, ReplacementTerm } from 'dbsder-api-types';
+import { Affaire, LabelStatus, LabelTreatments, PublishStatus, ReplacementTerm } from 'dbsder-api-types';
 
 export { sderApi };
 
@@ -43,7 +43,7 @@ async function fetchApi<T = Record<string, unknown>>({
 
 async function fetchDecisions(query: Record<string, unknown>) {
   type Response = {
-    decisions: Decision[];
+    decisions: AcceptedDocumentTypes[];
     totalDecisions: number;
     nextCursor?: string;
   };
@@ -88,7 +88,10 @@ const sderApi = {
     };
   },
 
-  async fetchCourtDecisionBySourceIdAndSourceName(sourceId: number, sourceName: string): Promise<Decision | undefined> {
+  async fetchCourtDecisionBySourceIdAndSourceName(
+    sourceId: number,
+    sourceName: string,
+  ): Promise<AcceptedDocumentTypes | undefined> {
     const decisionList = await fetchDecisions({ sourceId, sourceName });
 
     if (decisionList.decisions.length > 0) {
@@ -97,8 +100,8 @@ const sderApi = {
     return undefined;
   },
 
-  async fetchDecisionByExternalId(externalId: documentType['externalId']): Promise<Decision | undefined> {
-    const decision = await fetchApi<Decision>({
+  async fetchDecisionByExternalId(externalId: documentType['externalId']): Promise<AcceptedDocumentTypes | undefined> {
+    const decision = await fetchApi<AcceptedDocumentTypes>({
       method: 'get',
       path: `decisions/${externalId}`,
     });

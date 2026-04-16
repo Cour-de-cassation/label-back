@@ -16,6 +16,7 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
   const categoriesToOmit = document.decisionMetadata.categoriesToOmit;
 
   if (
+    checklist &&
     checklist.length > 0 &&
     // TEMP : ne pas prendre en compte les checklist si occultation des motifs
     document.decisionMetadata.motivationOccultation != true
