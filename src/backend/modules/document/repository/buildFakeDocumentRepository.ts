@@ -90,16 +90,6 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
       return document || undefined;
     },
 
-    async findOneByStatusWithoutLossNotIn(statuses, idsNotToSearchIn) {
-      const document = await collection.find(
-        (document) =>
-          statuses.some((status: documentType['status']) => document.status === status) &&
-          document.loss === undefined &&
-          !idsNotToSearchIn.some((id) => id.equals(document._id)),
-      );
-      return document || undefined;
-    },
-
     async findOneByDocumentNumberAndSource({ documentNumber, source }) {
       return collection.find((document) => document.source === source && document.documentNumber === documentNumber);
     },

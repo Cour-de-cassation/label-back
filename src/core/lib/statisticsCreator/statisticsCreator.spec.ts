@@ -22,7 +22,6 @@ describe('statisticsCreator', () => {
     decisionMetadata: documentModule.decisionMetadataGenerator.generate({
       additionalTermsToAnnotate: '',
       appealNumber: 'MACHIN',
-      boundDecisionDocumentNumbers: [],
       categoriesToOmit: [],
       chamberName: 'Chambre criminelle',
       criminalCaseCode: '',

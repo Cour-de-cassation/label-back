@@ -2,7 +2,6 @@ import { buildCallAttemptsRegulator } from '../../../../utils/callAttemptsRegula
 import { assertDocumentIsPublishable } from './assertDocumentIsPublishable';
 import { assertDocumentStatus } from './assertDocumentStatus';
 import { countDocumentsWithoutAnnotations } from './countDocumentsWithoutAnnotations';
-import { countDoneDocumentsWithoutLossNotIn } from './countDoneDocumentsWithoutLossNotIn';
 import { countDoneDocuments } from './countDoneDocuments';
 import { countFreeDocuments } from './countFreeDocuments';
 import { countLockedDocuments } from './countLockedDocuments';
@@ -21,7 +20,6 @@ import { buildFetchDocumentsForUser } from './fetchDocumentsForUser';
 import { fetchDocumentBySourceAndDocumentNumber } from './fetchDocumentBySourceAndDocumentNumber';
 import { fetchDocumentsReadyToExport } from './fetchDocumentsReadyToExport';
 import { fetchDoneDocuments } from './fetchDoneDocuments';
-import { fetchDoneDocumentWithoutLossNotIn } from './fetchDoneDocumentWithoutLossNotIn';
 import { fetchFreeDocumentsIds } from './fetchFreeDocumentsIds';
 import { fetchLockedDocuments } from './fetchLockedDocuments';
 import { fetchPublishableDocuments } from './fetchPublishableDocuments';
@@ -54,7 +52,6 @@ function buildDocumentService() {
     assertDocumentIsPublishable,
     assertDocumentStatus,
     countDocumentsWithoutAnnotations,
-    countDoneDocumentsWithoutLossNotIn,
     countDoneDocuments,
     countFreeDocuments,
     countLockedDocuments,
@@ -74,7 +71,6 @@ function buildDocumentService() {
     fetchDocumentsForUser: buildFetchDocumentsForUser(checkCallAttempts),
     fetchDocumentsReadyToExport,
     fetchDoneDocuments,
-    fetchDoneDocumentWithoutLossNotIn,
     fetchFreeDocumentsIds,
     fetchLockedDocuments,
     fetchPublishableDocuments,

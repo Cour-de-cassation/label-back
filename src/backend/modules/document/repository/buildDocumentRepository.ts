@@ -140,15 +140,6 @@ const buildDocumentRepository = buildRepositoryBuilder<documentType, customDocum
       return document || undefined;
     },
 
-    async findOneByStatusWithoutLossNotIn(statuses, idsNotToSearchIn) {
-      const document = await collection.findOne({
-        status: { $in: statuses },
-        loss: undefined,
-        _id: { $nin: idsNotToSearchIn },
-      });
-      return document || undefined;
-    },
-
     async findAllByNACCodesAndStatus(
       NACCodes: documentType['decisionMetadata']['NACCode'][],
       statuses: documentType['status'][],

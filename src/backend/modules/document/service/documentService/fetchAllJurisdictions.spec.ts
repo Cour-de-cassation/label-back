@@ -11,7 +11,6 @@ describe('fetchAllJurisdictions', () => {
           decisionMetadata: documentModule.decisionMetadataGenerator.generate({
             appealNumber: '',
             additionalTermsToAnnotate: '',
-            boundDecisionDocumentNumbers: [],
             categoriesToOmit: [],
             chamberName: '',
             criminalCaseCode: '',

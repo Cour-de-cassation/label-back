@@ -167,7 +167,6 @@ describe('filterTreatedDocuments', () => {
           chamberName: '',
           date: decisionDate,
           categoriesToOmit: [],
-          boundDecisionDocumentNumbers: [],
           NACCode: '',
           endCaseCode: '',
           appealNumber: '',

@@ -1,9 +1,5 @@
 import { documentType, documentModule, timeOperator, AcceptedDocumentTypes } from '@src/core';
-import {
-  extractReadableChamberName,
-  extractReadableJurisdictionName,
-  extractAppealRegisterRoleGeneralNumber,
-} from './extractors';
+import { extractReadableChamberName, extractNumeroPourvoi } from './extractors';
 import { categoriesMapper } from './categoriesMapper';
 import { DecisionCa, DecisionCc, DecisionTcom, DecisionTj, LabelTreatments } from 'dbsder-api-types';
 
@@ -28,15 +24,9 @@ async function mapCourtDecisionToDocument(
 // ─── Per-type mappers ─────────────────────────────────────────────────────────
 
 function mapDecisionCc(decision: DecisionCc, importer: documentType['importer']): documentType {
-  const jurisdictionName = extractReadableJurisdictionName(decision.jurisdictionName ?? undefined);
+  const jurisdictionName = 'Cour de cassation';
   const chamberName = extractReadableChamberName({ chamberId: decision.chamberId ?? undefined });
-  const appealNumber = extractAppealRegisterRoleGeneralNumber(
-    decision.originalText ?? '',
-    decision.sourceName,
-    jurisdictionName,
-    decision.appeals[0],
-    decision.registerNumber ?? undefined,
-  );
+  const appealNumber = extractNumeroPourvoi(jurisdictionName, decision.appeals[0]);
   const publicationCategory = computePublicationCategoryCc(decision);
   const NACCode = '';
   const NAOCode = decision.NAOCode ?? '';
@@ -53,7 +43,6 @@ function mapDecisionCc(decision: DecisionCc, importer: documentType['importer'])
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
       additionalTermsParsingFailed: (decision.occultation.additionalTermsToUnAnnotate?.length ?? 0) > 0,
-      boundDecisionDocumentNumbers: computeBoundDecisionsCc(decision.decatt),
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
       civilCaseCode: decision.natureAffaireCivil?.trim() ?? '',
       civilMatterCode: decision.codeMatiereCivil?.trim() ?? '',
@@ -72,7 +61,6 @@ function mapDecisionCc(decision: DecisionCc, importer: documentType['importer'])
     },
     documentNumber: decision.sourceId,
     externalId: decision._id,
-    loss: undefined,
     priority: computePriority(decision.sourceName, publicationCategory, NACCode, importer, undefined),
     publicationCategory,
     route: 'default',
@@ -95,19 +83,13 @@ function mapDecisionCc(decision: DecisionCc, importer: documentType['importer'])
 }
 
 function mapDecisionCa(decision: DecisionCa, importer: documentType['importer']): documentType {
-  const jurisdictionName = extractReadableJurisdictionName(decision.jurisdictionName ?? undefined);
+  const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
   const chamberName = extractReadableChamberName({
     chamberName: decision.chamberName ?? undefined,
     chamberId: decision.chamberId ?? undefined,
   });
-  const appealNumber = extractAppealRegisterRoleGeneralNumber(
-    decision.originalText ?? '',
-    decision.sourceName,
-    jurisdictionName,
-    undefined,
-    decision.registerNumber,
-  );
-  const publicationCategory = computePublicationCategoryCa(decision);
+  const appealNumber = decision.registerNumber ? decision.registerNumber.split(' ')[0] : undefined;
+  const publicationCategory = [decision.pubCategory];
   const NACCode = decision.NACCode ?? '';
   const decisionDate = convertToValidDate(decision.dateDecision ?? undefined);
   const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
@@ -122,7 +104,6 @@ function mapDecisionCa(decision: DecisionCa, importer: documentType['importer'])
         additionalTermsToUnAnnotate: decision.occultation?.additionalTermsToUnAnnotate ?? [],
       },
       additionalTermsParsingFailed: (decision.occultation?.additionalTermsToUnAnnotate?.length ?? 0) > 0,
-      boundDecisionDocumentNumbers: [],
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit),
       civilCaseCode: '',
       civilMatterCode: '',
@@ -141,7 +122,6 @@ function mapDecisionCa(decision: DecisionCa, importer: documentType['importer'])
     },
     documentNumber: decision.sourceId,
     externalId: decision._id,
-    loss: undefined,
     priority: computePriority(
       decision.sourceName,
       publicationCategory,
@@ -170,15 +150,8 @@ function mapDecisionCa(decision: DecisionCa, importer: documentType['importer'])
 }
 
 function mapDecisionTj(decision: DecisionTj, importer: documentType['importer']): documentType {
-  const jurisdictionName = extractReadableJurisdictionName(decision.jurisdictionName);
-  const appealNumber = extractAppealRegisterRoleGeneralNumber(
-    decision.originalText,
-    decision.sourceName,
-    jurisdictionName,
-    undefined,
-    undefined,
-    decision.numeroRoleGeneral,
-  );
+  const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
+  const appealNumber = decision.numeroRoleGeneral;
   const publicationCategory: string[] = [];
   const NACCode = decision.NACCode;
   const decisionDate = convertToValidDate(decision.dateDecision);
@@ -194,7 +167,6 @@ function mapDecisionTj(decision: DecisionTj, importer: documentType['importer'])
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
       additionalTermsParsingFailed: (decision.occultation.additionalTermsToUnAnnotate?.length ?? 0) > 0,
-      boundDecisionDocumentNumbers: [],
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
       civilCaseCode: '',
       civilMatterCode: '',
@@ -213,7 +185,6 @@ function mapDecisionTj(decision: DecisionTj, importer: documentType['importer'])
     },
     documentNumber: decision.sourceId,
     externalId: decision._id,
-    loss: undefined,
     priority: computePriority(
       decision.sourceName,
       publicationCategory,
@@ -242,18 +213,12 @@ function mapDecisionTj(decision: DecisionTj, importer: documentType['importer'])
 }
 
 function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importer']): documentType {
-  const jurisdictionName = extractReadableJurisdictionName(decision.jurisdictionName);
+  const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
   const chamberName = extractReadableChamberName({
     chamberName: decision.chamberName ?? undefined,
     chamberId: decision.chamberId ?? undefined,
   });
-  const appealNumber = extractAppealRegisterRoleGeneralNumber(
-    decision.originalText,
-    decision.sourceName,
-    jurisdictionName,
-    undefined,
-    decision.registerNumber,
-  );
+  const appealNumber = decision.registerNumber;
   const publicationCategory: string[] = [];
   const decisionDate = convertToValidDate(decision.dateDecision);
   const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
@@ -268,7 +233,6 @@ function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importe
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
       additionalTermsParsingFailed: (decision.occultation.additionalTermsToUnAnnotate?.length ?? 0) > 0,
-      boundDecisionDocumentNumbers: [],
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
       civilCaseCode: '',
       civilMatterCode: decision.codeMatiereCivil?.trim() ?? '',
@@ -287,7 +251,6 @@ function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importe
     },
     documentNumber: decision.sourceId,
     externalId: decision._id,
-    loss: undefined,
     priority: computePriority(decision.sourceName, publicationCategory, '', importer, undefined),
     publicationCategory,
     route: 'default',
@@ -374,15 +337,6 @@ function computePublicationCategoryCc(decision: DecisionCc): string[] {
   if (decision.pubCategory) categories.push(decision.pubCategory);
   if (decision.publication) categories.push(...decision.publication);
   return categories;
-}
-
-function computePublicationCategoryCa(decision: DecisionCa): string[] {
-  return [decision.pubCategory];
-}
-
-function computeBoundDecisionsCc(decatt: DecisionCc['decatt']): number[] {
-  if (!decatt) return [];
-  return decatt.map(Number).filter((n) => !isNaN(n));
 }
 
 function extractNlpTreatment(labelTreatments: LabelTreatments | undefined) {

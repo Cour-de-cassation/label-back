@@ -60,7 +60,6 @@ export type decisionMetadataType = {
     additionalTermsToUnAnnotate: string[];
   };
   additionalTermsParsingFailed?: boolean;
-  boundDecisionDocumentNumbers: number[];
   categoriesToOmit: string[];
   chamberName: string;
   civilCaseCode: string;
@@ -89,7 +88,6 @@ export type documentType = {
   decisionMetadata: decisionMetadataType;
   documentNumber: number;
   importer: documentImporterType;
-  loss?: number;
   nlpVersions?: nlpVersionsType | null;
   publicationCategory: string[];
   reviewStatus: reviewStatusType;

@@ -19,7 +19,7 @@ async function fetchAnonymizedDocumentText(documentId: documentType['_id']) {
     document.decisionMetadata.additionalTermsParsingFailed,
     document.decisionMetadata.motivationOccultation,
   );
-  const seed = documentModule.lib.computeCaseNumber(document);
+  const seed = document.documentNumber;
   const anonymizer = buildAnonymizer(settingsForDocument, annotations, seed);
 
   const anonymizedDocument = anonymizer.anonymizeDocument(document);
