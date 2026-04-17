@@ -42,7 +42,8 @@ function mapDecisionCc(decision: DecisionCc, importer: documentType['importer'])
         additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
-      additionalTermsParsingFailed: (decision.occultation.additionalTermsToUnAnnotate?.length ?? 0) > 0,
+      additionalTermsParsingFailed:
+        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
       civilCaseCode: decision.natureAffaireCivil?.trim() ?? '',
       civilMatterCode: decision.codeMatiereCivil?.trim() ?? '',
@@ -103,7 +104,9 @@ function mapDecisionCa(decision: DecisionCa, importer: documentType['importer'])
         additionalTermsToAnnotate: decision.occultation?.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation?.additionalTermsToUnAnnotate ?? [],
       },
-      additionalTermsParsingFailed: (decision.occultation?.additionalTermsToUnAnnotate?.length ?? 0) > 0,
+      additionalTermsParsingFailed:
+        decision.occultation?.additionalTermsToUnAnnotate &&
+        decision.occultation.additionalTermsToUnAnnotate.length > 0,
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit),
       civilCaseCode: '',
       civilMatterCode: '',
@@ -166,7 +169,8 @@ function mapDecisionTj(decision: DecisionTj, importer: documentType['importer'])
         additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
-      additionalTermsParsingFailed: (decision.occultation.additionalTermsToUnAnnotate?.length ?? 0) > 0,
+      additionalTermsParsingFailed:
+        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
       civilCaseCode: '',
       civilMatterCode: '',
@@ -232,7 +236,8 @@ function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importe
         additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
-      additionalTermsParsingFailed: (decision.occultation.additionalTermsToUnAnnotate?.length ?? 0) > 0,
+      additionalTermsParsingFailed:
+        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
       civilCaseCode: '',
       civilMatterCode: decision.codeMatiereCivil?.trim() ?? '',
