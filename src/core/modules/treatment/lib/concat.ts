@@ -22,6 +22,7 @@ function concat(
       labelTreatments.unshift({
         annotations: computeAnnotations(sortedTreatments).map((annotation) => ({
           ...annotation,
+          // Label do not use "Category" type from dbsder-api-types internaly to be independant but we need to cast it to build the labelTreatment to be exported
           category: annotation.category as Category,
         })),
         source: computeSource(currentTreatment.source),
@@ -33,6 +34,7 @@ function concat(
                 ...item,
                 entities: item.entities.map((entity) => ({
                   ...entity,
+                  // Label do not use "Category" type from dbsder-api-types internaly to be independant but we need to cast it to build the labelTreatment to be exported
                   category: entity.category as Category,
                 })),
               }))
