@@ -1,4 +1,4 @@
 import { extractReadableChamberName } from './extractReadableChamberName';
-import { extractNumeroPourvoi, regexExtractAppealNumber } from './extractNumeroPourvoi';
+import { extractNumeroPourvoi } from './extractNumeroPourvoi';
 
-export { extractReadableChamberName, extractNumeroPourvoi, regexExtractAppealNumber };
+export { extractReadableChamberName, extractNumeroPourvoi };
