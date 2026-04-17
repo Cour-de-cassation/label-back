@@ -1,7 +1,7 @@
 import { treatmentType } from '..';
 import { computeAnnotations } from './computeAnnotations';
 import { documentType } from '../../document/documentType';
-import { LabelTreatments } from 'dbsder-api-types';
+import { Category, LabelTreatments } from 'dbsder-api-types';
 
 export { concat };
 
@@ -20,11 +20,23 @@ function concat(
 
     if (currentTreatment.source != 'reimportedTreatment') {
       labelTreatments.unshift({
-        annotations: computeAnnotations(sortedTreatments),
+        annotations: computeAnnotations(sortedTreatments).map((annotation) => ({
+          ...annotation,
+          category: annotation.category as Category,
+        })),
         source: computeSource(currentTreatment.source),
         order,
         version: currentTreatment.source === 'NLP' ? nlpVersions : undefined,
-        checklist: currentTreatment.source === 'NLP' ? checklist : undefined,
+        checklist:
+          currentTreatment.source === 'NLP'
+            ? checklist?.map((item) => ({
+                ...item,
+                entities: item.entities.map((entity) => ({
+                  ...entity,
+                  category: entity.category as Category,
+                })),
+              }))
+            : undefined,
         treatmentDate: new Date(currentTreatment.lastUpdateDate).toISOString(),
       });
     }
