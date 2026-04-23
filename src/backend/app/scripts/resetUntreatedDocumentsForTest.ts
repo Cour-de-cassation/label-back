@@ -1,17 +1,23 @@
 import { documentType } from '@src/core';
 import { logger } from '../../utils';
 import { buildDocumentRepository } from '../../modules/document';
+import { TechLog } from '@src/backend/utils/logger/loggerType';
 
 export { resetUntreatedDocumentsForTest };
 
 async function resetUntreatedDocumentsForTest() {
-  logger.log({ operationName: 'resetUntreatedDocumentsForTest', msg: 'START' });
+  const loggerTech: TechLog = {
+    operations: ['other', 'resetUntreatedDocumentsForTest'],
+    path: 'src/backend/app/scripts/resetUntreatedDocumentsForTest.ts',
+    message: 'START',
+  };
+  logger.info(loggerTech);
   const documentRepository = buildDocumentRepository();
 
   const untreatedDocuments = await documentRepository.findAllByStatus(['free']);
-  logger.log({
-    operationName: 'resetUntreatedDocumentsForTest',
-    msg: `Found ${untreatedDocuments.length} untreated documents`,
+  logger.info({
+    ...loggerTech,
+    message: `Found ${untreatedDocuments.length} untreated documents`,
   });
 
   const updatedUntreatedDocuments = untreatedDocuments.map((document) => ({
@@ -28,7 +34,10 @@ async function resetUntreatedDocumentsForTest() {
     }),
   );
 
-  logger.log({ operationName: 'resetUntreatedDocumentsForTest', msg: 'DONE' });
+  logger.info({
+    ...loggerTech,
+    message: 'DONE',
+  });
 }
 
 function getRandomRoute(): documentType['route'] {

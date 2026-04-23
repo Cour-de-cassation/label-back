@@ -2,18 +2,25 @@ import { settingsType } from '@src/core';
 import { buildDocumentRepository, documentService } from '../../modules/document';
 import { statisticService } from '../../modules/statistic';
 import { logger } from '../../utils';
+import { TechLog } from '@src/backend/utils/logger/loggerType';
 
 export { deleteDocumentsBySource };
 
 const BATCH_SIZE = 500;
 
 async function deleteDocumentsBySource(source: string, settings: settingsType) {
+  const loggerTech: TechLog = {
+    operations: ['other', 'deleteDocumentsBySource'],
+    path: './src/backend/app/scripts/deleteDocumentsBySource.ts',
+    message: 'deleteDocumentsBySource',
+  };
+
   if (!source) {
-    logger.error({ operationName: 'deleteDocumentsBySource', msg: 'Missing source argument' });
+    logger.error({ ...loggerTech, message: 'Missing source argument' });
     return;
   }
 
-  logger.log({ operationName: 'deleteDocumentsBySource', msg: `START source=${source}` });
+  logger.info({ ...loggerTech, message: `START source=${source}` });
 
   const documentRepository = buildDocumentRepository();
   let totalDeleted = 0;
@@ -31,16 +38,16 @@ async function deleteDocumentsBySource(source: string, settings: settingsType) {
       totalDeleted += 1;
     }, Promise.resolve());
 
-    logger.log({
-      operationName: 'deleteDocumentsBySource',
-      msg: `Progress: deleted ${totalDeleted} (batch size ${documents.length})`,
+    logger.info({
+      ...loggerTech,
+      message: `Progress: deleted ${totalDeleted} (batch size ${documents.length})`,
     });
 
     await deleteNextBatch();
   }
 
-  logger.log({
-    operationName: 'deleteDocumentsBySource',
-    msg: `DONE source=${source}, totalDeleted=${totalDeleted}`,
+  logger.info({
+    ...loggerTech,
+    message: `DONE source=${source}, totalDeleted=${totalDeleted}`,
   });
 }

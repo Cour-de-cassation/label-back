@@ -4,6 +4,7 @@ import { preAssignationService } from '../../modules/preAssignation';
 import { assignationService } from '../../modules/assignation';
 import { documentService } from '../../modules/document';
 import { ObjectId } from 'mongodb';
+import { DecisionLog } from '@src/backend/utils/logger/loggerType';
 
 export { buildPreAssignator };
 
@@ -13,10 +14,17 @@ function buildPreAssignator() {
   };
 
   async function preAssignDocument(document: documentType): Promise<boolean> {
-    logger.log({
-      operationName: 'preAssignation',
-      msg: `Starting preAssignation for document ${document.source} ${document.documentNumber}`,
-    });
+    const loggerDecision: DecisionLog = {
+      operations: ['other', 'preAssignation'],
+      path: 'src/backend/lib/preAssignator/buildPreAssignator.ts',
+      message: `Starting preAssignation for document ${document.source} ${document.documentNumber}`,
+      decision: {
+        sourceId: document.documentNumber.toString(),
+        sourceName: document.source,
+        labelStatus: document.status,
+      },
+    };
+    logger.info(loggerDecision);
 
     if (document.status === 'loaded') {
       const preAssignationForDocument =
@@ -30,9 +38,10 @@ function buildPreAssignator() {
         ));
 
       if (preAssignationForDocument != undefined) {
-        logger.log({
-          operationName: 'preAssignation',
-          msg: `Pre-assignation found for document ${document.source} ${document.documentNumber}. Matching pre-assignation number : ${preAssignationForDocument.number}. Creating assignation...`,
+        logger.info({
+          ...loggerDecision,
+          operations: ['other', 'preAssignation'],
+          message: `Pre-assignation found for document ${document.source} ${document.documentNumber}. Matching pre-assignation number : ${preAssignationForDocument.number}. Creating assignation...`,
         });
         await assignationService.createAssignation({
           documentId: new ObjectId(document._id),
@@ -44,23 +53,23 @@ function buildPreAssignator() {
         }
         await documentService.updateDocumentStatus(new ObjectId(document._id), 'saved');
 
-        logger.log({
-          operationName: 'preAssignation',
-          msg: `Pre-assignation DONE`,
+        logger.info({
+          ...loggerDecision,
+          message: `Pre-assignation DONE`,
         });
 
         return true;
       } else {
-        logger.log({
-          operationName: 'preAssignation',
-          msg: `Pre-assignation not found for document ${document.source} ${document.documentNumber}`,
+        logger.info({
+          ...loggerDecision,
+          message: `Pre-assignation not found for document ${document.source} ${document.documentNumber}`,
         });
         return false;
       }
     } else {
       logger.error({
-        operationName: 'preAssignation',
-        msg: `Document status must be loaded before pre-assign it`,
+        ...loggerDecision,
+        message: `Document status must be loaded before pre-assign it`,
       });
       throw new Error('Document status must be loaded before pre-assign it');
     }

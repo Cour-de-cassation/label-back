@@ -9,9 +9,10 @@ function jwtMiddleware(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      logger.log({
-        operationName: 'JWT Middleware',
-        msg: `No authorization header, continuing without user`,
+      logger.info({
+        operations: ['other', 'JWT Middleware'],
+        path: './src/backend/utils/jwt/jwtMiddleware.ts',
+        message: `No authorization header, continuing without user`,
       });
       return next();
     }
@@ -30,8 +31,10 @@ function jwtMiddleware(req: Request, res: Response, next: NextFunction) {
     next();
   } catch (error) {
     logger.error({
-      operationName: 'JWT Middleware',
-      msg: `Token verification failed: ${error}`,
+      operations: ['other', 'JWT Middleware'],
+      path: './src/backend/utils/jwt/jwtMiddleware.ts',
+      message: `Token verification failed`,
+      stack: error instanceof Error ? error.stack : undefined,
     });
     next();
   }

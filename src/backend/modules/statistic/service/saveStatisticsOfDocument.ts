@@ -35,43 +35,42 @@ async function saveStatisticsOfDocument(document: documentType, settings: settin
       const user = users[humanTreatment.userId.toHexString()];
 
       if (user) {
-        logger.log({
-          operationName: 'documentStatistics',
-          msg: `Human treatment for document ${document.source}:${document.documentNumber} : ${
+        logger.info({
+          operations: ['other', 'documentStatistics'],
+          path: 'src/backend/modules/statistic/service/saveStatisticsOfDocument.ts',
+          message: `Human treatment for document ${document.source}:${document.documentNumber} : ${
             user.name
           } treat the document in ${timeOperator.convertDurationToReadableDuration(
             humanTreatment.treatment.duration,
           )} on ${timeOperator.convertTimestampToReadableDate(humanTreatment.treatment.lastUpdateDate, true)}`,
-          data: {
-            decision: {
-              sourceId: document.documentNumber,
-              sourceName: document.source,
-            },
-            treatmentDuration: humanTreatment.treatment.duration,
-            treatmentLastUpdateDate: new Date(humanTreatment.treatment.lastUpdateDate).toISOString(),
-            userName: user.name,
+          decision: {
+            sourceId: document.documentNumber.toString(),
+            sourceName: document.source,
           },
         });
       }
     }
   }
 
-  logger.log({
-    operationName: 'documentStatistics',
-    msg: `Create statistics for document ${document.source}:${document.documentNumber}`,
-    data: {
-      decision: {
-        sourceId: statistic.documentNumber,
-        sourceName: statistic.source,
+  logger.info({
+    operations: ['other', 'documentStatistics'],
+    path: 'src/backend/modules/statistic/service/saveStatisticsOfDocument.ts',
+    message: `Create statistics for document ${document.source}:${document.documentNumber}, 
+    ${JSON.stringify({
+      data: {
+        statistics: {
+          route: statistic.route,
+          wordsCount: statistic.wordsCount,
+          surAnnotationsCount: statistic.surAnnotationsCount,
+          subAnnotationsSensitiveCount: statistic.subAnnotationsSensitiveCount,
+          subAnnotationsNonSensitiveCount: statistic.subAnnotationsNonSensitiveCount,
+          linkedEntitiesCount: statistic.linkedEntitiesCount,
+        },
       },
-      statistics: {
-        route: statistic.route,
-        wordsCount: statistic.wordsCount,
-        surAnnotationsCount: statistic.surAnnotationsCount,
-        subAnnotationsSensitiveCount: statistic.subAnnotationsSensitiveCount,
-        subAnnotationsNonSensitiveCount: statistic.subAnnotationsNonSensitiveCount,
-        linkedEntitiesCount: statistic.linkedEntitiesCount,
-      },
+    })}`,
+    decision: {
+      sourceId: statistic.documentNumber.toString(),
+      sourceName: statistic.source,
     },
   });
 

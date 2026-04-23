@@ -1,22 +1,23 @@
-export type { loggerType };
+export type DecisionLog = {
+  decision: {
+    _id?: string;
+    sourceId: string;
+    sourceName: string;
+    publishStatus?: string;
+    labelStatus?: string;
+  };
+  path: string;
+  operations: readonly ['collect' | 'extraction' | 'normalization' | 'other', string];
+  message?: string;
+};
 
-type loggerType = {
-  log: ({
-    operationName,
-    msg,
-    data,
-  }: {
-    operationName: string;
-    msg: string;
-    data?: Record<string, unknown>;
-  }) => Promise<void>;
-  error: ({
-    operationName,
-    msg,
-    data,
-  }: {
-    operationName: string;
-    msg: string;
-    data?: Record<string, unknown>;
-  }) => Promise<void>;
+export type TechLog = {
+  path: string;
+  operations: readonly ['collect' | 'extraction' | 'normalization' | 'other', string];
+  message?: string;
+};
+export type loggerType = {
+  error: (a: TechLog & { stack?: string }) => void;
+  warn: (a: TechLog) => void;
+  info: (a: TechLog | DecisionLog) => void;
 };

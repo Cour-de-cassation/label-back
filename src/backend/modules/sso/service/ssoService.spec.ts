@@ -29,13 +29,15 @@ jest.mock('../../../utils/saml', () => ({
 }));
 jest.mock('../../../utils/logger', () => ({
   logger: {
-    log: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
     error: jest.fn(),
   },
 }));
 jest.mock('../../../utils', () => ({
   logger: {
-    log: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
     error: jest.fn(),
   },
   jwtHandler: {

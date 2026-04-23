@@ -40,16 +40,18 @@ const problemReportService = {
       const user = users[userId.toHexString()];
 
       if (document && user) {
-        logger.log({
-          operationName: 'createProblemReport',
-          msg: `Problem report created on document ${document.source}:${document.documentNumber} by ${user.name}`,
-          data: {
-            decision: {
-              sourceId: document.documentNumber,
-              sourceName: document.source,
+        logger.info({
+          operations: ['other', 'createProblemReport'],
+          path: 'src/backend/modules/problemReport/service/problemReportService.ts',
+          message: `Problem report created on document ${document.source}:${document.documentNumber} by ${user.name} - ${JSON.stringify(
+            {
+              userId: userId,
+              userName: user.name,
             },
-            userId: userId,
-            userName: user.name,
+          )}`,
+          decision: {
+            sourceId: document.documentNumber.toString(),
+            sourceName: document.source,
           },
         });
       }
