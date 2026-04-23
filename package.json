@@ -24,7 +24,7 @@
     "jsonwebtoken": "9.0.3",
     "lodash": "4.17.21",
     "mongodb": "6.18.0",
-    "pino": "^10.3.1",
+    "pino": "10.3.1",
     "samlify": "2.10.1",
     "yargs": "17.7.2"
   },
