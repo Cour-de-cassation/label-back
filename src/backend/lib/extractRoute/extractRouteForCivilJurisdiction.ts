@@ -132,7 +132,7 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
       return routeRelecture;
     }
   } else if (source === Deprecated.Sources.PORTALIS_CPH) {
-      const routeRelecture = 'exhaustive';
+      const routeRelecture = 'default';
       logger.log({
         operationName: 'computeRouteForPortalisCph',
         msg: `Relecture ${routeRelecture} appliquée`,
