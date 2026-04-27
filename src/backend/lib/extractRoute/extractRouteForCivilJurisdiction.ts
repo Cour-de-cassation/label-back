@@ -131,7 +131,15 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
       });
       return routeRelecture;
     }
-  }
+  } else if (source === Deprecated.Sources.PORTALIS_CPH) {
+      const routeRelecture = 'exhaustive';
+      logger.log({
+        operationName: 'computeRouteForPortalisCph',
+        msg: `Relecture ${routeRelecture} appliquée`,
+        data: { routeRelecture },
+      });
+      return routeRelecture;
+    }
 
   return 'default';
 }

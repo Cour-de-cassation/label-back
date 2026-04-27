@@ -216,6 +216,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
 
           await connectorConfig.updateDocumentLabelStatusToLoaded(converted.externalId);
         } catch (err) {
+          console.log(err)
           logger.error({
             ...logerDoc,
             message: `${err}`,

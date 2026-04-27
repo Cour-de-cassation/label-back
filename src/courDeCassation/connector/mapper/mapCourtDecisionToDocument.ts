@@ -23,7 +23,7 @@ async function mapCourtDecisionToDocument(
   const source = sderCourtDecision.sourceName;
 
   const registerNumber = sderCourtDecision.registerNumber;
-  const appeal = sderCourtDecision.appeals[0];
+  const appeal = sderCourtDecision.appeals?.[0];
   const numeroRoleGeneral = isDecisionTJ(sderCourtDecision) ? sderCourtDecision.numeroRoleGeneral : '';
   const appealNumber = extractAppealRegisterRoleGeneralNumber(
     sderCourtDecision.originalText,

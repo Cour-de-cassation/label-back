@@ -14,6 +14,7 @@ async function extractRoute(document: documentType): Promise<documentType['route
     [Deprecated.Sources.CA]: extractRouteForCivilJurisdiction,
     [Deprecated.Sources.TJ]: extractRouteForCivilJurisdiction,
     [Deprecated.Sources.TCOM]: extractRouteForCivilJurisdiction,
+    [Deprecated.Sources.PORTALIS_CPH]: extractRouteForCivilJurisdiction,
   };
 
   try {
