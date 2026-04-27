@@ -133,10 +133,10 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
     }
   } else if (source === Deprecated.Sources.PORTALIS_CPH) {
       const routeRelecture = 'default';
-      logger.log({
-        operationName: 'computeRouteForPortalisCph',
-        msg: `Relecture ${routeRelecture} appliquée`,
-        data: { routeRelecture },
+      logger.info({
+        path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
+        operations: ['other', 'computeRouteForTcom'],
+        message: `Relecture ${routeRelecture} appliquée`,
       });
       return routeRelecture;
     }
