@@ -13,6 +13,7 @@ import { extractRoute } from '../extractRoute';
 import { updateDocumentRoute } from '../../modules/document/service/documentService/updateDocumentRoute';
 import { updateDocumentStatus } from '../../modules/document/service/documentService/updateDocumentStatus';
 import { getNextStatus } from '@src/core/modules/document/lib';
+import { ENV } from '@src/backend/utils/env';
 
 export { buildConnector };
 
@@ -40,6 +41,17 @@ function buildConnector(connectorConfig: connectorConfigType) {
       path: 'src/backend/lib/connector/buildConnector.ts',
       message: 'importSpecificDocument',
     };
+
+    const sources = Object.values(Deprecated.Sources).map(_ => _.toString())
+      .filter(sourcesContent => ['LOCAL', 'DEV', 'PREPROD'].includes(ENV) || sourcesContent !== Deprecated.Sources.PORTALIS_CPH)
+
+    if (!sources.includes(source)) {
+      logger.info({
+        ...logerTech,
+        message: `Source '${source}' is missing in known sources: ${sources.join(", ")}`,
+      })
+    }
+
     logger.info({
       ...logerTech,
       message: `START: ${documentNumber} - ${source}, lowPriority: ${lowPriority}`,
@@ -150,7 +162,10 @@ function buildConnector(connectorConfig: connectorConfigType) {
       message: `Starting importNewDocuments...`,
     });
 
-    for (const source of Object.values(Deprecated.Sources)) {
+    const sources = Object.values(Deprecated.Sources)
+      .filter(source => ['LOCAL', 'DEV', 'PREPROD'].includes(ENV) || source !== Deprecated.Sources.PORTALIS_CPH)
+
+    for (const source of sources) {
       logger.info({
         ...logerDoc,
         message: `Fetching ${source} decisions...`,
