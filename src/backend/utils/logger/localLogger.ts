@@ -1,6 +1,7 @@
 export { localLogger };
 import pino from 'pino';
 import { TechLog, DecisionLog } from './loggerType';
+import { ENV } from '../env';
 
 const pinoPrettyConf = {
   target: 'pino-pretty',
@@ -31,7 +32,7 @@ const loggerOptions = {
     remove: true,
   },
   autoLogging: false,
-  transport: process.env.NODE_ENV === 'development' ? pinoPrettyConf : undefined,
+  transport: ['LOCAL', 'DEV'].includes(ENV) ? pinoPrettyConf : undefined,
 };
 
 const pinoInstance = pino(loggerOptions);

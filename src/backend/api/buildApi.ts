@@ -2,7 +2,7 @@ import { Express, Request, Response, NextFunction } from 'express';
 import { mapValues } from 'lodash';
 import { userType } from '@src/core';
 import { logger } from '../utils';
-import { NODE_ENV } from '../utils/env';
+import { ENV } from '../utils/env';
 import { ssoService } from '../modules/sso';
 import { settingsLoader } from '../lib/settingsLoader';
 import { assignationService } from '../modules/assignation';
@@ -511,7 +511,7 @@ function buildApi(app: Express) {
     }
   });
 
-  if (NODE_ENV === 'development') {
+  if (['LOCAL', 'DEV'].includes(ENV)) {
     app.get(`${API_BASE_URL}/sso/dev-login`, async (req, res) => {
       const email = String(req.query.email || '');
       try {

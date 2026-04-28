@@ -1,4 +1,4 @@
-node_env: 'development'
+env: 'DEV'
 
 label_mongodb_url: '{{ vault_label_mongodb_url }}'
 dbsder_api_key: '{{ vault_dbsder_api_key }}'
