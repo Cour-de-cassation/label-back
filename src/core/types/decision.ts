@@ -184,7 +184,7 @@ export namespace Deprecated {
     TJ = 'juritj',
     CA = 'jurica',
     TCOM = 'juritcom',
-    PORTALIS_CPH = 'portalis-cph'
+    PORTALIS_CPH = 'portalis-cph',
   }
 
   export interface Zoning {

@@ -42,14 +42,18 @@ function buildConnector(connectorConfig: connectorConfigType) {
       message: 'importSpecificDocument',
     };
 
-    const sources = Object.values(Deprecated.Sources).map(_ => _.toString())
-      .filter(sourcesContent => ['LOCAL', 'DEV', 'PREPROD'].includes(ENV) || sourcesContent !== Deprecated.Sources.PORTALIS_CPH)
+    const sources = Object.values(Deprecated.Sources)
+      .map((_) => _.toString())
+      .filter(
+        (sourcesContent) =>
+          ['LOCAL', 'DEV', 'PREPROD'].includes(ENV) || sourcesContent !== Deprecated.Sources.PORTALIS_CPH,
+      );
 
     if (!sources.includes(source)) {
       logger.info({
         ...logerTech,
-        message: `Source '${source}' is missing in known sources: ${sources.join(", ")}`,
-      })
+        message: `Source '${source}' is missing in known sources: ${sources.join(', ')}`,
+      });
     }
 
     logger.info({
@@ -162,8 +166,9 @@ function buildConnector(connectorConfig: connectorConfigType) {
       message: `Starting importNewDocuments...`,
     });
 
-    const sources = Object.values(Deprecated.Sources)
-      .filter(source => ['LOCAL', 'DEV', 'PREPROD'].includes(ENV) || source !== Deprecated.Sources.PORTALIS_CPH)
+    const sources = Object.values(Deprecated.Sources).filter(
+      (source) => ['LOCAL', 'DEV', 'PREPROD'].includes(ENV) || source !== Deprecated.Sources.PORTALIS_CPH,
+    );
 
     for (const source of sources) {
       logger.info({
