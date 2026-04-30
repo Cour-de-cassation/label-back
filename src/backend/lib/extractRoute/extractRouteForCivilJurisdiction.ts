@@ -136,7 +136,7 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
     const routeRelecture = 'default';
     logger.info({
       path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
-      operations: ['other', 'computeRouteForTcom'],
+      operations: ['other', 'computeRouteForCph'],
       message: `Relecture ${routeRelecture} appliquée`,
     });
     return routeRelecture;
