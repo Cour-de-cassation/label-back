@@ -2,6 +2,7 @@ import { logger } from '../../utils';
 import { buildDocumentRepository, documentService } from '../../modules/document';
 import { documentType, settingsType } from '@src/core';
 import { statisticService } from '../../modules/statistic';
+import { TechLog } from '@src/backend/utils/logger/loggerType';
 
 export { deleteDocument };
 
@@ -10,7 +11,12 @@ async function deleteDocument(
   source: documentType['source'],
   settings: settingsType,
 ) {
-  logger.log({ operationName: 'deleteDocument', msg: 'START' });
+  const loggerTech: TechLog = {
+    operations: ['other', 'deleteDocument'],
+    path: './src/backend/app/scripts/deleteDocument.ts',
+    message: 'deleteDocument',
+  };
+  logger.info({ ...loggerTech, message: 'START' });
   const documentRepository = buildDocumentRepository();
   const document = await documentRepository.findOneByDocumentNumberAndSource({
     documentNumber,
@@ -21,10 +27,13 @@ async function deleteDocument(
     await statisticService.saveStatisticsOfDocument(document, settings, 'deleted with script');
     await documentService.deleteDocument(document._id);
   } else {
-    logger.log({
-      operationName: 'deleteDocument',
-      msg: `Document ${source}:${documentNumber} not found`,
+    logger.info({
+      ...loggerTech,
+      message: `Document ${source}:${documentNumber} not found`,
     });
   }
-  logger.log({ operationName: 'deleteDocument', msg: 'DONE' });
+  logger.info({
+    ...loggerTech,
+    message: 'DONE',
+  });
 }

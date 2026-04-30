@@ -23,14 +23,16 @@ function buildRunScript(): (
 
       await script();
 
-      logger.log({
-        operationName: 'runScriptWithDb',
-        msg: `Closing connection with MongoDb...`,
+      logger.info({
+        operations: ['other', 'buildRunScript.runScriptWithDb'],
+        path: './src/backend/app/buildRunScript.ts',
+        message: `Closing connection with MongoDb...`,
       });
       await mongo.close();
-      logger.log({
-        operationName: 'runScriptWithDb',
-        msg: `MongoDb connection closed!`,
+      logger.info({
+        operations: ['other', 'buildRunScript.runScriptWithDb'],
+        path: './src/backend/app/buildRunScript.ts',
+        message: `MongoDb connection closed!`,
       });
     }
   };

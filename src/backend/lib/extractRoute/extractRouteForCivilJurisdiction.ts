@@ -4,6 +4,7 @@ import { documentService } from '../../modules/document';
 import { logger } from '../../utils';
 import { Category, CodeNac } from 'dbsder-api-types';
 import { DBSDER_API_URL, DBSDER_API_KEY } from '../../utils/env';
+import { DecisionLog, TechLog } from '@src/backend/utils/logger/loggerType';
 
 export { extractRouteForCivilJurisdiction };
 
@@ -52,31 +53,45 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
 
   if (source === 'jurica' || source === 'juritj') {
     const routeFromDb = await getDecisionRoute(NACCode);
-
+    const loggerTech: DecisionLog = {
+      operations: ['other', 'computeRouteFromNac'],
+      path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
+      message: `Computing route for NACCode: ${NACCode}`,
+      decision: {
+        sourceId: document.documentNumber.toString(),
+        sourceName: document.source,
+        labelStatus: document.status,
+      },
+    };
     switch (routeFromDb) {
       case 'systematique': {
-        logger.log({
-          operationName: 'computeRouteFromNac',
-          msg: 'Route systematique trouvée en base, relecture exhaustive appliquée',
-          data: { routeFromDb, routeRelecture: 'exhaustive' },
+        logger.info({
+          ...loggerTech,
+          message: `Route systematique trouvée en base, relecture exhaustive appliquée : ${JSON.stringify({
+            data: { routeFromDb, routeRelecture: 'exhaustive' },
+          })}`,
         });
         return 'exhaustive';
       }
       case 'aleatoireSensible': {
         const routeRelecture = Math.random() < sensibleRatio ? 'exhaustive' : 'automatic';
-        logger.log({
-          operationName: 'computeRouteFromNac',
-          msg: `Route aleatoireSensible trouvée en base, relecture ${routeRelecture} appliquée`,
-          data: { routeFromDb, routeRelecture },
+        logger.info({
+          ...loggerTech,
+          message: `Route aleatoireSensible trouvée en base, relecture ${routeRelecture} appliquée : ${JSON.stringify({
+            data: { routeFromDb, routeRelecture },
+          })}`,
         });
         return routeRelecture;
       }
       case 'aleatoireNonSensible': {
         const routeRelecture = Math.random() < nonSensibleRatio ? 'exhaustive' : 'automatic';
-        logger.log({
-          operationName: 'computeRouteFromNac',
-          msg: `Route aleatoireNonSensible trouvée en base, relecture ${routeRelecture} appliquée`,
-          data: { routeFromDb, routeRelecture },
+        logger.info({
+          ...loggerTech,
+          message: `Route aleatoireNonSensible trouvée en base, relecture ${routeRelecture} appliquée : ${JSON.stringify(
+            {
+              data: { routeFromDb, routeRelecture },
+            },
+          )}`,
         });
         return routeRelecture;
       }
@@ -86,18 +101,34 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
   } else if (source === 'juritcom') {
     if (!categoriesToOmit.includes(Category.PERSONNEMORALE)) {
       const routeRelecture = Math.random() < sensibleRatio ? 'exhaustive' : 'automatic';
-      logger.log({
-        operationName: 'computeRouteForTcom',
-        msg: `Occultation personneMorale demandée, décision sensible, relecture ${routeRelecture} appliquée`,
-        data: { routeRelecture },
+      logger.info({
+        operations: ['other', 'computeRouteForTcom'],
+        path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
+        message: `Occultation personneMorale demandée, décision sensible, relecture ${routeRelecture} appliquée. ${JSON.stringify(
+          {
+            data: { routeRelecture },
+          },
+        )}`,
+        decision: {
+          sourceId: document.documentNumber.toString(),
+          sourceName: document.source,
+        },
       });
       return routeRelecture;
     } else {
       const routeRelecture = Math.random() < nonSensibleRatio ? 'exhaustive' : 'automatic';
-      logger.log({
-        operationName: 'computeRouteForTcom',
-        msg: `Occultation personneMorale NON demandée, décision non sensible, relecture ${routeRelecture} appliquée`,
-        data: { routeRelecture },
+      logger.info({
+        operations: ['other', 'computeRouteForTcom'],
+        path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
+        message: `Occultation personneMorale NON demandée, décision non sensible, relecture ${routeRelecture} appliquée. ${JSON.stringify(
+          {
+            data: { routeRelecture },
+          },
+        )}`,
+        decision: {
+          sourceId: document.documentNumber.toString(),
+          sourceName: document.source,
+        },
       });
       return routeRelecture;
     }
@@ -146,8 +177,9 @@ async function getDecisionRoute(code: string): Promise<string | undefined> {
     return codenac.routeRelecture?.toString();
   } catch (error) {
     logger.error({
-      operationName: 'getDecisionRoute',
-      msg: `Failed to fetch code nac for code "${code}"`,
+      operations: ['other', 'getDecisionRoute'],
+      path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
+      message: `Failed to fetch code nac for code "${code}"`,
     });
     return undefined;
   }

@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
 
-if (!process.env.NODE_ENV) dotenv.config();
+if (!process.env.ENV) dotenv.config();
 
-const isTest = process.env.NODE_ENV?.toUpperCase() === 'TEST';
+export const isTest = process.env.NODE_ENV?.toUpperCase() === 'TEST';
 
-if (!isTest && process.env.NODE_ENV == null) throw new Error('process.env.NODE_ENV is missing');
+if (!isTest && process.env.ENV == null) throw new Error('process.env.ENV is missing');
 if (!isTest && process.env.LABEL_DB_URL == null) throw new Error('process.env.LABEL_DB_URL is missing');
 if (!isTest && process.env.LABEL_DB_NAME == null) throw new Error('process.env.LABEL_DB_NAME is missing');
 if (!isTest && process.env.LABEL_CLIENT_URL == null) throw new Error('process.env.LABEL_CLIENT_URL is missing');
@@ -37,7 +37,7 @@ if (!isTest && process.env.SSO_ATTRIBUTE_ROLE == null) throw new Error('process.
 if (!isTest && process.env.SSO_APP_NAME == null) throw new Error('process.env.SSO_APP_NAME is missing');
 if (!isTest && process.env.SSO_APP_ROLES == null) throw new Error('process.env.SSO_APP_ROLES is missing');
 
-export const NODE_ENV = process.env.NODE_ENV as string;
+export const ENV = process.env.ENV as string;
 export const LABEL_DB_URL = process.env.LABEL_DB_URL as string;
 export const LABEL_DB_NAME = process.env.LABEL_DB_NAME as string;
 export const LABEL_CLIENT_URL = process.env.LABEL_CLIENT_URL as string;

@@ -1,6 +1,6 @@
 import { buildDependencyManager } from '@src/core';
-import { NODE_ENV } from './env';
+import { isTest, ENV } from './env';
 
 export { dependencyManager };
 
-const { dependencyManager } = buildDependencyManager(NODE_ENV);
+const { dependencyManager } = buildDependencyManager(isTest ? 'TEST' : ENV);

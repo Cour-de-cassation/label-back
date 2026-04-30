@@ -75,9 +75,10 @@ export async function acs(req: any) {
     if (hasDiff) {
       currentUser = { ...userSSO, _id: userDB._id };
 
-      logger.log({
-        operationName: 'SSO ACS',
-        msg: `Difference between SSO and DB user, updating DB user`,
+      logger.info({
+        operations: ['other', 'ssoService.acs'],
+        path: './src/backend/modules/sso/service/ssoService.ts',
+        message: `Difference between SSO and DB user, updating DB user`,
       });
 
       await userService.updateUser({
@@ -128,7 +129,11 @@ export function getUserFromSSO(extract: ParseResponseResult['extract']): userTyp
 
   if (!roles.length || !userRolesInAppRoles) {
     const errorMsg = `User ${extract.nameID}, role ${roles} doesn't exist in application ${SSO_APP_NAME}`;
-    logger.error({ operationName: 'getUserFromSSO', msg: errorMsg });
+    logger.error({
+      operations: ['other', 'ssoService.getUserFromSSO'],
+      path: './src/backend/modules/sso/service/ssoService.ts',
+      message: errorMsg,
+    });
     throw new Error(errorMsg);
   }
 
@@ -143,7 +148,11 @@ export function getUserFromSSO(extract: ParseResponseResult['extract']): userTyp
 export function compareUser(userSSO: userType | undefined, userDB: userType | undefined): boolean {
   if (!userSSO || !userDB) {
     const errorMsg = `Both objects must be defined.`;
-    logger.error({ operationName: 'compareUser', msg: errorMsg });
+    logger.error({
+      operations: ['other', 'ssoService.compareUser'],
+      path: './src/backend/modules/sso/service/ssoService.ts',
+      message: errorMsg,
+    });
     throw new Error(errorMsg);
   }
   return userSSO.name !== userDB.name || userSSO.role !== userDB.role;

@@ -28,19 +28,10 @@ async function clearDb({
   user?: boolean;
   preAssignations?: boolean;
 }) {
-  logger.log({
-    operationName: 'clearDb',
-    msg: 'Clearing db',
-    data: {
-      annotation,
-      assignation,
-      document,
-      problemReport,
-      statistic,
-      treatment,
-      user,
-      preAssignations,
-    },
+  logger.info({
+    operations: ['other', 'clearDb'],
+    path: './src/backend/app/scripts/clearDb.ts',
+    message: `Clearing the database with the following options : annotation: ${annotation}, assignation: ${assignation}, document: ${document}, problemReport: ${problemReport}, statistic: ${statistic}, treatment: ${treatment}, user: ${user}, preAssignations: ${preAssignations}`,
   });
 
   const repositories = [

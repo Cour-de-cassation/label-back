@@ -2,6 +2,7 @@ import { dateBuilder } from '@src/core';
 import { buildDocumentRepository } from '../../../modules/document';
 import { buildTreatmentRepository } from '../../../modules/treatment';
 import { logger } from '../../../utils';
+import { TechLog } from '@src/backend/utils/logger/loggerType';
 
 export { cleanOrphansTreatments };
 
@@ -10,16 +11,24 @@ export { cleanOrphansTreatments };
  */
 
 async function cleanOrphansTreatments() {
-  logger.log({ operationName: 'cleanOrphansTreatments', msg: 'START' });
+  const logerTech: TechLog = {
+    operations: ['other', 'cleanOrphansTreatments'],
+    path: 'src/backend/app/scripts/cleanDocuments/cleanOrphansTreatments.ts',
+    message: 'cleanOrphansTreatments',
+  };
+  logger.info({
+    ...logerTech,
+    message: 'START',
+  });
   const treatmentRepository = buildTreatmentRepository();
   const documentRepository = buildDocumentRepository();
 
   const date = dateBuilder.monthsAgo(6);
 
   const treatments = await treatmentRepository.findAllByLastUpdateDateLessThan(date);
-  logger.log({
-    operationName: 'cleanOrphansTreatments',
-    msg: `Find ${treatments.length} treatments with lastUpdateDate more than 6 months ago.`,
+  logger.info({
+    ...logerTech,
+    message: `Find ${treatments.length} treatments with lastUpdateDate more than 6 months ago.`,
   });
 
   for (let i = 0; i < treatments.length; i++) {
@@ -27,16 +36,16 @@ async function cleanOrphansTreatments() {
       await documentRepository.findById(treatments[i].documentId);
     } catch (error) {
       logger.error({
-        operationName: 'cleanOrphansTreatments',
-        msg: `Document NOT found for treatment ${treatments[i]._id}`,
+        ...logerTech,
+        message: `Document NOT found for treatment ${treatments[i]._id}`,
       });
       await treatmentRepository.deleteById(treatments[i]._id);
-      logger.log({
-        operationName: 'cleanOrphansTreatments',
-        msg: `Treatment ${treatments[i]._id} deleted`,
+      logger.info({
+        ...logerTech,
+        message: `Treatment ${treatments[i]._id} deleted`,
       });
     }
   }
 
-  logger.log({ operationName: 'cleanOrphansTreatments', msg: 'DONE' });
+  logger.info({ ...logerTech, message: 'DONE' });
 }

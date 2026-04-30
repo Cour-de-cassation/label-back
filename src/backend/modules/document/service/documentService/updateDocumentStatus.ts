@@ -14,14 +14,14 @@ async function updateDocumentStatus(_id: documentType['_id'], status: documentTy
   if (status === 'free') {
     await assignationService.deleteAssignationsByDocumentId(_id);
   }
-  logger.log({
-    operationName: 'updateDocumentStatus',
-    msg: `Document ${updatedDocument.source}:${updatedDocument.documentNumber} status updated to ${status}`,
-    data: {
-      decision: {
-        sourceId: updatedDocument.documentNumber,
-        sourceName: updatedDocument.source,
-      },
+  logger.info({
+    operations: ['other', 'updateDocumentStatus'],
+    path: 'src/backend/modules/document/service/documentService/updateDocumentStatus.ts',
+    message: `Document ${updatedDocument.source}:${updatedDocument.documentNumber} status updated to ${status}`,
+    decision: {
+      sourceId: updatedDocument.documentNumber.toString(),
+      sourceName: updatedDocument.source,
+      labelStatus: updatedDocument.status,
     },
   });
   return updatedDocument;

@@ -6,30 +6,42 @@ import { logger } from '../../utils';
 export { listDocumentsWithProblemReports };
 
 async function listDocumentsWithProblemReports() {
-  logger.log({
-    operationName: 'listDocumentsWithProblemReports',
-    msg: 'START',
+  logger.info({
+    operations: ['other', 'listDocumentsWithProblemReports'],
+    path: 'src/backend/app/scripts/listDocumentsWithProblemReports.ts',
+    message: 'START',
   });
 
   const problemnReportsRepository = buildProblemReportRepository();
   const documentRepository = buildDocumentRepository();
 
   const problemReports = await problemnReportsRepository.findAll();
-  logger.log({
-    operationName: 'listDocumentsWithProblemReports',
-    msg: `${problemReports.length} problemReports found`,
+  logger.info({
+    operations: ['other', 'listDocumentsWithProblemReports'],
+    path: 'src/backend/app/scripts/listDocumentsWithProblemReports.ts',
+    message: `${problemReports.length} problemReports found`,
   });
   for (let index = 0; index < problemReports.length; index++) {
     const problemReport = problemReports[index];
     const document = await documentRepository.findById(problemReport['documentId']);
 
-    logger.log({
-      operationName: 'listDocumentsWithProblemReports',
-      msg: `${index + 1} | ${document['_id']} | ${document['source']} | ${document['documentNumber']} | ${
+    logger.info({
+      operations: ['other', 'listDocumentsWithProblemReports'],
+      path: 'src/backend/app/scripts/listDocumentsWithProblemReports.ts',
+      message: `${index + 1} | ${document['_id']} | ${document['source']} | ${document['documentNumber']} | ${
         document['creationDate'] && timeOperator.convertTimestampToReadableDate(document['creationDate'])
       }`,
+      decision: {
+        sourceId: document.documentNumber.toString(),
+        sourceName: document.source,
+        labelStatus: document.status,
+      },
     });
   }
 
-  logger.log({ operationName: 'listDocumentsWithProblemReports', msg: 'DONE' });
+  logger.info({
+    operations: ['other', 'listDocumentsWithProblemReports'],
+    path: 'src/backend/app/scripts/listDocumentsWithProblemReports.ts',
+    message: 'DONE',
+  });
 }
