@@ -8,7 +8,7 @@ export { buildFakeStatisticRepository };
 const buildFakeStatisticRepository = buildFakeRepositoryBuilder<statisticType, customStatisticRepositoryType>({
   collectionName: 'statistics',
   buildCustomFakeRepository: (collection) => ({
-    async findAllStatisticsByDocumentNumber(documentNumber: number) {
+    async findAllStatisticsByDocumentNumber(documentNumber: number | string) {
       return collection.filter((statistics) => statistics.documentNumber == documentNumber);
     },
     async findAllByRessourceFilter(ressourceFilter) {

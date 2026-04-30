@@ -13,10 +13,14 @@ import { updateDocumentRoute } from '../../modules/document/service/documentServ
 import { updateDocumentStatus } from '../../modules/document/service/documentService/updateDocumentStatus';
 import { getNextStatus } from '@src/core/modules/document/lib';
 import { mapCourtDecisionToDocument } from '@src/courDeCassation/connector/mapper/mapCourtDecisionToDocument';
+import { ENV } from '../../utils/env';
 
 export { buildConnector };
 
-const SOURCES = ['jurinet', 'jurica', 'juritj', 'juritcom'];
+const SOURCES =
+  ENV === 'PRODUCTION'
+    ? ['jurinet', 'jurica', 'juritj', 'juritcom']
+    : ['jurinet', 'jurica', 'juritj', 'juritcom', 'portalis-cph'];
 
 function buildConnector(connectorConfig: connectorConfigType) {
   const preAssignator = buildPreAssignator();
@@ -46,6 +50,14 @@ function buildConnector(connectorConfig: connectorConfigType) {
       ...logerTech,
       message: `START: ${documentNumber} - ${source}, lowPriority: ${lowPriority}`,
     });
+
+    if (ENV === 'PRODUCTION' && source === 'portalis-cph') {
+      logger.info({
+        ...logerTech,
+        message: `Source portalis-cph is excluded in PRODUCTION environment.`,
+      });
+      return;
+    }
 
     try {
       const courtDecision = await connectorConfig.fetchCourtDecisionBySourceIdAndSourceName(documentNumber, source);

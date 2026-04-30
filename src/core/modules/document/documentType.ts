@@ -86,7 +86,7 @@ export type documentType = {
   _id: ObjectId;
   creationDate?: number;
   decisionMetadata: decisionMetadataType;
-  documentNumber: number;
+  documentNumber: number | string;
   importer: documentImporterType;
   nlpVersions?: nlpVersionsType | null;
   publicationCategory: string[];

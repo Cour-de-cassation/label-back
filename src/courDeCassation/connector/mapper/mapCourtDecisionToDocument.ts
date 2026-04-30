@@ -1,7 +1,7 @@
 import { documentType, documentModule, timeOperator, AcceptedDocumentTypes } from '@src/core';
 import { extractReadableChamberName, extractNumeroPourvoi } from './extractors';
 import { categoriesMapper } from './categoriesMapper';
-import { DecisionCa, DecisionCc, DecisionTcom, DecisionTj, LabelTreatments } from 'dbsder-api-types';
+import { DecisionCa, DecisionCc, DecisionCph, DecisionTcom, DecisionTj, LabelTreatments } from 'dbsder-api-types';
 
 export { mapCourtDecisionToDocument };
 
@@ -18,6 +18,10 @@ async function mapCourtDecisionToDocument(
       return mapDecisionTj(decision, importer);
     case 'juritcom':
       return mapDecisionTcom(decision, importer);
+    case 'portalis-cph':
+      return mapDecisionCph(decision, importer);
+    default:
+      throw new Error(`Source non gérée.`);
   }
 }
 
@@ -277,6 +281,70 @@ function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importe
   });
 }
 
+function mapDecisionCph(decision: DecisionCph, importer: documentType['importer']): documentType {
+  const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
+  const appealNumber = decision.portalisNumber;
+  const publicationCategory: string[] = [];
+  const NACCode = decision.NACCode;
+  const decisionDate = convertToValidDate(decision.dateDecision);
+  const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+
+  return documentModule.lib.buildDocument({
+    creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
+    decisionMetadata: {
+      appealNumber: appealNumber ?? '',
+      additionalTermsToAnnotate: decision.occultation.additionalTerms,
+      computedAdditionalTerms: {
+        additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
+        additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
+      },
+      additionalTermsParsingFailed:
+        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
+      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
+      civilCaseCode: '',
+      civilMatterCode: '',
+      criminalCaseCode: '',
+      chamberName: '',
+      date: decisionDate?.getTime(),
+      jurisdiction: jurisdictionName,
+      NACCode,
+      endCaseCode: decision.endCaseCode,
+      occultationBlock: decision.blocOccultation,
+      session: decision.formation?.trim() ?? '',
+      solution: '',
+      motivationOccultation: decision.occultation.motivationOccultation ?? undefined,
+      raisonInteretParticulier: decision.raisonInteretParticulier ?? undefined,
+      sommaire: decision.sommaire ?? '',
+    },
+    documentNumber: decision.sourceId,
+    externalId: decision._id,
+    priority: computePriority(
+      decision.sourceName,
+      publicationCategory,
+      NACCode,
+      importer,
+      decision.raisonInteretParticulier ?? undefined,
+    ),
+    publicationCategory,
+    route: 'default',
+    importer,
+    source: decision.sourceName,
+    title: computeTitle({
+      source: decision.sourceName,
+      sourceId: decision.sourceId,
+      appealNumber,
+      chamberName: '',
+      jurisdictionName,
+      NACCode,
+      NAOCode: '',
+      date: decisionDate,
+    }),
+    text: decision.originalText,
+    nlpVersions: nlpTreatment?.version,
+    checklist: nlpTreatment?.checklist,
+  });
+}
+
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
 function computeTitle({
@@ -290,7 +358,7 @@ function computeTitle({
   date,
 }: {
   source: string;
-  sourceId: number;
+  sourceId: number | string;
   appealNumber: string | undefined;
   chamberName: string;
   jurisdictionName: string;

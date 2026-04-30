@@ -132,6 +132,14 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
       });
       return routeRelecture;
     }
+  } else if (source === 'portalis-cph') {
+    const routeRelecture = 'default';
+    logger.info({
+      path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
+      operations: ['other', 'computeRouteForTcom'],
+      message: `Relecture ${routeRelecture} appliquée`,
+    });
+    return routeRelecture;
   }
 
   return 'default';

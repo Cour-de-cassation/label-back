@@ -13,6 +13,7 @@ async function extractRoute(document: documentType): Promise<documentType['route
     ['jurica']: extractRouteForCivilJurisdiction,
     ['juritj']: extractRouteForCivilJurisdiction,
     ['juritcom']: extractRouteForCivilJurisdiction,
+    ['portalis-cph']: extractRouteForCivilJurisdiction,
   };
 
   try {
