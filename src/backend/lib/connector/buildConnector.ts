@@ -17,10 +17,9 @@ import { ENV } from '../../utils/env';
 
 export { buildConnector };
 
-const SOURCES =
-  ENV === 'PRODUCTION'
-    ? ['jurinet', 'jurica', 'juritj', 'juritcom']
-    : ['jurinet', 'jurica', 'juritj', 'juritcom', 'portalis-cph'];
+const SOURCES = ['LOCAL', 'DEV', 'PREPROD'].includes(ENV)
+  ? ['jurinet', 'jurica', 'juritj', 'juritcom', 'portalis-cph']
+  : ['jurinet', 'jurica', 'juritj', 'juritcom'];
 
 function buildConnector(connectorConfig: connectorConfigType) {
   const preAssignator = buildPreAssignator();
@@ -51,7 +50,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
       message: `START: ${documentNumber} - ${source}, lowPriority: ${lowPriority}`,
     });
 
-    if (ENV === 'PRODUCTION' && source === 'portalis-cph') {
+    if (!['LOCAL', 'DEV', 'PREPROD'].includes(ENV) && source === 'portalis-cph') {
       logger.info({
         ...logerTech,
         message: `Source portalis-cph is excluded in PRODUCTION environment.`,
