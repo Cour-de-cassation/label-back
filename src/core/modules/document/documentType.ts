@@ -1,3 +1,4 @@
+import { Category } from 'dbsder-api-types';
 import { ObjectId } from 'mongodb';
 
 export type documentRouteType = 'automatic' | 'exhaustive' | 'simple' | 'confirmation' | 'request' | 'default';
@@ -13,13 +14,14 @@ export type documentStatusType =
   | 'toBeConfirmed';
 
 export type checklistEntityType = {
+  entityId: string;
   text: string;
   start: number;
+  end?: number;
   category: string;
-  source: string;
-  score: number;
-  entityId: string;
-  end: number;
+  score?: number | null;
+  certaintyScore?: number | null;
+  source?: string | null;
 };
 
 export type checklistItemType = {
@@ -32,6 +34,7 @@ export type checklistItemType = {
     end: number;
   }>;
   metadata_text: string[];
+  _rank?: number | null;
 };
 
 export type nlpVersionType = {
@@ -42,7 +45,8 @@ export type nlpVersionType = {
 export type nlpVersionsType = {
   juriSpacyTokenizer: nlpVersionType;
   juritools: nlpVersionType;
-  pseudonymisationApi: nlpVersionType;
+  pseudonymisationApi?: nlpVersionType;
+  nlpApi?: nlpVersionType;
   model: {
     name: string;
   };
@@ -56,7 +60,6 @@ export type decisionMetadataType = {
     additionalTermsToUnAnnotate: string[];
   };
   additionalTermsParsingFailed?: boolean;
-  boundDecisionDocumentNumbers: number[];
   categoriesToOmit: string[];
   chamberName: string;
   civilCaseCode: string;
@@ -83,10 +86,9 @@ export type documentType = {
   _id: ObjectId;
   creationDate?: number;
   decisionMetadata: decisionMetadataType;
-  documentNumber: number;
+  documentNumber: number | string;
   importer: documentImporterType;
-  loss?: number;
-  nlpVersions?: nlpVersionsType;
+  nlpVersions?: nlpVersionsType | null;
   publicationCategory: string[];
   reviewStatus: reviewStatusType;
   route: documentRouteType;
@@ -94,7 +96,7 @@ export type documentType = {
   status: documentStatusType;
   title: string;
   text: string;
-  checklist: checklistItemType[];
+  checklist: checklistItemType[] | undefined;
   externalId: string;
   priority: number;
   updateDate: number;

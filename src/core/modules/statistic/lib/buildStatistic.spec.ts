@@ -22,7 +22,6 @@ describe('buildStatistic', () => {
       decisionMetadata: documentModule.decisionMetadataGenerator.generate({
         additionalTermsToAnnotate: '',
         appealNumber: 'TRUC',
-        boundDecisionDocumentNumbers: [],
         categoriesToOmit: [],
         chamberName: 'Chambre criminelle',
         criminalCaseCode: '',

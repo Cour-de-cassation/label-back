@@ -1,8 +1,8 @@
-import { Deprecated, documentType } from '@src/core';
+import { documentType } from '@src/core';
 import axios, { AxiosResponse, Method } from 'axios';
 import { documentService } from '../../modules/document';
 import { logger } from '../../utils';
-import { CodeNac } from 'dbsder-api-types';
+import { Category, CodeNac } from 'dbsder-api-types';
 import { DBSDER_API_URL, DBSDER_API_KEY } from '../../utils/env';
 import { DecisionLog, TechLog } from '@src/backend/utils/logger/loggerType';
 
@@ -17,6 +17,7 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
   const categoriesToOmit = document.decisionMetadata.categoriesToOmit;
 
   if (
+    checklist &&
     checklist.length > 0 &&
     // TEMP : ne pas prendre en compte les checklist si occultation des motifs
     document.decisionMetadata.motivationOccultation != true
@@ -50,7 +51,7 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
     nonSensibleRatio * 10 < sensibleMinimumRatio ? sensibleMinimumRatio : nonSensibleRatio * 10,
   );
 
-  if (source === Deprecated.Sources.CA || source === Deprecated.Sources.TJ) {
+  if (source === 'jurica' || source === 'juritj') {
     const routeFromDb = await getDecisionRoute(NACCode);
     const loggerTech: DecisionLog = {
       operations: ['other', 'computeRouteFromNac'],
@@ -97,8 +98,8 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
       default:
         throw new Error('Route non trouvée en base');
     }
-  } else if (source === Deprecated.Sources.TCOM) {
-    if (!categoriesToOmit.includes(Deprecated.Categories.PERSONNEMORALE)) {
+  } else if (source === 'juritcom') {
+    if (!categoriesToOmit.includes(Category.PERSONNEMORALE)) {
       const routeRelecture = Math.random() < sensibleRatio ? 'exhaustive' : 'automatic';
       logger.info({
         operations: ['other', 'computeRouteForTcom'],
@@ -131,6 +132,14 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
       });
       return routeRelecture;
     }
+  } else if (source === 'portalis-cph') {
+    const routeRelecture = 'default';
+    logger.info({
+      path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
+      operations: ['other', 'computeRouteForCph'],
+      message: `Relecture ${routeRelecture} appliquée`,
+    });
+    return routeRelecture;
   }
 
   return 'default';

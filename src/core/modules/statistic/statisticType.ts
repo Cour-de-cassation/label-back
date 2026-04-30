@@ -5,7 +5,7 @@ export type statisticType = {
   _id: ObjectId;
   annotationsCount: number;
   appealNumber?: string;
-  documentNumber: number;
+  documentNumber: number | string;
   decisionDate?: number;
   documentExternalId: string;
   chamberName?: string;
@@ -27,6 +27,6 @@ export type statisticType = {
     treatmentDuration: number;
   }>;
   wordsCount: number;
-  checklist: checklistItemType[];
+  checklist: checklistItemType[] | undefined;
   comment?: string;
 };

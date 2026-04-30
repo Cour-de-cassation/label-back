@@ -1,7 +1,7 @@
 import { treatmentType } from '..';
 import { computeAnnotations } from './computeAnnotations';
 import { documentType } from '../../document/documentType';
-import { Deprecated } from '../../../types/decision';
+import { Category, LabelTreatments } from 'dbsder-api-types';
 
 export { concat };
 
@@ -9,8 +9,8 @@ function concat(
   treatments: treatmentType[],
   nlpVersions?: documentType['nlpVersions'],
   checklist?: documentType['checklist'],
-): Deprecated.LabelTreatment[] {
-  const labelTreatments: Deprecated.LabelTreatment[] = [];
+): LabelTreatments {
+  const labelTreatments: LabelTreatments = [];
 
   const sortedTreatments = treatments.sort((treatment1, treatment2) => treatment1.order - treatment2.order);
 
@@ -20,11 +20,25 @@ function concat(
 
     if (currentTreatment.source != 'reimportedTreatment') {
       labelTreatments.unshift({
-        annotations: computeAnnotations(sortedTreatments),
+        annotations: computeAnnotations(sortedTreatments).map((annotation) => ({
+          ...annotation,
+          // Label do not use "Category" type from dbsder-api-types internaly to be independant but we need to cast it to build the labelTreatment to be exported
+          category: annotation.category as Category,
+        })),
         source: computeSource(currentTreatment.source),
         order,
         version: currentTreatment.source === 'NLP' ? nlpVersions : undefined,
-        checklist: currentTreatment.source === 'NLP' ? checklist : undefined,
+        checklist:
+          currentTreatment.source === 'NLP'
+            ? checklist?.map((item) => ({
+                ...item,
+                entities: item.entities.map((entity) => ({
+                  ...entity,
+                  // Label do not use "Category" type from dbsder-api-types internaly to be independant but we need to cast it to build the labelTreatment to be exported
+                  category: entity.category as Category,
+                })),
+              }))
+            : undefined,
         treatmentDate: new Date(currentTreatment.lastUpdateDate).toISOString(),
       });
     }

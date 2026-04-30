@@ -14,7 +14,6 @@ import {
 import {
   buildDocument,
   comparator,
-  computeCaseNumber,
   countWords,
   getNextStatus,
   getMinutesBeforeFreeingPendingDocuments,
@@ -43,7 +42,6 @@ const documentModule = {
   lib: {
     buildDocument,
     comparator,
-    computeCaseNumber,
     countWords,
     getNextStatus,
     getMinutesBeforeFreeingPendingDocuments,

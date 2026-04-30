@@ -1,11 +1,11 @@
-import { dateBuilder, documentModule, settingsModule, treatmentModule, treatmentType, Deprecated } from '@src/core';
+import { dateBuilder, documentModule, settingsModule, treatmentModule, treatmentType } from '@src/core';
 import { buildDocumentRepository } from '../../modules/document';
 import { buildTreatmentRepository } from '../../modules/treatment';
 import { buildExporter } from './buildExporter';
 import { exporterConfigType } from './exporterConfigType';
 import { sderApi } from '@src/courDeCassation/sderApi';
 import { nlpApi } from '@src/courDeCassation/nlpApi';
-import { ObjectId } from 'mongodb';
+import { Affaire, LabelTreatments } from 'dbsder-api-types';
 
 jest.mock('@src/courDeCassation/sderApi');
 jest.mock('@src/courDeCassation/nlpApi');
@@ -18,8 +18,8 @@ describe('buildExporter', () => {
   });
 
   beforeEach(() => {
-    const mockAffaire: Deprecated.Affaire = {
-      _id: new ObjectId(),
+    const mockAffaire: Affaire = {
+      _id: '123456',
       replacementTerms: [],
       decisionIds: [],
       documentAssocieIds: [],
@@ -158,12 +158,12 @@ describe('buildExporter', () => {
 function buildFakeExporterConfig(): exporterConfigType & {
   getExportedExternalIds: () => string[];
   getExportedPseudonymizationTexts: () => string[];
-  getExportedLabelTreatments: () => Deprecated.LabelTreatment[];
+  getExportedLabelTreatments: () => LabelTreatments;
   getLockedExternalIds: () => string[];
 } {
   const exportedExternalIds: string[] = [];
   const exportedpseudonymizationTexts: string[] = [];
-  const exportedlabelTreatments: Deprecated.LabelTreatment[] = [];
+  const exportedlabelTreatments: LabelTreatments = [];
   const lockedExternalIds: string[] = [];
 
   return {

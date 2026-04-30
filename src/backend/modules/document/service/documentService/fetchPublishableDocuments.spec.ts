@@ -14,7 +14,6 @@ describe('fetchPublishableDocuments', () => {
         decisionMetadata: documentModule.decisionMetadataGenerator.generate({
           additionalTermsToAnnotate: '',
           appealNumber: '08-16.486',
-          boundDecisionDocumentNumbers: [],
           categoriesToOmit: [],
           chamberName: 'CIV. I',
           criminalCaseCode: '',

@@ -1,8 +1,8 @@
-import { documentType } from '@src/core';
+import { AcceptedDocumentTypes, documentType } from '@src/core';
 import axios, { AxiosError, AxiosResponse, Method } from 'axios';
-import { Deprecated } from '@src/core';
 import QueryString from 'qs';
 import { DBSDER_API_URL, DBSDER_API_KEY } from '@src/backend/utils/env';
+import { Affaire, LabelStatus, LabelTreatments, PublishStatus, ReplacementTerm } from 'dbsder-api-types';
 
 export { sderApi };
 
@@ -43,7 +43,7 @@ async function fetchApi<T = Record<string, unknown>>({
 
 async function fetchDecisions(query: Record<string, unknown>) {
   type Response = {
-    decisions: Deprecated.DecisionDTO[];
+    decisions: AcceptedDocumentTypes[];
     totalDecisions: number;
     nextCursor?: string;
   };
@@ -91,7 +91,7 @@ const sderApi = {
   async fetchCourtDecisionBySourceIdAndSourceName(
     sourceId: number,
     sourceName: string,
-  ): Promise<Deprecated.DecisionDTO | undefined> {
+  ): Promise<AcceptedDocumentTypes | undefined> {
     const decisionList = await fetchDecisions({ sourceId, sourceName });
 
     if (decisionList.decisions.length > 0) {
@@ -100,8 +100,8 @@ const sderApi = {
     return undefined;
   },
 
-  async fetchDecisionByExternalId(externalId: documentType['externalId']): Promise<Deprecated.DecisionDTO | undefined> {
-    const decision = await fetchApi<Deprecated.DecisionDTO>({
+  async fetchDecisionByExternalId(externalId: documentType['externalId']): Promise<AcceptedDocumentTypes | undefined> {
+    const decision = await fetchApi<AcceptedDocumentTypes>({
       method: 'get',
       path: `decisions/${externalId}`,
     });
@@ -123,9 +123,9 @@ const sderApi = {
     publishStatus,
   }: {
     externalId: documentType['externalId'];
-    labelTreatments: Deprecated.LabelTreatment[];
-    labelStatus: Deprecated.LabelStatus;
-    publishStatus: Deprecated.PublishStatus;
+    labelTreatments: LabelTreatments;
+    labelStatus: LabelStatus;
+    publishStatus: PublishStatus;
   }) {
     await fetchApi({
       method: 'patch',
@@ -138,8 +138,8 @@ const sderApi = {
     });
   },
 
-  async getAffaire(query: Record<string, unknown>): Promise<Deprecated.Affaire> {
-    const affaire = await fetchApi<Deprecated.Affaire>({
+  async getAffaire(query: Record<string, unknown>): Promise<Affaire> {
+    const affaire = await fetchApi<Affaire>({
       method: 'get',
       path: `affaires`,
       query,
@@ -147,8 +147,8 @@ const sderApi = {
     return affaire;
   },
 
-  async patchAffaire(externalId: string, replacementTerms: Deprecated.replacementTerms[]): Promise<Deprecated.Affaire> {
-    const affaire = await fetchApi<Deprecated.Affaire>({
+  async patchAffaire(externalId: string, replacementTerms: ReplacementTerm[]): Promise<Affaire> {
+    const affaire = await fetchApi<Affaire>({
       method: 'patch',
       path: `affaires/${externalId}`,
       body: { replacementTerms },

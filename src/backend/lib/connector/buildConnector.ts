@@ -5,7 +5,6 @@ import { DecisionLog, TechLog } from '@src/backend/utils/logger/loggerType';
 import { connectorConfigType } from './connectorConfigType';
 import { treatmentService } from '../../modules/treatment';
 import { buildPreAssignator } from '../preAssignator';
-import { Deprecated } from '@src/core';
 import { assignationService } from '../../modules/assignation';
 import { preAssignationService } from '../../modules/preAssignation';
 import { statisticService } from '../../modules/statistic';
@@ -13,8 +12,14 @@ import { extractRoute } from '../extractRoute';
 import { updateDocumentRoute } from '../../modules/document/service/documentService/updateDocumentRoute';
 import { updateDocumentStatus } from '../../modules/document/service/documentService/updateDocumentStatus';
 import { getNextStatus } from '@src/core/modules/document/lib';
+import { mapCourtDecisionToDocument } from '@src/courDeCassation/connector/mapper/mapCourtDecisionToDocument';
+import { ENV } from '../../utils/env';
 
 export { buildConnector };
+
+const SOURCES = ['LOCAL', 'DEV', 'PREPROD'].includes(ENV)
+  ? ['jurinet', 'jurica', 'juritj', 'juritcom', 'portalis-cph']
+  : ['jurinet', 'jurica', 'juritj', 'juritcom'];
 
 function buildConnector(connectorConfig: connectorConfigType) {
   const preAssignator = buildPreAssignator();
@@ -45,6 +50,14 @@ function buildConnector(connectorConfig: connectorConfigType) {
       message: `START: ${documentNumber} - ${source}, lowPriority: ${lowPriority}`,
     });
 
+    if (!['LOCAL', 'DEV', 'PREPROD'].includes(ENV) && source === 'portalis-cph') {
+      logger.info({
+        ...logerTech,
+        message: `Source portalis-cph is excluded in PRODUCTION environment.`,
+      });
+      return;
+    }
+
     try {
       const courtDecision = await connectorConfig.fetchCourtDecisionBySourceIdAndSourceName(documentNumber, source);
 
@@ -68,7 +81,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
         ...logerTech,
         message: `Court decision found. labelStatus: ${courtDecision.labelStatus}`,
       });
-      const document = await connectorConfig.mapCourtDecisionToDocument(courtDecision, 'manual');
+      const document = await mapCourtDecisionToDocument(courtDecision, 'manual');
 
       logger.info({
         ...logerTech,
@@ -150,7 +163,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
       message: `Starting importNewDocuments...`,
     });
 
-    for (const source of Object.values(Deprecated.Sources)) {
+    for (const source of SOURCES) {
       logger.info({
         ...logerDoc,
         message: `Fetching ${source} decisions...`,
@@ -170,7 +183,7 @@ function buildConnector(connectorConfig: connectorConfigType) {
           if (!decision.originalText || !decision.labelTreatments || decision.labelTreatments.length === 0) {
             throw new Error('Court decision must have an original text and labelTreatments, can not be imported.');
           }
-          const converted = await connectorConfig.mapCourtDecisionToDocument(decision, 'recent');
+          const converted = await mapCourtDecisionToDocument(decision, 'recent');
           await insertDocument(converted, settings);
 
           const lastLabelTreatment = decision.labelTreatments.sort((a, b) => b.order - a.order)[0];

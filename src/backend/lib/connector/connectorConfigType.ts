@@ -1,5 +1,4 @@
-import { documentType } from '@src/core';
-import { Deprecated } from '@src/core';
+import { AcceptedDocumentTypes } from '@src/core';
 
 export type { connectorConfigType };
 
@@ -8,14 +7,10 @@ type connectorConfigType = {
   fetchCourtDecisionBySourceIdAndSourceName(
     sourceId: number,
     sourceName: string,
-  ): Promise<Deprecated.DecisionDTO | undefined>;
+  ): Promise<AcceptedDocumentTypes | undefined>;
   fetchDecisionsToPseudonymise(sourceName: string): Promise<{
-    next: () => Promise<Deprecated.DecisionDTO | undefined>;
+    next: () => Promise<AcceptedDocumentTypes | undefined>;
     length: number;
   }>;
   updateDocumentLabelStatusToLoaded: (externalId: string) => Promise<void>;
-  mapCourtDecisionToDocument: (
-    courtDecision: Deprecated.DecisionDTO,
-    importer: documentType['importer'],
-  ) => Promise<documentType>;
 };

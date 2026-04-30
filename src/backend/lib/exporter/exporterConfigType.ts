@@ -1,5 +1,5 @@
-import { documentType } from '@src/core';
-import { Deprecated } from '@src/core';
+import { AcceptedDocumentTypes, documentType } from '@src/core';
+import { LabelStatus, LabelTreatments, PublishStatus } from 'dbsder-api-types';
 
 export type { exporterConfigType };
 
@@ -7,9 +7,9 @@ type exporterConfigType = {
   name: string;
   patchDecisionInSder: (param: {
     externalId: documentType['externalId'];
-    labelTreatments: Deprecated.LabelTreatment[];
-    labelStatus: Deprecated.LabelStatus;
-    publishStatus: Deprecated.PublishStatus;
+    labelTreatments: LabelTreatments;
+    labelStatus: LabelStatus;
+    publishStatus: PublishStatus;
   }) => Promise<void>;
-  fetchDecisionByExternalId: (externalId: documentType['externalId']) => Promise<Deprecated.DecisionDTO | undefined>;
+  fetchDecisionByExternalId: (externalId: documentType['externalId']) => Promise<AcceptedDocumentTypes | undefined>;
 };

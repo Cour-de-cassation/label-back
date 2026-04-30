@@ -1,205 +1,428 @@
-import { documentType, documentModule, timeOperator } from '@src/core';
-import {
-  extractReadableChamberName,
-  extractReadableJurisdictionName,
-  extractAppealRegisterRoleGeneralNumber,
-} from './extractors';
+import { documentType, documentModule, timeOperator, AcceptedDocumentTypes } from '@src/core';
+import { extractReadableChamberName, extractNumeroPourvoi } from './extractors';
 import { categoriesMapper } from './categoriesMapper';
-import { Deprecated } from '@src/core';
+import { DecisionCa, DecisionCc, DecisionCph, DecisionTcom, DecisionTj, LabelTreatments } from 'dbsder-api-types';
 
 export { mapCourtDecisionToDocument };
 
 async function mapCourtDecisionToDocument(
-  sderCourtDecision: Deprecated.DecisionDTO,
+  decision: AcceptedDocumentTypes,
   importer: documentType['importer'],
 ): Promise<documentType> {
-  const readableChamberName = extractReadableChamberName({
-    chamberName: sderCourtDecision.chamberName,
-    chamberId: sderCourtDecision.chamberId,
-  });
-  const readableJurisdictionName = extractReadableJurisdictionName(sderCourtDecision.jurisdictionName);
-  const creationDate = convertToValidDate(sderCourtDecision.dateCreation);
-  const decisionDate = convertToValidDate(sderCourtDecision.dateDecision);
-  const source = sderCourtDecision.sourceName;
+  switch (decision.sourceName) {
+    case 'jurinet':
+      return mapDecisionCc(decision, importer);
+    case 'jurica':
+      return mapDecisionCa(decision, importer);
+    case 'juritj':
+      return mapDecisionTj(decision, importer);
+    case 'juritcom':
+      return mapDecisionTcom(decision, importer);
+    case 'portalis-cph':
+      return mapDecisionCph(decision, importer);
+    default:
+      throw new Error(`Source non gérée.`);
+  }
+}
 
-  const registerNumber = sderCourtDecision.registerNumber;
-  const appeal = sderCourtDecision.appeals[0];
-  const numeroRoleGeneral = isDecisionTJ(sderCourtDecision) ? sderCourtDecision.numeroRoleGeneral : '';
-  const appealNumber = extractAppealRegisterRoleGeneralNumber(
-    sderCourtDecision.originalText,
-    source,
-    readableJurisdictionName,
-    appeal,
-    registerNumber,
-    numeroRoleGeneral,
-  );
+// ─── Per-type mappers ─────────────────────────────────────────────────────────
 
-  const publicationCategory = computePublicationCategory(sderCourtDecision.pubCategory, sderCourtDecision.publication);
-
-  const categoriesToOmit = categoriesMapper.mapSderCategoriesToLabelCategories(
-    sderCourtDecision.occultation?.categoriesToOmit,
-  );
-
-  const solution = sderCourtDecision.solution ? sderCourtDecision.solution.trim() : '';
-
-  const session = sderCourtDecision.formation?.trim() || '';
-
-  const additionalTermsToAnnotate = sderCourtDecision.occultation?.additionalTerms || '';
-  const civilCaseCode = sderCourtDecision.natureAffaireCivil?.trim() || '';
-  const civilMatterCode = sderCourtDecision.codeMatiereCivil?.trim() || '';
-  const criminalCaseCode = sderCourtDecision.natureAffairePenal?.trim() || '';
-  const NACCode = sderCourtDecision.NACCode || '';
-  const NAOCode = sderCourtDecision.NAOCode || '';
-  const endCaseCode = sderCourtDecision.endCaseCode || '';
-
-  const title = computeTitleFromParsedCourtDecision({
-    source: source,
-    number: sderCourtDecision.sourceId,
-    appealNumber,
-    readableChamberName,
-    readableJurisdictionName,
-    NACCode: NACCode,
-    NAOCode: NAOCode,
-    date: decisionDate,
-  });
-
-  const priority = computePriority(
-    sderCourtDecision.sourceName,
-    publicationCategory,
-    NACCode,
-    importer,
-    sderCourtDecision.raisonInteretParticulier,
-  );
-
-  const nlpTreatment = sderCourtDecision.labelTreatments
-    ?.filter((treatment) => treatment.source === 'NLP')
-    .sort((a, b) => b.order - a.order)[0];
+function mapDecisionCc(decision: DecisionCc, importer: documentType['importer']): documentType {
+  const jurisdictionName = 'Cour de cassation';
+  const chamberName = extractReadableChamberName({ chamberId: decision.chamberId ?? undefined });
+  const appealNumber = extractNumeroPourvoi(jurisdictionName, decision.appeals[0]);
+  const publicationCategory = computePublicationCategoryCc(decision);
+  const NACCode = '';
+  const NAOCode = decision.NAOCode ?? '';
+  const decisionDate = convertToValidDate(decision.dateDecision ?? undefined);
+  const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
 
   return documentModule.lib.buildDocument({
-    creationDate: creationDate?.getTime(),
+    creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
     decisionMetadata: {
-      appealNumber: appealNumber || '',
-      additionalTermsToAnnotate,
+      appealNumber: appealNumber ?? '',
+      additionalTermsToAnnotate: decision.occultation.additionalTerms,
       computedAdditionalTerms: {
-        additionalTermsToAnnotate: sderCourtDecision.occultation.additionalTermsToAnnotate ?? [],
-        additionalTermsToUnAnnotate: sderCourtDecision.occultation.additionalTermsToUnAnnotate ?? [],
+        additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
+        additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
       additionalTermsParsingFailed:
-        sderCourtDecision.occultation.additionalTermsToUnAnnotate &&
-        sderCourtDecision.occultation.additionalTermsToUnAnnotate.length > 0,
-      boundDecisionDocumentNumbers: sderCourtDecision.decatt || [],
-      categoriesToOmit,
-      civilCaseCode,
-      civilMatterCode,
-      criminalCaseCode,
-      chamberName: readableChamberName,
+        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
+      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
+      civilCaseCode: decision.natureAffaireCivil?.trim() ?? '',
+      civilMatterCode: decision.codeMatiereCivil?.trim() ?? '',
+      criminalCaseCode: decision.natureAffairePenal?.trim() ?? '',
+      chamberName,
       date: decisionDate?.getTime(),
-      jurisdiction: readableJurisdictionName,
+      jurisdiction: jurisdictionName,
       NACCode,
-      endCaseCode,
-      occultationBlock: sderCourtDecision.blocOccultation || undefined,
-      session,
-      solution,
-      motivationOccultation: sderCourtDecision.occultation.motivationOccultation ?? undefined,
-      raisonInteretParticulier: sderCourtDecision.raisonInteretParticulier ?? undefined,
-      sommaire: sderCourtDecision.sommaire ?? '',
+      endCaseCode: '',
+      occultationBlock: decision.blocOccultation ?? undefined,
+      session: decision.formation?.trim() ?? '',
+      solution: decision.solution?.trim() ?? '',
+      motivationOccultation: decision.occultation.motivationOccultation ?? undefined,
+      raisonInteretParticulier: undefined,
+      sommaire: '',
     },
-    documentNumber: sderCourtDecision.sourceId,
-    externalId: sderCourtDecision._id ?? '',
-    loss: undefined,
-    priority,
+    documentNumber: decision.sourceId,
+    externalId: decision._id,
+    priority: computePriority(decision.sourceName, publicationCategory, NACCode, importer, undefined),
     publicationCategory,
     route: 'default',
     importer,
-    source,
-    title,
-    text: sderCourtDecision.originalText,
+    source: decision.sourceName,
+    title: computeTitle({
+      source: decision.sourceName,
+      sourceId: decision.sourceId,
+      appealNumber,
+      chamberName,
+      jurisdictionName,
+      NACCode,
+      NAOCode,
+      date: decisionDate,
+    }),
+    text: decision.originalText ?? '',
     nlpVersions: nlpTreatment?.version,
-    checklist: nlpTreatment?.checklist ?? [],
+    checklist: nlpTreatment?.checklist,
   });
 }
 
-function getPrefixedNumber(numberToPrefix: string | undefined, source: string, readableJurisdictionName: string) {
-  if (numberToPrefix === undefined) {
-    return undefined;
-  }
-  if (source === 'jurinet' && readableJurisdictionName.includes('cassation')) {
-    return `Pourvoi n°${numberToPrefix}`;
-  } else {
-    return `RG n°${numberToPrefix}`;
-  }
+function mapDecisionCa(decision: DecisionCa, importer: documentType['importer']): documentType {
+  const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
+  const chamberName = extractReadableChamberName({
+    chamberName: decision.chamberName ?? undefined,
+    chamberId: decision.chamberId ?? undefined,
+  });
+  const appealNumber = decision.registerNumber ? decision.registerNumber.split(' ')[0] : undefined;
+  const publicationCategory = [decision.pubCategory];
+  const NACCode = decision.NACCode ?? '';
+  const decisionDate = convertToValidDate(decision.dateDecision ?? undefined);
+  const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+
+  return documentModule.lib.buildDocument({
+    creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
+    decisionMetadata: {
+      appealNumber: appealNumber ?? '',
+      additionalTermsToAnnotate: decision.occultation?.additionalTerms ?? '',
+      computedAdditionalTerms: {
+        additionalTermsToAnnotate: decision.occultation?.additionalTermsToAnnotate ?? [],
+        additionalTermsToUnAnnotate: decision.occultation?.additionalTermsToUnAnnotate ?? [],
+      },
+      additionalTermsParsingFailed:
+        decision.occultation?.additionalTermsToUnAnnotate &&
+        decision.occultation.additionalTermsToUnAnnotate.length > 0,
+      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit),
+      civilCaseCode: '',
+      civilMatterCode: '',
+      criminalCaseCode: '',
+      chamberName,
+      date: decisionDate?.getTime(),
+      jurisdiction: jurisdictionName,
+      NACCode,
+      endCaseCode: decision.endCaseCode ?? '',
+      occultationBlock: decision.blocOccultation ?? undefined,
+      session: '',
+      solution: decision.solution?.trim() ?? '',
+      motivationOccultation: decision.occultation?.motivationOccultation ?? undefined,
+      raisonInteretParticulier: decision.raisonInteretParticulier ?? undefined,
+      sommaire: decision.sommaire ?? '',
+    },
+    documentNumber: decision.sourceId,
+    externalId: decision._id,
+    priority: computePriority(
+      decision.sourceName,
+      publicationCategory,
+      NACCode,
+      importer,
+      decision.raisonInteretParticulier ?? undefined,
+    ),
+    publicationCategory,
+    route: 'default',
+    importer,
+    source: decision.sourceName,
+    title: computeTitle({
+      source: decision.sourceName,
+      sourceId: decision.sourceId,
+      appealNumber,
+      chamberName,
+      jurisdictionName,
+      NACCode,
+      NAOCode: '',
+      date: decisionDate,
+    }),
+    text: decision.originalText ?? '',
+    nlpVersions: nlpTreatment?.version,
+    checklist: nlpTreatment?.checklist,
+  });
 }
 
-function computeTitleFromParsedCourtDecision({
+function mapDecisionTj(decision: DecisionTj, importer: documentType['importer']): documentType {
+  const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
+  const appealNumber = decision.numeroRoleGeneral;
+  const publicationCategory: string[] = [];
+  const NACCode = decision.NACCode;
+  const decisionDate = convertToValidDate(decision.dateDecision);
+  const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+
+  return documentModule.lib.buildDocument({
+    creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
+    decisionMetadata: {
+      appealNumber: appealNumber ?? '',
+      additionalTermsToAnnotate: decision.occultation.additionalTerms,
+      computedAdditionalTerms: {
+        additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
+        additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
+      },
+      additionalTermsParsingFailed:
+        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
+      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
+      civilCaseCode: '',
+      civilMatterCode: '',
+      criminalCaseCode: '',
+      chamberName: '',
+      date: decisionDate?.getTime(),
+      jurisdiction: jurisdictionName,
+      NACCode,
+      endCaseCode: decision.endCaseCode,
+      occultationBlock: decision.blocOccultation,
+      session: decision.formation?.trim() ?? '',
+      solution: decision.solution?.trim() ?? '',
+      motivationOccultation: decision.occultation.motivationOccultation ?? undefined,
+      raisonInteretParticulier: decision.raisonInteretParticulier ?? undefined,
+      sommaire: decision.sommaire ?? '',
+    },
+    documentNumber: decision.sourceId,
+    externalId: decision._id,
+    priority: computePriority(
+      decision.sourceName,
+      publicationCategory,
+      NACCode,
+      importer,
+      decision.raisonInteretParticulier ?? undefined,
+    ),
+    publicationCategory,
+    route: 'default',
+    importer,
+    source: decision.sourceName,
+    title: computeTitle({
+      source: decision.sourceName,
+      sourceId: decision.sourceId,
+      appealNumber,
+      chamberName: '',
+      jurisdictionName,
+      NACCode,
+      NAOCode: '',
+      date: decisionDate,
+    }),
+    text: decision.originalText,
+    nlpVersions: nlpTreatment?.version,
+    checklist: nlpTreatment?.checklist,
+  });
+}
+
+function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importer']): documentType {
+  const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
+  const chamberName = extractReadableChamberName({
+    chamberName: decision.chamberName ?? undefined,
+    chamberId: decision.chamberId ?? undefined,
+  });
+  const appealNumber = decision.registerNumber;
+  const publicationCategory: string[] = [];
+  const decisionDate = convertToValidDate(decision.dateDecision);
+  const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+
+  return documentModule.lib.buildDocument({
+    creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
+    decisionMetadata: {
+      appealNumber: appealNumber ?? '',
+      additionalTermsToAnnotate: decision.occultation.additionalTerms,
+      computedAdditionalTerms: {
+        additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
+        additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
+      },
+      additionalTermsParsingFailed:
+        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
+      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
+      civilCaseCode: '',
+      civilMatterCode: decision.codeMatiereCivil?.trim() ?? '',
+      criminalCaseCode: '',
+      chamberName,
+      date: decisionDate?.getTime(),
+      jurisdiction: jurisdictionName,
+      NACCode: '',
+      endCaseCode: '',
+      occultationBlock: decision.blocOccultation,
+      session: '',
+      solution: decision.solution?.trim() ?? '',
+      motivationOccultation: decision.occultation.motivationOccultation ?? undefined,
+      raisonInteretParticulier: undefined,
+      sommaire: '',
+    },
+    documentNumber: decision.sourceId,
+    externalId: decision._id,
+    priority: computePriority(decision.sourceName, publicationCategory, '', importer, undefined),
+    publicationCategory,
+    route: 'default',
+    importer,
+    source: decision.sourceName,
+    title: computeTitle({
+      source: decision.sourceName,
+      sourceId: decision.sourceId,
+      appealNumber,
+      chamberName,
+      jurisdictionName,
+      NACCode: '',
+      NAOCode: '',
+      date: decisionDate,
+    }),
+    text: decision.originalText,
+    nlpVersions: nlpTreatment?.version,
+    checklist: nlpTreatment?.checklist,
+  });
+}
+
+function mapDecisionCph(decision: DecisionCph, importer: documentType['importer']): documentType {
+  const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
+  const appealNumber = decision.portalisNumber;
+  const publicationCategory: string[] = [];
+  const NACCode = decision.NACCode;
+  const decisionDate = convertToValidDate(decision.dateDecision);
+  const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+
+  return documentModule.lib.buildDocument({
+    creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
+    decisionMetadata: {
+      appealNumber: appealNumber ?? '',
+      additionalTermsToAnnotate: decision.occultation.additionalTerms,
+      computedAdditionalTerms: {
+        additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
+        additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
+      },
+      additionalTermsParsingFailed:
+        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
+      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
+      civilCaseCode: '',
+      civilMatterCode: '',
+      criminalCaseCode: '',
+      chamberName: '',
+      date: decisionDate?.getTime(),
+      jurisdiction: jurisdictionName,
+      NACCode,
+      endCaseCode: decision.endCaseCode,
+      occultationBlock: decision.blocOccultation,
+      session: decision.formation?.trim() ?? '',
+      solution: '',
+      motivationOccultation: decision.occultation.motivationOccultation ?? undefined,
+      raisonInteretParticulier: decision.raisonInteretParticulier ?? undefined,
+      sommaire: decision.sommaire ?? '',
+    },
+    documentNumber: decision.sourceId,
+    externalId: decision._id,
+    priority: computePriority(
+      decision.sourceName,
+      publicationCategory,
+      NACCode,
+      importer,
+      decision.raisonInteretParticulier ?? undefined,
+    ),
+    publicationCategory,
+    route: 'default',
+    importer,
+    source: decision.sourceName,
+    title: computeTitle({
+      source: decision.sourceName,
+      sourceId: decision.sourceId,
+      appealNumber,
+      chamberName: '',
+      jurisdictionName,
+      NACCode,
+      NAOCode: '',
+      date: decisionDate,
+    }),
+    text: decision.originalText,
+    nlpVersions: nlpTreatment?.version,
+    checklist: nlpTreatment?.checklist,
+  });
+}
+
+// ─── Shared helpers ───────────────────────────────────────────────────────────
+
+function computeTitle({
   source,
-  number,
+  sourceId,
   appealNumber,
-  readableChamberName,
-  readableJurisdictionName,
+  chamberName,
+  jurisdictionName,
   NACCode,
   NAOCode,
   date,
 }: {
   source: string;
-  number: number;
+  sourceId: number | string;
   appealNumber: string | undefined;
-  readableChamberName: string;
-  readableJurisdictionName: string;
+  chamberName: string;
+  jurisdictionName: string;
   NACCode: string;
   NAOCode: string;
-  date?: Date;
-}) {
-  const prefixedNumber = getPrefixedNumber(appealNumber, source, readableJurisdictionName);
+  date: Date | undefined;
+}): string {
+  let readableJurisdictionName = jurisdictionName;
+  if (source === 'juritj') readableJurisdictionName = `TJ de ${jurisdictionName}`;
+  if (source === 'juritcom') readableJurisdictionName = `TCOM de ${jurisdictionName}`;
 
-  if (source === Deprecated.Sources.TJ) {
-    readableJurisdictionName = `TJ de ${readableJurisdictionName}`;
-  }
-
-  if (source === Deprecated.Sources.TCOM) {
-    readableJurisdictionName = `TCOM de ${readableJurisdictionName}`;
-  }
+  const prefixedAppealNumber = formatAppealNumber(appealNumber, source, readableJurisdictionName);
 
   const nomenclatureNumber =
-    source === Deprecated.Sources.CC && NAOCode
+    source === 'jurinet' && NAOCode
       ? `NAO ${NAOCode}`
-      : (source === Deprecated.Sources.TJ || source === Deprecated.Sources.CA) && NACCode
+      : (source === 'juritj' || source === 'jurica') && NACCode
         ? `NAC ${NACCode}`
         : undefined;
 
-  const readableNumber = `Décision n°${number}`;
-  const readableAppealNumber = prefixedNumber ? prefixedNumber : undefined;
   const readableDate = date ? timeOperator.convertTimestampToReadableDate(date.getTime()) : undefined;
-  const title = [
-    readableNumber,
-    readableAppealNumber,
+
+  return [
+    `Décision n°${sourceId}`,
+    prefixedAppealNumber,
     readableJurisdictionName,
-    readableChamberName,
+    chamberName,
     nomenclatureNumber,
     readableDate,
   ]
     .filter(Boolean)
     .join(' · ');
-  return title;
 }
 
-function computePublicationCategory(
-  pubCategory: Deprecated.DecisionDTO['pubCategory'],
-  publication: Deprecated.DecisionDTO['publication'],
-): documentType['publicationCategory'] {
-  const publicationCategory: string[] = [];
-  if (!!pubCategory) {
-    publicationCategory.push(pubCategory);
+function formatAppealNumber(
+  appealNumber: string | undefined,
+  source: string,
+  readableJurisdictionName: string,
+): string | undefined {
+  if (appealNumber === undefined) return undefined;
+  if (source === 'jurinet' && readableJurisdictionName.includes('cassation')) {
+    return `Pourvoi n°${appealNumber}`;
   }
-  if (!!publication) {
-    publicationCategory.push(...publication);
+  if (source === 'portalis-cph') {
+    return `Numéro Portalis : ${appealNumber}`;
   }
-  return publicationCategory;
+  return `RG n°${appealNumber}`;
+}
+
+function computePublicationCategoryCc(decision: DecisionCc): string[] {
+  const categories: string[] = [];
+  if (decision.pubCategory) categories.push(decision.pubCategory);
+  if (decision.publication) categories.push(...decision.publication);
+  return categories;
+}
+
+function extractNlpTreatment(labelTreatments: LabelTreatments | undefined) {
+  return labelTreatments?.filter((treatment) => treatment.source === 'NLP').sort((a, b) => b.order - a.order)[0];
 }
 
 function computePriority(
-  source: Deprecated.DecisionDTO['sourceName'],
+  source: string,
   publicationCategory: documentType['publicationCategory'],
-  NACCode: Deprecated.DecisionDTO['NACCode'],
+  NACCode: string,
   importer: documentType['importer'],
   raisonInteretParticulier: documentType['decisionMetadata']['raisonInteretParticulier'],
 ): documentType['priority'] {
@@ -209,30 +432,17 @@ function computePriority(
   if (raisonInteretParticulier != null) {
     return 2;
   }
-  switch (importer) {
-    case 'manual':
-      return 3;
+  if (importer === 'manual') {
+    return 3;
   }
-  switch (source) {
-    case 'jurinet':
-      return 2;
-    default:
-      return 0;
+  if (source === 'jurinet') {
+    return 2;
   }
+  return 0;
 }
 
-function convertToValidDate(date: string | undefined) {
-  if (!date) {
-    return undefined;
-  }
-
-  const convertedDate = new Date(date);
-  if (isNaN(convertedDate.valueOf())) {
-    return undefined;
-  }
-  return convertedDate;
-}
-
-function isDecisionTJ(decision: Deprecated.DecisionDTO): decision is Deprecated.DecisionTJDTO {
-  return decision.sourceName === Deprecated.Sources.TJ;
+function convertToValidDate(date: string | undefined): Date | undefined {
+  if (!date) return undefined;
+  const converted = new Date(date);
+  return isNaN(converted.valueOf()) ? undefined : converted;
 }

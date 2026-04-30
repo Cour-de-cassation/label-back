@@ -1,4 +1,5 @@
 import { generatorType } from './generatorType';
-export { Deprecated } from './decision';
+import { AcceptedDocumentTypes } from './acceptedDocuments';
 
+export type { AcceptedDocumentTypes };
 export type { generatorType };
