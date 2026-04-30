@@ -402,6 +402,9 @@ function formatAppealNumber(
   if (source === 'jurinet' && readableJurisdictionName.includes('cassation')) {
     return `Pourvoi n°${appealNumber}`;
   }
+  if (source === 'portalis-cph') {
+    return `Numéro Portalis : ${appealNumber}`;
+  }
   return `RG n°${appealNumber}`;
 }
 
