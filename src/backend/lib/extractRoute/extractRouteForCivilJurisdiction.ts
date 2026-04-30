@@ -16,6 +16,16 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
   const checklist = document.checklist;
   const categoriesToOmit = document.decisionMetadata.categoriesToOmit;
 
+  if (source === 'portalis-cph') {
+    const routeRelecture = 'default';
+    logger.info({
+      path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
+      operations: ['other', 'computeRouteForCph'],
+      message: `Relecture ${routeRelecture} appliquée`,
+    });
+    return routeRelecture;
+  }
+
   if (
     checklist &&
     checklist.length > 0 &&
@@ -132,14 +142,6 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
       });
       return routeRelecture;
     }
-  } else if (source === 'portalis-cph') {
-    const routeRelecture = 'default';
-    logger.info({
-      path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
-      operations: ['other', 'computeRouteForCph'],
-      message: `Relecture ${routeRelecture} appliquée`,
-    });
-    return routeRelecture;
   }
 
   return 'default';
