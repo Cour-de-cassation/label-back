@@ -11,6 +11,7 @@ import {
   SSO_ATTRIBUTE_ROLE,
   SSO_APP_NAME,
 } from '../env';
+import { ExtractorField } from 'samlify/types/src/types';
 
 export class SamlService {
   private sp;
@@ -82,19 +83,19 @@ export class SamlService {
 
     const samlContent = Buffer.from(samlResponse, 'base64').toString();
 
-    const extractFields = [
+    const extractFields: ExtractorField[] = [
       ...samlify.Extractor.loginResponseFields(samlContent),
       {
         key: 'nameID',
         localPath: ['Response', 'Assertion', 'Subject', 'NameID'],
         attributes: [],
-        shortcut: samlContent as unknown,
+        shortcut: samlContent,
       },
       {
         key: 'sessionIndex',
         localPath: ['Response', 'Assertion', 'AuthnStatement'],
         attributes: ['SessionIndex'],
-        shortcut: samlContent as unknown,
+        shortcut: samlContent,
       },
       {
         key: 'attributes',
@@ -102,7 +103,7 @@ export class SamlService {
         index: ['Name'],
         attributePath: ['AttributeValue'],
         attributes: [],
-        shortcut: samlContent as unknown,
+        shortcut: samlContent,
       },
     ];
 
