@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 ARG http_proxy
 ARG https_proxy
@@ -16,7 +16,7 @@ COPY --chown=node:node . .
 
 RUN npm run compile && npm prune --production
 
-FROM node:22-alpine AS label-back
+FROM node:24-alpine AS label-back
 
 USER node
 WORKDIR /home/node
