@@ -1,9 +1,18 @@
+import yargs from 'yargs';
+import { withMongo } from './withMongo';
 import { cacheType } from '@src/core';
 import { cacheService } from '../../modules/cache';
 import { statisticService } from '../../modules/statistic';
 import { logger } from '../../utils';
 
 export { renewCache };
+
+if (require.main === module) {
+  (async () => {
+    const { beforeMinutes } = parseArgv();
+    await withMongo(() => renewCache({ minutes: beforeMinutes }));
+  })();
+}
 
 async function renewCache({ minutes }: { minutes: number }) {
   logger.info({ operations: ['other', 'renewCache'], path: 'src/backend/app/scripts/renewCache.ts', message: 'START' });
@@ -44,4 +53,20 @@ async function renewCache({ minutes }: { minutes: number }) {
     path: 'src/backend/app/scripts/renewCache.ts',
     message: 'DONE',
   });
+}
+
+function parseArgv() {
+  const argv = yargs
+    .options({
+      beforeMinutes: {
+        demandOption: true,
+        description: 'minutes before renewing cache',
+        type: 'number',
+      },
+    })
+    .help()
+    .alias('help', 'h')
+    .parseSync();
+
+  return { beforeMinutes: argv.beforeMinutes as number };
 }

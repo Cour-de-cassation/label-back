@@ -1,8 +1,15 @@
+import { withMongo } from './withMongo';
 import { buildDocumentRepository } from '../../modules/document';
 import { logger } from '../../utils';
 import { TechLog, DecisionLog } from '@src/backend/utils/logger/loggerType';
 
 export { listAllDocuments };
+
+if (require.main === module) {
+  (async () => {
+    await withMongo(listAllDocuments);
+  })();
+}
 
 async function listAllDocuments() {
   const loggerTech: TechLog = {

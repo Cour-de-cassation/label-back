@@ -1,9 +1,29 @@
-import { buildBackend } from '@src/backend';
-import { parametersHandler } from './lib/parametersHandler';
+import { settingsModule } from '@src/core';
+import { buildRunServer } from '@src/backend/app/buildRunServer';
+import { promises as fs } from 'fs';
+import { resolve } from 'path';
+import yargs from 'yargs';
 
 (async () => {
-  const { settings } = await parametersHandler.getParameters();
-  const backend = buildBackend(settings);
+  const argv = yargs
+    .options({
+      settings: {
+        alias: 's',
+        demandOption: true,
+        description: 'Settings of LABEL',
+        type: 'string',
+      },
+    })
+    .help()
+    .alias('help', 'h')
+    .parseSync();
 
-  backend.runServer();
+  const raw = await fs.readFile(resolve(argv.settings as string), { encoding: 'utf8' });
+  const parsed = settingsModule.lib.parseFromJson(raw);
+  const settings = settingsModule.lib.motivationCategoryHandler.addCategoryToSettings(
+    settingsModule.lib.additionalAnnotationCategoryHandler.addCategoryToSettings(parsed),
+  );
+
+  const runServer = buildRunServer(settings);
+  runServer();
 })();
