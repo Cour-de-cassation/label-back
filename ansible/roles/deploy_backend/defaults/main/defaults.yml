@@ -8,7 +8,7 @@ jobs:
     restartPolicy: 'Never'
     parallelism: 1
     active_deadline_seconds: 1800
-    command: 'dist/backend/app/scripts/autoImportDocumentsFromSder.js'
+    command: 'dist/backend/app/scripts/autoImportDocumentsFromSder.js -s settings/settings.json'
   - name: 'export-j-7'
     schedule: '25 18 * * *'
     successful_jobs_history_limit: 7
@@ -17,7 +17,7 @@ jobs:
     restartPolicy: 'OnFailure'
     parallelism: 1
     active_deadline_seconds: 2400
-    command: 'dist/backend/app/scripts/exportTreatedDocumentsSince.js --days 7'
+    command: 'dist/backend/app/scripts/exportTreatedDocumentsSince.js --days 7 -s settings/settings.json'
   - name: 'export-publishable'
     schedule: '50 13 * * *'
     successful_jobs_history_limit: 7
@@ -26,7 +26,7 @@ jobs:
     restartPolicy: 'OnFailure'
     parallelism: 1
     active_deadline_seconds: 300
-    command: 'dist/backend/app/scripts/exportTreatedPublishableDocuments.js'
+    command: 'dist/backend/app/scripts/exportTreatedPublishableDocuments.js -s settings/settings.json'
   - name: 'free-pending'
     schedule: '*/16 6-17 * * *'
     successful_jobs_history_limit: 7
