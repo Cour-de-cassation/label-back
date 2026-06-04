@@ -13,5 +13,10 @@ async function fetchPublishableDocumentsToExport() {
     documentModule.lib.publicationHandler.getPrioritizedNACCodes(),
     ['toBePublished', 'done'],
   );
-  return [...lettersDocuments, ...codesDocuments];
+
+  const interetParticulierDocuments = await documentRepository.findAllByParticularInterestAndStatus([
+    'toBePublished',
+    'done',
+  ]);
+  return [...lettersDocuments, ...codesDocuments, ...interetParticulierDocuments];
 }

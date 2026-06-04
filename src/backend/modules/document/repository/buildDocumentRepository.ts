@@ -147,6 +147,12 @@ const buildDocumentRepository = buildRepositoryBuilder<documentType, customDocum
       return collection.find(buildFindAllByNACCodesAndStatusRequest(NACCodes, statuses)).toArray();
     },
 
+    async findAllByParticularInterestAndStatus(statuses: documentType['status'][]) {
+      return collection
+        .find({ status: { $in: statuses }, 'decisionMetadata.raisonInteretParticulier': { $ne: null } })
+        .toArray();
+    },
+
     async findAllByPublicationCategoryLettersAndStatus(publicationCategoryLetters, statuses) {
       return collection
         .find(buildFindByPublicationCategoryLettersAndStatusRequest(publicationCategoryLetters, statuses))
