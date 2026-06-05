@@ -18,5 +18,13 @@ async function fetchPublishableDocumentsToExport() {
     'toBePublished',
     'done',
   ]);
-  return [...lettersDocuments, ...codesDocuments, ...interetParticulierDocuments];
+
+  const allDocuments = [...lettersDocuments, ...codesDocuments, ...interetParticulierDocuments];
+  const seenIds = new Set<string>();
+  return allDocuments.filter((doc) => {
+    const idString = doc._id.toString();
+    if (seenIds.has(idString)) return false;
+    seenIds.add(idString);
+    return true;
+  });
 }
