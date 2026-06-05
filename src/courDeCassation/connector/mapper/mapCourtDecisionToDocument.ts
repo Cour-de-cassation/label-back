@@ -429,11 +429,11 @@ function computePriority(
   if (documentModule.lib.publicationHandler.mustBePublished(publicationCategory, NACCode)) {
     return 4;
   }
-  if (raisonInteretParticulier != null) {
-    return 2;
-  }
   if (importer === 'manual') {
     return 3;
+  }
+  if (raisonInteretParticulier != null) {
+    return 2;
   }
   if (source === 'jurinet') {
     return 2;
