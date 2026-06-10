@@ -40,6 +40,12 @@ const buildFakeDocumentRepository = buildFakeRepositoryBuilder<documentType, cus
       );
     },
 
+    async findAllByParticularInterestAndStatus(statuses: documentType['status'][]) {
+      return collection
+        .filter((document) => statuses.includes(document.status))
+        .filter((document) => document.decisionMetadata.raisonInteretParticulier != null);
+    },
+
     async findAllByPublicationCategoryLettersAndStatus(publicationCategoryLetters, statuses) {
       return collection.filter(
         (document) =>
