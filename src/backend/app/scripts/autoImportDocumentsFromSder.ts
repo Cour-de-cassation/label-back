@@ -74,8 +74,8 @@ async function importNewDocuments(settings: settingsType) {
         if (!decision.originalText || !decision.labelTreatments || decision.labelTreatments.length === 0) {
           throw new Error('Court decision must have an original text and labelTreatments, can not be imported.');
         }
-        const converted = await mapCourtDecisionToDocument(decision, 'recent');
-        await insertDocument(converted, settings);
+        const document = await mapCourtDecisionToDocument(decision, 'recent');
+        await insertDocument(document, settings);
 
         const lastLabelTreatment = decision.labelTreatments.sort((a, b) => b.order - a.order)[0];
 
@@ -96,7 +96,7 @@ async function importNewDocuments(settings: settingsType) {
 
         await treatmentService.createTreatment(
           {
-            documentId: converted._id,
+            documentId: document._id,
             previousAnnotations: [],
             nextAnnotations: annotations,
             source: 'reimportedTreatment',
@@ -104,20 +104,20 @@ async function importNewDocuments(settings: settingsType) {
           settings,
         );
 
-        const routeForDocument = await extractRoute(converted);
-        await updateDocumentRoute(converted._id, routeForDocument);
+        const routeForDocument = await extractRoute(document);
+        await updateDocumentRoute(document._id, routeForDocument);
 
-        const isPreassignated = await preAssignator.preAssignDocument({ ...converted, route: routeForDocument });
+        const isPreassignated = await preAssignator.preAssignDocument({ ...document, route: routeForDocument });
         if (!isPreassignated) {
           const nextStatus = getNextStatus({
-            publicationCategory: converted.publicationCategory,
-            status: converted.status,
+            publicationCategory: document.publicationCategory,
+            status: document.status,
             route: routeForDocument,
           });
-          await updateDocumentStatus(converted._id, nextStatus);
+          await updateDocumentStatus(document._id, nextStatus);
         }
 
-        await sderApi.setCourtDecisionLoaded(converted.externalId);
+        await sderApi.setCourtDecisionLoaded(document.externalId);
       } catch (err) {
         logger.error({ ...loggerTech, message: `${err}` });
       }
