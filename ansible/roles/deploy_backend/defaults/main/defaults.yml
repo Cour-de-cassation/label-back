@@ -53,4 +53,4 @@ jobs:
     restartPolicy: 'OnFailure'
     parallelism: 1
     active_deadline_seconds: 600
-    command: 'dist/backend/app/scripts/cleanDocuments/cleanDocuments.js'
+    command: 'dist/backend/app/scripts/cleanDocuments.js'

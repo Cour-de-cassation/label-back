@@ -1,9 +1,9 @@
 import { range } from 'lodash';
-import { buildDocumentRepository } from '../../../modules/document';
+import { buildDocumentRepository } from '../../modules/document';
 import { documentModule, settingsModule, userModule } from '@src/core';
-import { buildAssignationRepository } from '../../../modules/assignation';
-import { buildTreatmentRepository, treatmentService } from '../../../modules/treatment';
-import { buildUserRepository } from '../../../modules/user';
+import { buildAssignationRepository } from '../../modules/assignation';
+import { buildTreatmentRepository, treatmentService } from '../../modules/treatment';
+import { buildUserRepository } from '../../modules/user';
 import { cleanDocuments } from './cleanDocuments';
 
 describe('cleanDocuments', () => {
