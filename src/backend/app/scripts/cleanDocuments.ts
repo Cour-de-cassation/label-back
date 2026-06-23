@@ -1,10 +1,17 @@
-import { logger } from '../../../utils';
-import { cleanAssignations } from './cleanAssignations';
-import { cleanAssignedDocuments } from './cleanAssignedDocuments';
-import { cleanFreeDocuments } from './cleanFreeDocuments';
-import { cleanOrphansTreatments } from './cleanOrphansTreatments';
+import { withMongo } from './withMongo';
+import { logger } from '../../utils';
+import { cleanAssignations } from './cleanDocuments/cleanAssignations';
+import { cleanAssignedDocuments } from './cleanDocuments/cleanAssignedDocuments';
+import { cleanFreeDocuments } from './cleanDocuments/cleanFreeDocuments';
+import { cleanOrphansTreatments } from './cleanDocuments/cleanOrphansTreatments';
 
 export { cleanDocuments };
+
+if (require.main === module) {
+  (async () => {
+    await withMongo(cleanDocuments);
+  })();
+}
 
 async function cleanDocuments() {
   logger.info({

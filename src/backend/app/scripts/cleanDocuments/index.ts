@@ -1,1 +1,1 @@
-export { cleanDocuments } from './cleanDocuments';
+export { cleanDocuments } from '../cleanDocuments';

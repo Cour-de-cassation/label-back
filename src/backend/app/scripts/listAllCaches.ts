@@ -1,9 +1,16 @@
+import { withMongo } from './withMongo';
 import { cacheType, timeOperator } from '@src/core';
 import { buildCacheRepository } from '../../modules/cache';
 import { logger } from '../../utils';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
 
 export { listAllCaches };
+
+if (require.main === module) {
+  (async () => {
+    await withMongo(listAllCaches);
+  })();
+}
 
 async function listAllCaches() {
   const loggerTech: TechLog = {

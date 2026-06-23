@@ -1,15 +1,11 @@
-import { buildConnector, connectorConfigType } from './lib/connector';
-import { buildExporter, exporterConfigType } from './lib/exporter';
+import { buildRunServer } from './app';
 import { settingsLoader } from './lib/settingsLoader';
 import { buildMongo, dependencyManager, fileSystem, logger } from './utils';
-import { buildBackend } from './app';
 import { treatmentService } from './modules/treatment';
 import { buildDocumentRepository } from './modules/document';
 
 export {
-  buildBackend,
-  buildConnector,
-  buildExporter,
+  buildRunServer,
   buildMongo,
   buildDocumentRepository,
   dependencyManager,
@@ -18,5 +14,3 @@ export {
   settingsLoader,
   treatmentService,
 };
-
-export type { connectorConfigType, exporterConfigType };

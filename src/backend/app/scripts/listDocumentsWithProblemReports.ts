@@ -1,9 +1,16 @@
+import { withMongo } from './withMongo';
 import { timeOperator } from '@src/core';
 import { buildProblemReportRepository } from '../../modules/problemReport';
 import { buildDocumentRepository } from '../../modules/document';
 import { logger } from '../../utils';
 
 export { listDocumentsWithProblemReports };
+
+if (require.main === module) {
+  (async () => {
+    await withMongo(listDocumentsWithProblemReports);
+  })();
+}
 
 async function listDocumentsWithProblemReports() {
   logger.info({

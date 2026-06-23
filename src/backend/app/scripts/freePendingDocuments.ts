@@ -1,9 +1,16 @@
+import { withMongo } from './withMongo';
 import { dateBuilder, documentModule } from '@src/core';
 import { buildDocumentRepository, documentService } from '../../modules/document';
 import { logger } from '../../utils';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
 
 export { freePendingDocuments };
+
+if (require.main === module) {
+  (async () => {
+    await withMongo(freePendingDocuments);
+  })();
+}
 
 async function freePendingDocuments() {
   const loggerTech: TechLog = {

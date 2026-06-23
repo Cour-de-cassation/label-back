@@ -2,6 +2,7 @@
 
 DIRNAME=$(realpath "$(dirname "$0")")
 CASSATION_DIRNAME=$(realpath "$DIRNAME/../dist/courDeCassation")
+SCRIPT_DIRNAME=$(realpath "$DIRNAME/../dist/backend/app/scripts")
 
 SCRIPT_NAME="$1"
 shift
@@ -10,4 +11,4 @@ if [ -f .env ]; then
   export $(grep -v '^#' .env | xargs)
 fi
 
-node $CASSATION_DIRNAME/scripts/$SCRIPT_NAME -s $CASSATION_DIRNAME/settings/settings.json
+node $SCRIPT_DIRNAME/$SCRIPT_NAME -s $CASSATION_DIRNAME/settings/settings.json

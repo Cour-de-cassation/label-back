@@ -1,3 +1,6 @@
+import yargs from 'yargs';
+import { withMongo } from './withMongo';
+import { loadSettingsFromPath } from './loadSettings';
 import { settingsType } from '@src/core';
 import { buildDocumentRepository, documentService } from '../../modules/document';
 import { statisticService } from '../../modules/statistic';
@@ -5,6 +8,14 @@ import { logger } from '../../utils';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
 
 export { deleteDocumentsBySource };
+
+if (require.main === module) {
+  (async () => {
+    const { source, settings: settingsFile } = parseArgv();
+    const settings = await loadSettingsFromPath(settingsFile);
+    await withMongo(() => deleteDocumentsBySource(source, settings));
+  })();
+}
 
 const BATCH_SIZE = 500;
 
@@ -50,4 +61,29 @@ async function deleteDocumentsBySource(source: string, settings: settingsType) {
     ...loggerTech,
     message: `DONE source=${source}, totalDeleted=${totalDeleted}`,
   });
+}
+
+function parseArgv() {
+  const argv = yargs
+    .options({
+      source: {
+        demandOption: true,
+        description: 'source of the documents you want to delete',
+        type: 'string',
+      },
+      settings: {
+        alias: 's',
+        demandOption: true,
+        description: 'Path to settings.json',
+        type: 'string',
+      },
+    })
+    .help()
+    .alias('help', 'h')
+    .parseSync();
+
+  return {
+    source: argv.source as string,
+    settings: argv.settings as string,
+  };
 }

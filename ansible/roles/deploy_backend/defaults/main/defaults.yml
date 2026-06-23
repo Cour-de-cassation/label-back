@@ -8,7 +8,7 @@ jobs:
     restartPolicy: 'Never'
     parallelism: 1
     active_deadline_seconds: 1800
-    command: 'dist/courDeCassation/scripts/autoImportDocumentsFromSder.js'
+    command: 'dist/backend/app/scripts/autoImportDocumentsFromSder.js -s settings/settings.json'
   - name: 'export-j-7'
     schedule: '25 18 * * *'
     successful_jobs_history_limit: 7
@@ -17,7 +17,7 @@ jobs:
     restartPolicy: 'OnFailure'
     parallelism: 1
     active_deadline_seconds: 2400
-    command: 'dist/courDeCassation/scripts/exportTreatedDocumentsSince.js --days 7'
+    command: 'dist/backend/app/scripts/exportTreatedDocumentsSince.js --days 7 -s settings/settings.json'
   - name: 'export-publishable'
     schedule: '50 13 * * *'
     successful_jobs_history_limit: 7
@@ -26,7 +26,7 @@ jobs:
     restartPolicy: 'OnFailure'
     parallelism: 1
     active_deadline_seconds: 300
-    command: 'dist/courDeCassation/scripts/exportTreatedPublishableDocuments.js'
+    command: 'dist/backend/app/scripts/exportTreatedPublishableDocuments.js -s settings/settings.json'
   - name: 'free-pending'
     schedule: '*/16 6-17 * * *'
     successful_jobs_history_limit: 7
@@ -35,7 +35,7 @@ jobs:
     restartPolicy: 'Never'
     parallelism: 1
     active_deadline_seconds: 300
-    command: 'dist/courDeCassation/scripts/freePendingDocuments.js'
+    command: 'dist/backend/app/scripts/freePendingDocuments.js'
   - name: 'purge-m-12'
     schedule: '0 19 * * *'
     successful_jobs_history_limit: 7
@@ -44,16 +44,7 @@ jobs:
     restartPolicy: 'Never'
     parallelism: 1
     active_deadline_seconds: 300
-    command: 'dist/courDeCassation/scripts/purgeDb.js --beforeMonths 12'
-  # - name: "renew-cache"
-  #   schedule: "*/5 6-17 * * *"
-  #   successful_jobs_history_limit: 3
-  #   failed_jobs_history_limit: 7
-  #   backoff_limit: 0
-  #   restartPolicy: "Never"
-  #   parallelism: 1
-  #   active_deadline_seconds: 300
-  #   command: "dist/courDeCassation/scripts/renewCache.js --beforeMinutes 5"
+    command: 'dist/backend/app/scripts/purgeDb.js --beforeMonths 12'
   - name: 'cleaning'
     schedule: '30 19 * * *'
     successful_jobs_history_limit: 7
@@ -62,4 +53,4 @@ jobs:
     restartPolicy: 'OnFailure'
     parallelism: 1
     active_deadline_seconds: 600
-    command: 'dist/courDeCassation/scripts/cleanDocuments.js'
+    command: 'dist/backend/app/scripts/cleanDocuments.js'

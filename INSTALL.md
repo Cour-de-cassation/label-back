@@ -54,7 +54,7 @@ You can launch scripts with theses commands :
 #### With docker
 
 ```sh
-docker compose exec labelbk sh -c "node dist/courDeCassation/scripts/MYSCRIPT.js -s src/courDeCassation/settings/settings.json --MYARGUMENT XX"
+docker compose exec labelbk sh -c "node dist/backend/app/scripts/MYSCRIPT.js -s src/courDeCassation/settings/settings.json --MYARGUMENT XX"
 ```
 
 #### Without docker

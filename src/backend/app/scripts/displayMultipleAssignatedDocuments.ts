@@ -1,3 +1,4 @@
+import { withMongo } from './withMongo';
 import { logger } from '../../utils';
 import { assignationService } from '../../modules/assignation';
 import { buildDocumentRepository } from '../../modules/document';
@@ -5,6 +6,12 @@ import { userService } from '../../modules/user';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
 
 export { displayMultipleAssignatedDocuments };
+
+if (require.main === module) {
+  (async () => {
+    await withMongo(displayMultipleAssignatedDocuments);
+  })();
+}
 
 async function displayMultipleAssignatedDocuments() {
   const loggerTech: TechLog = {

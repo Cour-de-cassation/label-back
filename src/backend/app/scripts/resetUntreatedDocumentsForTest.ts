@@ -1,9 +1,16 @@
+import { withMongo } from './withMongo';
 import { documentType } from '@src/core';
 import { logger } from '../../utils';
 import { buildDocumentRepository } from '../../modules/document';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
 
 export { resetUntreatedDocumentsForTest };
+
+if (require.main === module) {
+  (async () => {
+    await withMongo(resetUntreatedDocumentsForTest);
+  })();
+}
 
 async function resetUntreatedDocumentsForTest() {
   const loggerTech: TechLog = {
