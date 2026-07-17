@@ -11,6 +11,7 @@ async function extractRoute(document: documentType): Promise<documentType['route
   const extractRouteFunctions = {
     ['jurinet']: extractRouteForJurinet,
     ['jurica']: extractRouteForCivilJurisdiction,
+    ['juricav2']: extractRouteForCivilJurisdiction,
     ['juritj']: extractRouteForCivilJurisdiction,
     ['juritcom']: extractRouteForCivilJurisdiction,
     ['portalis-cph']: extractRouteForCivilJurisdiction,

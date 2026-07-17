@@ -21,7 +21,7 @@ import { ENV } from '@src/backend/utils/env';
 export { importNewDocuments as autoImportDocumentsFromSder };
 
 const SOURCES = ['LOCAL', 'DEV', 'PREPROD'].includes(ENV)
-  ? ['jurinet', 'jurica', 'juritj', 'juritcom', 'portalis-cph']
+  ? ['jurinet', 'jurica', 'juricav2', 'juritj', 'juritcom', 'portalis-cph']
   : ['jurinet', 'jurica', 'juritj', 'juritcom'];
 
 if (require.main === module) {

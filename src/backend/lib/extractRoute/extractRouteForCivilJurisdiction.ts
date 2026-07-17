@@ -61,7 +61,7 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
     nonSensibleRatio * 10 < sensibleMinimumRatio ? sensibleMinimumRatio : nonSensibleRatio * 10,
   );
 
-  if (source === 'jurica' || source === 'juritj') {
+  if (source === 'jurica' || source === 'juricav2' || source === 'juritj') {
     const routeFromDb = await getDecisionRoute(NACCode);
     const loggerTech: DecisionLog = {
       operations: ['other', 'computeRouteFromNac'],
