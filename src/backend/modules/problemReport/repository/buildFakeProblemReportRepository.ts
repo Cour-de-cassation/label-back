@@ -16,5 +16,8 @@ const buildFakeProblemReportRepository = buildFakeRepositoryBuilder<
         collection.filter((problemReport) => !problemReport.documentId.equals(documentId)),
       );
     },
+    async countUnread() {
+      return collection.filter((problemReport) => !problemReport.hasBeenRead).length;
+    },
   }),
 });

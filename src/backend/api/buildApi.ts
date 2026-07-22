@@ -22,6 +22,17 @@ const API_BASE_URL = '/label/api';
 
 function buildApi(app: Express) {
   app.get(
+    `${API_BASE_URL}/adminBadgeCounts`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const [unreadProblemReportsCount, toBeConfirmedDocumentsCount] = await Promise.all([
+        problemReportService.countUnreadProblemReports(),
+        documentService.countToBeConfirmedDocuments(),
+      ]);
+      res.status(200).json({ unreadProblemReportsCount, toBeConfirmedDocumentsCount });
+    }),
+  );
+
+  app.get(
     `${API_BASE_URL}/aggregatedStatistics`,
     withAuth(['admin', 'scrutator'], async (user, req, res) => {
       const { ressourceFilter } = req.query as any;
@@ -516,8 +527,10 @@ function buildApi(app: Express) {
       const email = String(req.query.email || '');
       try {
         const user = await ssoService.getUserByEmail(email);
+        console.log(user);
         if (!user) return res.status(404).send(`Utilisateur introuvable : ${email}`);
         const url = ssoService.setUserSessionAndReturnRedirectUrl(req, user, 'dev-session');
+        console.log(url);
         res.redirect(url);
       } catch (err) {
         logger.error({
