@@ -11,7 +11,7 @@ async function fetchTreatedDocuments(settings: settingsType) {
   const documentRepository = buildDocumentRepository();
 
   const treatedDocuments = await documentRepository.findAllByStatusProjection(
-    ['done', 'toBePublished'],
+    ['done'],
     [
       '_id',
       'decisionMetadata',

@@ -14,7 +14,7 @@ describe('fetchPublishableDocumentsToExport', () => {
       { status: 'pending' as const, publicationCategory: ['B'] },
       { status: 'done' as const, publicationCategory: ['I'] },
       { status: 'done' as const, publicationCategory: ['B'] },
-      { status: 'toBePublished' as const, publicationCategory: ['B'] },
+      { status: 'done' as const, publicationCategory: ['B'] },
     ].map(documentModule.generator.generate);
     await Promise.all(documents.map(documentRepository.insert));
 

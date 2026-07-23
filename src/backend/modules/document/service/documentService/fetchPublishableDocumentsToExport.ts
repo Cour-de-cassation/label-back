@@ -7,17 +7,14 @@ async function fetchPublishableDocumentsToExport() {
   const documentRepository = buildDocumentRepository();
   const lettersDocuments = await documentRepository.findAllByPublicationCategoryLettersAndStatus(
     documentModule.lib.publicationHandler.getPublishedPublicationCategory(),
-    ['toBePublished', 'done'],
+    ['done'],
   );
   const codesDocuments = await documentRepository.findAllByNACCodesAndStatus(
     documentModule.lib.publicationHandler.getPrioritizedNACCodes(),
-    ['toBePublished', 'done'],
+    ['done'],
   );
 
-  const interetParticulierDocuments = await documentRepository.findAllByParticularInterestAndStatus([
-    'toBePublished',
-    'done',
-  ]);
+  const interetParticulierDocuments = await documentRepository.findAllByParticularInterestAndStatus(['done']);
 
   const allDocuments = [...lettersDocuments, ...codesDocuments, ...interetParticulierDocuments];
   const seenIds = new Set<string>();

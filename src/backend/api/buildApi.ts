@@ -359,16 +359,6 @@ function buildApi(app: Express) {
   );
 
   app.post(
-    `${API_BASE_URL}/updatePublishableDocumentStatus`,
-    withAuth(['admin', 'publicator'], async (user, req, res) => {
-      const { documentId, status } = req.body;
-      await documentService.assertDocumentIsPublishable(new ObjectId(documentId));
-      const result = await documentService.updateDocumentStatus(new ObjectId(documentId), status);
-      res.status(201).json(result);
-    }),
-  );
-
-  app.post(
     `${API_BASE_URL}/updateProblemReportHasBeenRead`,
     withAuth(['admin'], async (user, req, res) => {
       const { problemReportId, hasBeenRead } = req.body;

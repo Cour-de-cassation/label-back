@@ -161,7 +161,6 @@ async function importSpecificDocument({
       const isPreassignated = await preAssignator.preAssignDocument(document);
       if (!isPreassignated) {
         const nextStatus = getNextStatus({
-          publicationCategory: document.publicationCategory,
           status: document.status,
           route: 'exhaustive',
         });

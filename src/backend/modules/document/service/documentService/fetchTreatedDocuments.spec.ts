@@ -37,7 +37,7 @@ describe('fetchTreatedDocuments', () => {
       status: 'pending',
     });
     const toBePublishedDocument = documentModule.generator.generate({
-      status: 'toBePublished',
+      status: 'done',
     });
     const doneDocument = documentModule.generator.generate({
       status: 'done',

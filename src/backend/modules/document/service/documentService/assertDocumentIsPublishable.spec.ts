@@ -16,7 +16,7 @@ describe('assertDocumentIsPublishable', () => {
 
   it('should throw an error if the document publication category is not right', async () => {
     const document = documentModule.generator.generate({
-      status: 'toBePublished',
+      status: 'done',
       publicationCategory: ['N', 'W'],
     });
     await documentRepository.insert(document);

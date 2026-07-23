@@ -110,7 +110,6 @@ async function importNewDocuments(settings: settingsType) {
         const isPreassignated = await preAssignator.preAssignDocument({ ...document, route: routeForDocument });
         if (!isPreassignated) {
           const nextStatus = getNextStatus({
-            publicationCategory: document.publicationCategory,
             status: document.status,
             route: routeForDocument,
           });

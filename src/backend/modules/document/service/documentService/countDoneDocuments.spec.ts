@@ -27,7 +27,7 @@ describe('countDoneDocuments', () => {
       status: 'done',
     });
     const toBePublishedDocument = documentModule.generator.generate({
-      status: 'toBePublished',
+      status: 'done',
     });
     const lockedDocument = documentModule.generator.generate({
       status: 'locked',

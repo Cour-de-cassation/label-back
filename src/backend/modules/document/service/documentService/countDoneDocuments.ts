@@ -4,5 +4,5 @@ export { countDoneDocuments };
 
 async function countDoneDocuments() {
   const documentRepository = buildDocumentRepository();
-  return documentRepository.countByStatus(['done', 'toBePublished']);
+  return documentRepository.countByStatus(['done']);
 }
