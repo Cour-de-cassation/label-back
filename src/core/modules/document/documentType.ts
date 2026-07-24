@@ -1,4 +1,3 @@
-import { Category } from 'dbsder-api-types';
 import { ObjectId } from 'mongodb';
 
 export type documentRouteType = 'automatic' | 'exhaustive' | 'simple' | 'confirmation' | 'request' | 'default';

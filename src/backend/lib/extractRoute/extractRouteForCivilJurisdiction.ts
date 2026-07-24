@@ -4,7 +4,7 @@ import { documentService } from '../../modules/document';
 import { logger } from '../../utils';
 import { Category, CodeNac } from 'dbsder-api-types';
 import { DBSDER_API_URL, DBSDER_API_KEY } from '../../utils/env';
-import { DecisionLog, TechLog } from '@src/backend/utils/logger/loggerType';
+import { DecisionLog } from '@src/backend/utils/logger/loggerType';
 
 export { extractRouteForCivilJurisdiction };
 
@@ -190,6 +190,7 @@ async function getDecisionRoute(code: string): Promise<string | undefined> {
       operations: ['other', 'getDecisionRoute'],
       path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
       message: `Failed to fetch code nac for code "${code}"`,
+      stack: `${error}`,
     });
     return undefined;
   }

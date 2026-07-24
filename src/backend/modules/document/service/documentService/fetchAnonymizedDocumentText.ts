@@ -1,4 +1,4 @@
-import { buildAnonymizer, documentModule, documentType, settingsModule } from '@src/core';
+import { buildAnonymizer, documentType, settingsModule } from '@src/core';
 import { settingsLoader } from '../../../../lib/settingsLoader';
 import { treatmentService } from '../../../treatment';
 import { buildDocumentRepository } from '../../repository';

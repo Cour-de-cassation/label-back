@@ -56,7 +56,7 @@ const problemReportService = {
         });
       }
     } catch (error) {
-      throw new Error('Error while creating problem report');
+      throw new Error(`Error while creating problem report : ${error}`);
     }
   },
 
@@ -96,7 +96,9 @@ const problemReportService = {
           route: document.route,
           status: document.status,
         };
-      } catch (e) {}
+      } catch (error) {
+        throw new Error(`Error while formating problemReports : ${error}`);
+      }
 
       return {
         problemReport,
