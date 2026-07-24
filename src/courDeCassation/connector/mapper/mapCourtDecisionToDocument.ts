@@ -2,6 +2,8 @@ import { documentType, documentModule, timeOperator, AcceptedDocumentTypes } fro
 import { extractReadableChamberName, extractNumeroPourvoi } from './extractors';
 import { categoriesMapper } from './categoriesMapper';
 import { DecisionCa, DecisionCc, DecisionCph, DecisionTcom, DecisionTj, LabelTreatments } from 'dbsder-api-types';
+import { extractRouteForJurinet } from '@src/backend/lib/extractRoute/extractRouteForJurinet';
+import { extractRouteForCivilJurisdiction } from '@src/backend/lib/extractRoute/extractRouteForCivilJurisdiction';
 
 export { mapCourtDecisionToDocument };
 
@@ -27,7 +29,7 @@ async function mapCourtDecisionToDocument(
 
 // ─── Per-type mappers ─────────────────────────────────────────────────────────
 
-function mapDecisionCc(decision: DecisionCc, importer: documentType['importer']): documentType {
+async function mapDecisionCc(decision: DecisionCc, importer: documentType['importer']): Promise<documentType> {
   const jurisdictionName = 'Cour de cassation';
   const chamberName = extractReadableChamberName({ chamberId: decision.chamberId ?? undefined });
   const appealNumber = extractNumeroPourvoi(jurisdictionName, decision.appeals[0]);
@@ -36,6 +38,8 @@ function mapDecisionCc(decision: DecisionCc, importer: documentType['importer'])
   const NAOCode = decision.NAOCode ?? '';
   const decisionDate = convertToValidDate(decision.dateDecision ?? undefined);
   const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+  const session = decision.formation?.trim() ?? '';
+  const solution = decision.solution?.trim() ?? '';
 
   return documentModule.lib.buildDocument({
     creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
@@ -56,8 +60,8 @@ function mapDecisionCc(decision: DecisionCc, importer: documentType['importer'])
       NACCode,
       endCaseCode: '',
       occultationBlock: decision.blocOccultation ?? undefined,
-      session: decision.formation?.trim() ?? '',
-      solution: decision.solution?.trim() ?? '',
+      session,
+      solution,
       motivationOccultation: decision.occultation.motivationOccultation ?? undefined,
       raisonInteretParticulier: undefined,
       sommaire: '',
@@ -66,7 +70,13 @@ function mapDecisionCc(decision: DecisionCc, importer: documentType['importer'])
     externalId: decision._id,
     priority: computePriority(decision.sourceName, publicationCategory, NACCode, importer, undefined),
     publicationCategory,
-    route: 'default',
+    route: extractRouteForJurinet({
+      chamberName,
+      checklist: nlpTreatment?.checklist,
+      publicationCategory,
+      session,
+      solution,
+    }),
     importer,
     source: decision.sourceName,
     title: computeTitle({
