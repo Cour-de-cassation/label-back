@@ -78,75 +78,9 @@ describe('computeFilteredSettings', () => {
     expect(filteredSettings[additionalAnnotationCategory].status).toBe('hidden');
   });
 
-  it('should compute filtered settings for additional annotations before sendind to nlp api (parsing not done yet)', () => {
+  it('should compute filtered settings for additional annotations if there is additional terms', () => {
     const categoriesToOmit = ['prenom', 'professionnelAvocat', 'professionnelMagistratGreffier'];
     const additionalTermsToAnnotate = 'thing';
-    const motivationOccultation = undefined;
-
-    const filteredSettings = computeFilteredSettings(
-      settings,
-      categoriesToOmit,
-      additionalTermsToAnnotate,
-      motivationOccultation,
-    );
-
-    expect(filteredSettings['prenom'].status).toBe('hidden');
-    expect(filteredSettings['professionnelMagistratGreffier'].status).toBe('visible');
-    expect(filteredSettings['professionnelAvocat'].status).toBe('alwaysVisible');
-    expect(filteredSettings[additionalAnnotationCategory].status).toBe('annotable');
-  });
-
-  it('should compute filtered settings for additional annotations when parsing failed', () => {
-    const categoriesToOmit = ['prenom', 'professionnelAvocat', 'professionnelMagistratGreffier'];
-    const additionalTermsToAnnotate = 'thing';
-    const computedAdditionalTerms = undefined;
-    const additionalTermsParsingFailed = true;
-    const motivationOccultation = undefined;
-
-    const filteredSettings = computeFilteredSettings(
-      settings,
-      categoriesToOmit,
-      additionalTermsToAnnotate,
-      motivationOccultation,
-    );
-
-    expect(filteredSettings['prenom'].status).toBe('hidden');
-    expect(filteredSettings['professionnelMagistratGreffier'].status).toBe('visible');
-    expect(filteredSettings['professionnelAvocat'].status).toBe('alwaysVisible');
-    expect(filteredSettings[additionalAnnotationCategory].status).toBe('annotable');
-  });
-
-  it('should compute filtered settings for additional annotations when parsing succeed but no additional terms to annotate after parsing', () => {
-    const categoriesToOmit = ['prenom', 'professionnelAvocat', 'professionnelMagistratGreffier'];
-    const additionalTermsToAnnotate = 'thing';
-    const computedAdditionalTerms = {
-      additionalTermsToAnnotate: [],
-      additionalTermsToUnAnnotate: ['toUnanotate'],
-    };
-    const additionalTermsParsingFailed = false;
-    const motivationOccultation = undefined;
-
-    const filteredSettings = computeFilteredSettings(
-      settings,
-      categoriesToOmit,
-      additionalTermsToAnnotate,
-      motivationOccultation,
-    );
-
-    expect(filteredSettings['prenom'].status).toBe('hidden');
-    expect(filteredSettings['professionnelMagistratGreffier'].status).toBe('visible');
-    expect(filteredSettings['professionnelAvocat'].status).toBe('alwaysVisible');
-    expect(filteredSettings[additionalAnnotationCategory].status).toBe('hidden');
-  });
-
-  it('should compute filtered settings for additional annotations when parsing succeed AND there is additional terms to annotate after parsing', () => {
-    const categoriesToOmit = ['prenom', 'professionnelAvocat', 'professionnelMagistratGreffier'];
-    const additionalTermsToAnnotate = 'thing';
-    const computedAdditionalTerms = {
-      additionalTermsToAnnotate: ['toAnnotate', 'another'],
-      additionalTermsToUnAnnotate: ['toUnanotate'],
-    };
-    const additionalTermsParsingFailed = false;
     const motivationOccultation = undefined;
 
     const filteredSettings = computeFilteredSettings(
@@ -165,8 +99,6 @@ describe('computeFilteredSettings', () => {
   it('should compute filtered settings for motivation when motivationOccultation is true', () => {
     const categoriesToOmit = ['prenom', 'professionnelAvocat', 'professionnelMagistratGreffier'];
     const additionalTermsToAnnotate = 'thing';
-    const computedAdditionalTerms = undefined;
-    const additionalTermsParsingFailed = false;
     const motivationOccultation = true;
 
     const filteredSettings = computeFilteredSettings(
@@ -185,8 +117,6 @@ describe('computeFilteredSettings', () => {
   it('should compute filtered settings for motivation when motivationOccultation is false', () => {
     const categoriesToOmit = ['prenom', 'professionnelAvocat', 'professionnelMagistratGreffier'];
     const additionalTermsToAnnotate = 'thing';
-    const computedAdditionalTerms = undefined;
-    const additionalTermsParsingFailed = false;
     const motivationOccultation = false;
 
     const filteredSettings = computeFilteredSettings(
