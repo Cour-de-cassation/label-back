@@ -13,8 +13,6 @@ export async function exportDocument(document: documentType, settings: settingsT
     settings,
     document.decisionMetadata.categoriesToOmit,
     document.decisionMetadata.additionalTermsToAnnotate,
-    document.decisionMetadata.computedAdditionalTerms,
-    document.decisionMetadata.additionalTermsParsingFailed,
     document.decisionMetadata.motivationOccultation,
   );
 
@@ -23,7 +21,7 @@ export async function exportDocument(document: documentType, settings: settingsT
     const publishStatus =
       currentDecision?.publishStatus === PublishStatus.BLOCKED ? PublishStatus.BLOCKED : PublishStatus.TOBEPUBLISHED;
 
-    const labelTreatments = treatmentModule.lib.concat(treatments, document.nlpVersions, document.checklist);
+    const labelTreatments = treatmentModule.lib.concat(treatments, document.checklist);
     const currentDecisionTreatments = currentDecision?.labelTreatments ?? [];
     const updatedLabelTreatments = labelTreatments
       ? [

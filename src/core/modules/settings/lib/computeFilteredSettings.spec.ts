@@ -28,16 +28,12 @@ describe('computeFilteredSettings', () => {
   it('should compute filtered settings for an omitted hidden category', () => {
     const categoriesToOmit = ['prenom'];
     const additionalTermsToAnnotate = '';
-    const computedAdditionalTerms = undefined;
-    const additionalTermsParsingFailed = undefined;
     const motivationOccultation = undefined;
 
     const filteredSettings = computeFilteredSettings(
       settings,
       categoriesToOmit,
       additionalTermsToAnnotate,
-      computedAdditionalTerms,
-      additionalTermsParsingFailed,
       motivationOccultation,
     );
     expect(filteredSettings['prenom'].status).toBe('hidden');
@@ -49,16 +45,12 @@ describe('computeFilteredSettings', () => {
   it('should compute filtered settings for an omitted visible category', () => {
     const categoriesToOmit = ['professionnelMagistratGreffier'];
     const additionalTermsToAnnotate = '';
-    const computedAdditionalTerms = undefined;
-    const additionalTermsParsingFailed = undefined;
     const motivationOccultation = undefined;
 
     const filteredSettings = computeFilteredSettings(
       settings,
       categoriesToOmit,
       additionalTermsToAnnotate,
-      computedAdditionalTerms,
-      additionalTermsParsingFailed,
       motivationOccultation,
     );
 
@@ -71,16 +63,12 @@ describe('computeFilteredSettings', () => {
   it('should compute filtered settings for an omitted alwaysVisible category', () => {
     const categoriesToOmit = ['professionnelAvocat'];
     const additionalTermsToAnnotate = '';
-    const computedAdditionalTerms = undefined;
-    const additionalTermsParsingFailed = undefined;
     const motivationOccultation = undefined;
 
     const filteredSettings = computeFilteredSettings(
       settings,
       categoriesToOmit,
       additionalTermsToAnnotate,
-      computedAdditionalTerms,
-      additionalTermsParsingFailed,
       motivationOccultation,
     );
 
@@ -93,16 +81,12 @@ describe('computeFilteredSettings', () => {
   it('should compute filtered settings for additional annotations before sendind to nlp api (parsing not done yet)', () => {
     const categoriesToOmit = ['prenom', 'professionnelAvocat', 'professionnelMagistratGreffier'];
     const additionalTermsToAnnotate = 'thing';
-    const computedAdditionalTerms = undefined;
-    const additionalTermsParsingFailed = undefined;
     const motivationOccultation = undefined;
 
     const filteredSettings = computeFilteredSettings(
       settings,
       categoriesToOmit,
       additionalTermsToAnnotate,
-      computedAdditionalTerms,
-      additionalTermsParsingFailed,
       motivationOccultation,
     );
 
@@ -123,8 +107,6 @@ describe('computeFilteredSettings', () => {
       settings,
       categoriesToOmit,
       additionalTermsToAnnotate,
-      computedAdditionalTerms,
-      additionalTermsParsingFailed,
       motivationOccultation,
     );
 
@@ -148,8 +130,6 @@ describe('computeFilteredSettings', () => {
       settings,
       categoriesToOmit,
       additionalTermsToAnnotate,
-      computedAdditionalTerms,
-      additionalTermsParsingFailed,
       motivationOccultation,
     );
 
@@ -173,8 +153,6 @@ describe('computeFilteredSettings', () => {
       settings,
       categoriesToOmit,
       additionalTermsToAnnotate,
-      computedAdditionalTerms,
-      additionalTermsParsingFailed,
       motivationOccultation,
     );
 
@@ -195,8 +173,6 @@ describe('computeFilteredSettings', () => {
       settings,
       categoriesToOmit,
       additionalTermsToAnnotate,
-      computedAdditionalTerms,
-      additionalTermsParsingFailed,
       motivationOccultation,
     );
 
@@ -217,8 +193,6 @@ describe('computeFilteredSettings', () => {
       settings,
       categoriesToOmit,
       additionalTermsToAnnotate,
-      computedAdditionalTerms,
-      additionalTermsParsingFailed,
       motivationOccultation,
     );
 

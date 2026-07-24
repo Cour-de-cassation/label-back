@@ -46,8 +46,6 @@ function mapDecisionCc(decision: DecisionCc, importer: documentType['importer'])
         additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
-      additionalTermsParsingFailed:
-        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
       civilCaseCode: decision.natureAffaireCivil?.trim() ?? '',
       civilMatterCode: decision.codeMatiereCivil?.trim() ?? '',
@@ -82,7 +80,6 @@ function mapDecisionCc(decision: DecisionCc, importer: documentType['importer'])
       date: decisionDate,
     }),
     text: decision.originalText ?? '',
-    nlpVersions: nlpTreatment?.version,
     checklist: nlpTreatment?.checklist,
   });
 }
@@ -108,9 +105,6 @@ function mapDecisionCa(decision: DecisionCa, importer: documentType['importer'])
         additionalTermsToAnnotate: decision.occultation?.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation?.additionalTermsToUnAnnotate ?? [],
       },
-      additionalTermsParsingFailed:
-        decision.occultation?.additionalTermsToUnAnnotate &&
-        decision.occultation.additionalTermsToUnAnnotate.length > 0,
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit),
       civilCaseCode: '',
       civilMatterCode: '',
@@ -151,7 +145,6 @@ function mapDecisionCa(decision: DecisionCa, importer: documentType['importer'])
       date: decisionDate,
     }),
     text: decision.originalText ?? '',
-    nlpVersions: nlpTreatment?.version,
     checklist: nlpTreatment?.checklist,
   });
 }
@@ -173,8 +166,6 @@ function mapDecisionTj(decision: DecisionTj, importer: documentType['importer'])
         additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
-      additionalTermsParsingFailed:
-        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
       civilCaseCode: '',
       civilMatterCode: '',
@@ -215,7 +206,6 @@ function mapDecisionTj(decision: DecisionTj, importer: documentType['importer'])
       date: decisionDate,
     }),
     text: decision.originalText,
-    nlpVersions: nlpTreatment?.version,
     checklist: nlpTreatment?.checklist,
   });
 }
@@ -240,8 +230,6 @@ function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importe
         additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
-      additionalTermsParsingFailed:
-        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
       civilCaseCode: '',
       civilMatterCode: decision.codeMatiereCivil?.trim() ?? '',
@@ -276,7 +264,6 @@ function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importe
       date: decisionDate,
     }),
     text: decision.originalText,
-    nlpVersions: nlpTreatment?.version,
     checklist: nlpTreatment?.checklist,
   });
 }
@@ -298,8 +285,6 @@ function mapDecisionCph(decision: DecisionCph, importer: documentType['importer'
         additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
-      additionalTermsParsingFailed:
-        decision.occultation.additionalTermsToUnAnnotate && decision.occultation.additionalTermsToUnAnnotate.length > 0,
       categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
       civilCaseCode: '',
       civilMatterCode: '',
@@ -340,7 +325,6 @@ function mapDecisionCph(decision: DecisionCph, importer: documentType['importer'
       date: decisionDate,
     }),
     text: decision.originalText,
-    nlpVersions: nlpTreatment?.version,
     checklist: nlpTreatment?.checklist,
   });
 }

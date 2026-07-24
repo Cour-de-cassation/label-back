@@ -37,21 +37,6 @@ export type checklistItemType = {
   _rank?: number | null;
 };
 
-export type nlpVersionType = {
-  version: string;
-  date: string;
-};
-
-export type nlpVersionsType = {
-  juriSpacyTokenizer: nlpVersionType;
-  juritools: nlpVersionType;
-  pseudonymisationApi?: nlpVersionType;
-  nlpApi?: nlpVersionType;
-  model: {
-    name: string;
-  };
-};
-
 export type decisionMetadataType = {
   appealNumber: string;
   additionalTermsToAnnotate: string;
@@ -59,7 +44,6 @@ export type decisionMetadataType = {
     additionalTermsToAnnotate: string[];
     additionalTermsToUnAnnotate: string[];
   };
-  additionalTermsParsingFailed?: boolean;
   categoriesToOmit: string[];
   chamberName: string;
   civilCaseCode: string;
@@ -88,7 +72,6 @@ export type documentType = {
   decisionMetadata: decisionMetadataType;
   documentNumber: number | string;
   importer: documentImporterType;
-  nlpVersions?: nlpVersionsType | null;
   publicationCategory: string[];
   reviewStatus: reviewStatusType;
   route: documentRouteType;
