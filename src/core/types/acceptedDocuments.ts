@@ -1,3 +1,3 @@
-import { DecisionCa, DecisionCc, DecisionCph, DecisionTcom, DecisionTj } from 'dbsder-api-types';
+import { DecisionCa, DecisionCaV2, DecisionCc, DecisionCph, DecisionTcom, DecisionTj } from 'dbsder-api-types';
 
-export type AcceptedDocumentTypes = DecisionCc | DecisionCa | DecisionTj | DecisionTcom | DecisionCph;
+export type AcceptedDocumentTypes = DecisionCc | DecisionCa | DecisionCaV2 | DecisionTj | DecisionTcom | DecisionCph;

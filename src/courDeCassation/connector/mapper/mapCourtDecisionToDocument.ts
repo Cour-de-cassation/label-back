@@ -1,7 +1,15 @@
 import { documentType, documentModule, timeOperator, AcceptedDocumentTypes } from '@src/core';
 import { extractReadableChamberName, extractNumeroPourvoi } from './extractors';
 import { categoriesMapper } from './categoriesMapper';
-import { DecisionCa, DecisionCc, DecisionCph, DecisionTcom, DecisionTj, LabelTreatments } from 'dbsder-api-types';
+import {
+  DecisionCa,
+  DecisionCaV2,
+  DecisionCc,
+  DecisionCph,
+  DecisionTcom,
+  DecisionTj,
+  LabelTreatments,
+} from 'dbsder-api-types';
 
 export { mapCourtDecisionToDocument };
 
@@ -14,6 +22,8 @@ async function mapCourtDecisionToDocument(
       return mapDecisionCc(decision, importer);
     case 'jurica':
       return mapDecisionCa(decision, importer);
+    case 'juricav2':
+      return mapDecisionCav2(decision, importer);
     case 'juritj':
       return mapDecisionTj(decision, importer);
     case 'juritcom':
@@ -95,6 +105,75 @@ function mapDecisionCa(decision: DecisionCa, importer: documentType['importer'])
   });
   const appealNumber = decision.registerNumber ? decision.registerNumber.split(' ')[0] : undefined;
   const publicationCategory = [decision.pubCategory];
+  const NACCode = decision.NACCode ?? '';
+  const decisionDate = convertToValidDate(decision.dateDecision ?? undefined);
+  const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+
+  return documentModule.lib.buildDocument({
+    creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
+    decisionMetadata: {
+      appealNumber: appealNumber ?? '',
+      additionalTermsToAnnotate: decision.occultation?.additionalTerms ?? '',
+      computedAdditionalTerms: {
+        additionalTermsToAnnotate: decision.occultation?.additionalTermsToAnnotate ?? [],
+        additionalTermsToUnAnnotate: decision.occultation?.additionalTermsToUnAnnotate ?? [],
+      },
+      additionalTermsParsingFailed:
+        decision.occultation?.additionalTermsToUnAnnotate &&
+        decision.occultation.additionalTermsToUnAnnotate.length > 0,
+      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit),
+      civilCaseCode: '',
+      civilMatterCode: '',
+      criminalCaseCode: '',
+      chamberName,
+      date: decisionDate?.getTime(),
+      jurisdiction: jurisdictionName,
+      NACCode,
+      endCaseCode: decision.endCaseCode ?? '',
+      occultationBlock: decision.blocOccultation ?? undefined,
+      session: '',
+      solution: decision.solution?.trim() ?? '',
+      motivationOccultation: decision.occultation?.motivationOccultation ?? undefined,
+      raisonInteretParticulier: decision.raisonInteretParticulier ?? undefined,
+      sommaire: decision.sommaire ?? '',
+    },
+    documentNumber: decision.sourceId,
+    externalId: decision._id,
+    priority: computePriority(
+      decision.sourceName,
+      publicationCategory,
+      NACCode,
+      importer,
+      decision.raisonInteretParticulier ?? undefined,
+    ),
+    publicationCategory,
+    route: 'default',
+    importer,
+    source: decision.sourceName,
+    title: computeTitle({
+      source: decision.sourceName,
+      sourceId: decision.sourceId,
+      appealNumber,
+      chamberName,
+      jurisdictionName,
+      NACCode,
+      NAOCode: '',
+      date: decisionDate,
+    }),
+    text: decision.originalText ?? '',
+    nlpVersions: nlpTreatment?.version,
+    checklist: nlpTreatment?.checklist,
+  });
+}
+
+function mapDecisionCav2(decision: DecisionCaV2, importer: documentType['importer']): documentType {
+  const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
+  const chamberName = extractReadableChamberName({
+    chamberName: decision.chamberName ?? undefined,
+    chamberId: decision.chamberId ?? undefined,
+  });
+  const appealNumber = decision.registerNumber ? decision.registerNumber.split(' ')[0] : undefined;
+  const publicationCategory = ['W'];
   const NACCode = decision.NACCode ?? '';
   const decisionDate = convertToValidDate(decision.dateDecision ?? undefined);
   const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
@@ -308,7 +387,7 @@ function mapDecisionCph(decision: DecisionCph, importer: documentType['importer'
       date: decisionDate?.getTime(),
       jurisdiction: jurisdictionName,
       NACCode,
-      endCaseCode: decision.endCaseCode,
+      endCaseCode: decision.endCaseCode || '',
       occultationBlock: decision.blocOccultation,
       session: decision.formation?.trim() ?? '',
       solution: '',
@@ -375,7 +454,7 @@ function computeTitle({
   const nomenclatureNumber =
     source === 'jurinet' && NAOCode
       ? `NAO ${NAOCode}`
-      : (source === 'juritj' || source === 'jurica') && NACCode
+      : (source === 'juritj' || source === 'jurica' || source === 'juricav2') && NACCode
         ? `NAC ${NACCode}`
         : undefined;
 
