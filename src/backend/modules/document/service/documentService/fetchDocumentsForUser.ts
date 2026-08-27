@@ -108,7 +108,6 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
 
     const nextStatus = documentModule.lib.getNextStatus({
       status: document.status,
-      publicationCategory: document.publicationCategory,
       route: document.route,
     });
 
