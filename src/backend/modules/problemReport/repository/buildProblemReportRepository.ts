@@ -11,5 +11,8 @@ const buildProblemReportRepository = buildRepositoryBuilder<problemReportType, c
     async deleteByDocumentId(documentId) {
       await collection.deleteMany({ documentId });
     },
+    async countUnread() {
+      return await collection.countDocuments({ hasBeenRead: false });
+    },
   }),
 });

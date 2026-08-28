@@ -113,4 +113,9 @@ const problemReportService = {
     const problemReportRepository = buildProblemReportRepository();
     return problemReportRepository.updateOne(problemReportId, { hasBeenRead });
   },
+
+  async countUnreadProblemReports() {
+    const problemReportRepository = buildProblemReportRepository();
+    return problemReportRepository.countUnread();
+  },
 };

@@ -7,6 +7,7 @@ import { countFreeDocuments } from './countFreeDocuments';
 import { countLockedDocuments } from './countLockedDocuments';
 import { countPendingDocuments } from './countPendingDocuments';
 import { countSavedDocuments } from './countSavedDocuments';
+import { countToBeConfirmedDocuments } from './countToBeConfirmedDocuments';
 import { deleteDocument } from './deleteDocument';
 import { fetchAllDocumentsByIds } from './fetchAllDocumentsByIds';
 import { fetchAllExportableDocuments } from './fetchAllExportableDocuments';
@@ -57,6 +58,7 @@ function buildDocumentService() {
     countLockedDocuments,
     countPendingDocuments,
     countSavedDocuments,
+    countToBeConfirmedDocuments,
     deleteDocument,
     fetchAllDocumentsByIds,
     fetchAllExportableDocuments,

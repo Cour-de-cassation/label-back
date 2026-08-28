@@ -22,6 +22,17 @@ const API_BASE_URL = '/label/api';
 
 function buildApi(app: Express) {
   app.get(
+    `${API_BASE_URL}/adminBadgeCounts`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const [unreadProblemReportsCount, toBeConfirmedDocumentsCount] = await Promise.all([
+        problemReportService.countUnreadProblemReports(),
+        documentService.countToBeConfirmedDocuments(),
+      ]);
+      res.status(200).json({ unreadProblemReportsCount, toBeConfirmedDocumentsCount });
+    }),
+  );
+
+  app.get(
     `${API_BASE_URL}/aggregatedStatistics`,
     withAuth(['admin', 'scrutator'], async (user, req, res) => {
       const { ressourceFilter } = req.query as any;
