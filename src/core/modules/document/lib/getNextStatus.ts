@@ -1,14 +1,11 @@
 import { documentType } from '../documentType';
-import { publicationHandler } from './publicationHandler';
 
 export { getNextStatus };
 
 function getNextStatus({
-  publicationCategory,
   status,
   route,
 }: {
-  publicationCategory: documentType['publicationCategory'];
   status: documentType['status'];
   route: documentType['route'];
 }): documentType['status'] {
@@ -29,15 +26,13 @@ function getNextStatus({
       if (route === 'confirmation') {
         return 'toBeConfirmed';
       }
-      return publicationHandler.mustBePublished(publicationCategory) ? 'toBePublished' : 'done';
+      return 'done';
     case 'locked':
       if (route === 'confirmation') {
         return 'toBeConfirmed';
       }
-      return publicationHandler.mustBePublished(publicationCategory) ? 'toBePublished' : 'done';
+      return 'done';
     case 'toBeConfirmed':
-      return publicationHandler.mustBePublished(publicationCategory) ? 'toBePublished' : 'done';
-    case 'toBePublished':
       return 'done';
     default:
       return status;

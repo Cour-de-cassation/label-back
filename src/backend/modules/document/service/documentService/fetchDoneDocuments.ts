@@ -5,5 +5,5 @@ export { fetchDoneDocuments };
 async function fetchDoneDocuments() {
   const documentRepository = buildDocumentRepository();
 
-  return documentRepository.findAllByStatus(['done', 'toBePublished']);
+  return documentRepository.findAllByStatus(['done']);
 }

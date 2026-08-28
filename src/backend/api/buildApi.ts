@@ -22,6 +22,17 @@ const API_BASE_URL = '/label/api';
 
 function buildApi(app: Express) {
   app.get(
+    `${API_BASE_URL}/adminBadgeCounts`,
+    withAuth(['admin', 'scrutator'], async (user, req, res) => {
+      const [unreadProblemReportsCount, toBeConfirmedDocumentsCount] = await Promise.all([
+        problemReportService.countUnreadProblemReports(),
+        documentService.countToBeConfirmedDocuments(),
+      ]);
+      res.status(200).json({ unreadProblemReportsCount, toBeConfirmedDocumentsCount });
+    }),
+  );
+
+  app.get(
     `${API_BASE_URL}/aggregatedStatistics`,
     withAuth(['admin', 'scrutator'], async (user, req, res) => {
       const { ressourceFilter } = req.query as any;
@@ -354,16 +365,6 @@ function buildApi(app: Express) {
     withAuth(['admin'], async (user, req, res) => {
       const { documentId, route } = req.body;
       const result = await documentService.updateDocumentRoute(new ObjectId(documentId), route);
-      res.status(201).json(result);
-    }),
-  );
-
-  app.post(
-    `${API_BASE_URL}/updatePublishableDocumentStatus`,
-    withAuth(['admin', 'publicator'], async (user, req, res) => {
-      const { documentId, status } = req.body;
-      await documentService.assertDocumentIsPublishable(new ObjectId(documentId));
-      const result = await documentService.updateDocumentStatus(new ObjectId(documentId), status);
       res.status(201).json(result);
     }),
   );

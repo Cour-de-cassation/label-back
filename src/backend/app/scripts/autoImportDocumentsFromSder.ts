@@ -19,7 +19,7 @@ import { ENV } from '@src/backend/utils/env';
 export { importNewDocuments as autoImportDocumentsFromSder };
 
 const SOURCES = ['LOCAL', 'DEV', 'PREPROD'].includes(ENV)
-  ? ['jurinet', 'jurica', 'juritj', 'juritcom', 'portalis-cph']
+  ? ['jurinet', 'jurica', 'juricav2', 'juritj', 'juritcom', 'portalis-cph']
   : ['jurinet', 'jurica', 'juritj', 'juritcom'];
 
 if (require.main === module) {
@@ -105,7 +105,6 @@ async function importNewDocuments(settings: settingsType) {
         const isPreassignated = await preAssignator.preAssignDocument(document);
         if (!isPreassignated) {
           const nextStatus = getNextStatus({
-            publicationCategory: document.publicationCategory,
             status: document.status,
             route: document.route,
           });

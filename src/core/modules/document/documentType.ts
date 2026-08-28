@@ -2,15 +2,7 @@ import { ObjectId } from 'mongodb';
 
 export type documentRouteType = 'automatic' | 'exhaustive' | 'simple' | 'confirmation' | 'request' | 'default';
 export type documentImporterType = 'recent' | 'manual' | 'default';
-export type documentStatusType =
-  | 'loaded'
-  | 'done'
-  | 'free'
-  | 'pending'
-  | 'locked'
-  | 'saved'
-  | 'toBePublished'
-  | 'toBeConfirmed';
+export type documentStatusType = 'loaded' | 'done' | 'free' | 'pending' | 'locked' | 'saved' | 'toBeConfirmed';
 
 export type checklistEntityType = {
   entityId: string;

@@ -75,7 +75,7 @@ async function exportSpecificDocument(
     return;
   }
 
-  if (document.status !== 'toBePublished' && document.status !== 'done') {
+  if (document.status !== 'done') {
     logger.error({
       ...loggerDecision,
       message: `The document you specified has been found, but is not ready to be exported (status: ${document.status})`,
