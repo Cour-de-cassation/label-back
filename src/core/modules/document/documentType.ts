@@ -48,7 +48,7 @@ export type decisionMetadataType = {
   session: string;
   solution: string;
   motivationOccultation?: boolean;
-  raisonInteretParticulier?: string;
+  raisonInteretParticulier?: string | null;
   sommaire?: string;
 };
 

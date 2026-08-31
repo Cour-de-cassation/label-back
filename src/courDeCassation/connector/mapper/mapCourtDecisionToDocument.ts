@@ -104,28 +104,32 @@ async function mapDecisionCc(decision: DecisionCc, importer: documentType['impor
   });
 }
 
-function mapDecisionCa(decision: DecisionCa, importer: documentType['importer']): documentType {
+async function mapDecisionCa(decision: DecisionCa, importer: documentType['importer']): Promise<documentType> {
   const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
   const chamberName = extractReadableChamberName({
     chamberName: decision.chamberName ?? undefined,
     chamberId: decision.chamberId ?? undefined,
   });
-  const appealNumber = decision.registerNumber ? decision.registerNumber.split(' ')[0] : undefined;
+  const appealNumber = decision.registerNumber ? decision.registerNumber.split(' ')[0] : '';
   const publicationCategory = [decision.pubCategory];
   const NACCode = decision.NACCode ?? '';
   const decisionDate = convertToValidDate(decision.dateDecision ?? undefined);
   const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+  const categoriesToOmit = categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit);
+  const additionalTermsToAnnotate = decision.occultation?.additionalTerms ?? '';
+  const motivationOccultation = decision.occultation?.motivationOccultation ?? undefined;
+  const raisonInteretParticulier = (decision.raisonInteretParticulier as string) ?? null;
 
   return documentModule.lib.buildDocument({
     creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
     decisionMetadata: {
-      appealNumber: appealNumber ?? '',
-      additionalTermsToAnnotate: decision.occultation?.additionalTerms ?? '',
+      appealNumber,
+      additionalTermsToAnnotate,
       computedAdditionalTerms: {
         additionalTermsToAnnotate: decision.occultation?.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation?.additionalTermsToUnAnnotate ?? [],
       },
-      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit),
+      categoriesToOmit,
       civilCaseCode: '',
       civilMatterCode: '',
       criminalCaseCode: '',
@@ -137,21 +141,24 @@ function mapDecisionCa(decision: DecisionCa, importer: documentType['importer'])
       occultationBlock: decision.blocOccultation ?? undefined,
       session: '',
       solution: decision.solution?.trim() ?? '',
-      motivationOccultation: decision.occultation?.motivationOccultation ?? undefined,
-      raisonInteretParticulier: decision.raisonInteretParticulier ?? undefined,
+      motivationOccultation,
+      raisonInteretParticulier,
       sommaire: decision.sommaire ?? '',
     },
     documentNumber: decision.sourceId,
     externalId: decision._id,
-    priority: computePriority(
-      decision.sourceName,
-      publicationCategory,
-      NACCode,
-      importer,
-      decision.raisonInteretParticulier ?? undefined,
-    ),
+    priority: computePriority(decision.sourceName, publicationCategory, NACCode, importer, raisonInteretParticulier),
     publicationCategory,
-    route: 'default',
+    route: await extractRouteForCivilJurisdiction({
+      sourceId: decision.sourceId,
+      sourceName: decision.sourceName,
+      NACCode,
+      raisonInteretParticulier,
+      additionalTermsToAnnotate,
+      categoriesToOmit,
+      checklist: nlpTreatment?.checklist,
+      motivationOccultation,
+    }),
     importer,
     source: decision.sourceName,
     title: computeTitle({
@@ -169,7 +176,7 @@ function mapDecisionCa(decision: DecisionCa, importer: documentType['importer'])
   });
 }
 
-function mapDecisionCav2(decision: DecisionCaV2, importer: documentType['importer']): documentType {
+async function mapDecisionCav2(decision: DecisionCaV2, importer: documentType['importer']): Promise<documentType> {
   const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
   const chamberName = extractReadableChamberName({
     chamberName: decision.chamberName ?? undefined,
@@ -180,17 +187,21 @@ function mapDecisionCav2(decision: DecisionCaV2, importer: documentType['importe
   const NACCode = decision.NACCode ?? '';
   const decisionDate = convertToValidDate(decision.dateDecision ?? undefined);
   const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+  const categoriesToOmit = categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit);
+  const additionalTermsToAnnotate = decision.occultation?.additionalTerms ?? '';
+  const motivationOccultation = decision.occultation?.motivationOccultation ?? undefined;
+  const raisonInteretParticulier = (decision.raisonInteretParticulier as string) ?? null;
 
   return documentModule.lib.buildDocument({
     creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
     decisionMetadata: {
       appealNumber: appealNumber ?? '',
-      additionalTermsToAnnotate: decision.occultation?.additionalTerms ?? '',
+      additionalTermsToAnnotate,
       computedAdditionalTerms: {
         additionalTermsToAnnotate: decision.occultation?.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation?.additionalTermsToUnAnnotate ?? [],
       },
-      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit),
+      categoriesToOmit,
       civilCaseCode: '',
       civilMatterCode: '',
       criminalCaseCode: '',
@@ -202,21 +213,24 @@ function mapDecisionCav2(decision: DecisionCaV2, importer: documentType['importe
       occultationBlock: decision.blocOccultation ?? undefined,
       session: '',
       solution: decision.solution?.trim() ?? '',
-      motivationOccultation: decision.occultation?.motivationOccultation ?? undefined,
-      raisonInteretParticulier: decision.raisonInteretParticulier ?? undefined,
+      motivationOccultation,
+      raisonInteretParticulier,
       sommaire: decision.sommaire ?? '',
     },
     documentNumber: decision.sourceId,
     externalId: decision._id,
-    priority: computePriority(
-      decision.sourceName,
-      publicationCategory,
-      NACCode,
-      importer,
-      decision.raisonInteretParticulier ?? undefined,
-    ),
+    priority: computePriority(decision.sourceName, publicationCategory, NACCode, importer, raisonInteretParticulier),
     publicationCategory,
-    route: 'default',
+    route: await extractRouteForCivilJurisdiction({
+      sourceId: decision.sourceId,
+      sourceName: decision.sourceName,
+      NACCode,
+      raisonInteretParticulier,
+      additionalTermsToAnnotate,
+      categoriesToOmit,
+      checklist: nlpTreatment?.checklist,
+      motivationOccultation,
+    }),
     importer,
     source: decision.sourceName,
     title: computeTitle({
@@ -234,24 +248,28 @@ function mapDecisionCav2(decision: DecisionCaV2, importer: documentType['importe
   });
 }
 
-function mapDecisionTj(decision: DecisionTj, importer: documentType['importer']): documentType {
+async function mapDecisionTj(decision: DecisionTj, importer: documentType['importer']): Promise<documentType> {
   const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
   const appealNumber = decision.numeroRoleGeneral;
   const publicationCategory: string[] = [];
   const NACCode = decision.NACCode;
   const decisionDate = convertToValidDate(decision.dateDecision);
   const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+  const categoriesToOmit = categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit);
+  const additionalTermsToAnnotate = decision.occultation?.additionalTerms ?? '';
+  const motivationOccultation = decision.occultation?.motivationOccultation ?? undefined;
+  const raisonInteretParticulier = (decision.raisonInteretParticulier as string) ?? null;
 
   return documentModule.lib.buildDocument({
     creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
     decisionMetadata: {
       appealNumber: appealNumber ?? '',
-      additionalTermsToAnnotate: decision.occultation.additionalTerms,
+      additionalTermsToAnnotate,
       computedAdditionalTerms: {
         additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
-      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
+      categoriesToOmit,
       civilCaseCode: '',
       civilMatterCode: '',
       criminalCaseCode: '',
@@ -263,21 +281,24 @@ function mapDecisionTj(decision: DecisionTj, importer: documentType['importer'])
       occultationBlock: decision.blocOccultation,
       session: decision.formation?.trim() ?? '',
       solution: decision.solution?.trim() ?? '',
-      motivationOccultation: decision.occultation.motivationOccultation ?? undefined,
-      raisonInteretParticulier: decision.raisonInteretParticulier ?? undefined,
+      motivationOccultation,
+      raisonInteretParticulier,
       sommaire: decision.sommaire ?? '',
     },
     documentNumber: decision.sourceId,
     externalId: decision._id,
-    priority: computePriority(
-      decision.sourceName,
-      publicationCategory,
-      NACCode,
-      importer,
-      decision.raisonInteretParticulier ?? undefined,
-    ),
+    priority: computePriority(decision.sourceName, publicationCategory, NACCode, importer, raisonInteretParticulier),
     publicationCategory,
-    route: 'default',
+    route: await extractRouteForCivilJurisdiction({
+      sourceId: decision.sourceId,
+      sourceName: decision.sourceName,
+      NACCode,
+      raisonInteretParticulier,
+      additionalTermsToAnnotate,
+      categoriesToOmit,
+      checklist: nlpTreatment?.checklist,
+      motivationOccultation,
+    }),
     importer,
     source: decision.sourceName,
     title: computeTitle({
@@ -295,7 +316,7 @@ function mapDecisionTj(decision: DecisionTj, importer: documentType['importer'])
   });
 }
 
-function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importer']): documentType {
+async function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importer']): Promise<documentType> {
   const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
   const chamberName = extractReadableChamberName({
     chamberName: decision.chamberName ?? undefined,
@@ -305,37 +326,51 @@ function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importe
   const publicationCategory: string[] = [];
   const decisionDate = convertToValidDate(decision.dateDecision);
   const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+  const categoriesToOmit = categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit);
+  const additionalTermsToAnnotate = decision.occultation?.additionalTerms ?? '';
+  const motivationOccultation = decision.occultation?.motivationOccultation ?? undefined;
+  const raisonInteretParticulier = null;
+  const NACCode = '';
 
   return documentModule.lib.buildDocument({
     creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
     decisionMetadata: {
       appealNumber: appealNumber ?? '',
-      additionalTermsToAnnotate: decision.occultation.additionalTerms,
+      additionalTermsToAnnotate,
       computedAdditionalTerms: {
         additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
-      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
+      categoriesToOmit,
       civilCaseCode: '',
       civilMatterCode: decision.codeMatiereCivil?.trim() ?? '',
       criminalCaseCode: '',
       chamberName,
       date: decisionDate?.getTime(),
       jurisdiction: jurisdictionName,
-      NACCode: '',
+      NACCode,
       endCaseCode: '',
       occultationBlock: decision.blocOccultation,
       session: '',
       solution: decision.solution?.trim() ?? '',
-      motivationOccultation: decision.occultation.motivationOccultation ?? undefined,
-      raisonInteretParticulier: undefined,
+      motivationOccultation,
+      raisonInteretParticulier,
       sommaire: '',
     },
     documentNumber: decision.sourceId,
     externalId: decision._id,
     priority: computePriority(decision.sourceName, publicationCategory, '', importer, undefined),
     publicationCategory,
-    route: 'default',
+    route: await extractRouteForCivilJurisdiction({
+      sourceId: decision.sourceId,
+      sourceName: decision.sourceName,
+      NACCode,
+      raisonInteretParticulier,
+      additionalTermsToAnnotate,
+      categoriesToOmit,
+      checklist: nlpTreatment?.checklist,
+      motivationOccultation,
+    }),
     importer,
     source: decision.sourceName,
     title: computeTitle({
@@ -353,24 +388,28 @@ function mapDecisionTcom(decision: DecisionTcom, importer: documentType['importe
   });
 }
 
-function mapDecisionCph(decision: DecisionCph, importer: documentType['importer']): documentType {
+async function mapDecisionCph(decision: DecisionCph, importer: documentType['importer']): Promise<documentType> {
   const jurisdictionName = decision.jurisdictionName?.trim() ?? '';
   const appealNumber = decision.portalisNumber;
   const publicationCategory: string[] = [];
   const NACCode = decision.NACCode;
   const decisionDate = convertToValidDate(decision.dateDecision);
   const nlpTreatment = extractNlpTreatment(decision.labelTreatments);
+  const categoriesToOmit = categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation?.categoriesToOmit);
+  const additionalTermsToAnnotate = decision.occultation?.additionalTerms ?? '';
+  const motivationOccultation = decision.occultation?.motivationOccultation ?? undefined;
+  const raisonInteretParticulier = (decision.raisonInteretParticulier as string) ?? null;
 
   return documentModule.lib.buildDocument({
     creationDate: convertToValidDate(decision.dateCreation)?.getTime(),
     decisionMetadata: {
       appealNumber: appealNumber ?? '',
-      additionalTermsToAnnotate: decision.occultation.additionalTerms,
+      additionalTermsToAnnotate,
       computedAdditionalTerms: {
         additionalTermsToAnnotate: decision.occultation.additionalTermsToAnnotate ?? [],
         additionalTermsToUnAnnotate: decision.occultation.additionalTermsToUnAnnotate ?? [],
       },
-      categoriesToOmit: categoriesMapper.mapSderCategoriesToLabelCategories(decision.occultation.categoriesToOmit),
+      categoriesToOmit,
       civilCaseCode: '',
       civilMatterCode: '',
       criminalCaseCode: '',
@@ -382,21 +421,24 @@ function mapDecisionCph(decision: DecisionCph, importer: documentType['importer'
       occultationBlock: decision.blocOccultation,
       session: decision.formation?.trim() ?? '',
       solution: '',
-      motivationOccultation: decision.occultation.motivationOccultation ?? undefined,
-      raisonInteretParticulier: decision.raisonInteretParticulier ?? undefined,
+      motivationOccultation,
+      raisonInteretParticulier,
       sommaire: decision.sommaire ?? '',
     },
     documentNumber: decision.sourceId,
     externalId: decision._id,
-    priority: computePriority(
-      decision.sourceName,
-      publicationCategory,
-      NACCode,
-      importer,
-      decision.raisonInteretParticulier ?? undefined,
-    ),
+    priority: computePriority(decision.sourceName, publicationCategory, NACCode, importer, raisonInteretParticulier),
     publicationCategory,
-    route: 'default',
+    route: await extractRouteForCivilJurisdiction({
+      sourceId: decision.sourceId,
+      sourceName: decision.sourceName,
+      NACCode,
+      raisonInteretParticulier,
+      additionalTermsToAnnotate,
+      categoriesToOmit,
+      checklist: nlpTreatment?.checklist,
+      motivationOccultation,
+    }),
     importer,
     source: decision.sourceName,
     title: computeTitle({

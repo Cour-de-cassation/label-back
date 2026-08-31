@@ -18,14 +18,14 @@ async function extractRouteForCivilJurisdiction({
   categoriesToOmit,
   motivationOccultation,
 }: {
-  raisonInteretParticulier: string;
+  raisonInteretParticulier: string | null;
   NACCode: string;
   sourceName: string;
   sourceId: string | number;
-  additionalTermsToAnnotate: string;
-  checklist: unknown[];
+  additionalTermsToAnnotate: string | undefined;
+  checklist: unknown[] | undefined;
   categoriesToOmit: string[];
-  motivationOccultation: boolean;
+  motivationOccultation: boolean | undefined;
 }): Promise<documentType['route']> {
   if (sourceName === 'portalis-cph') {
     const routeRelecture = 'default';
@@ -41,18 +41,18 @@ async function extractRouteForCivilJurisdiction({
     checklist &&
     checklist.length > 0 &&
     // TEMP : ne pas prendre en compte les checklist si occultation des motifs
-    motivationOccultation != true
+    !motivationOccultation == true
   ) {
     return 'exhaustive';
   }
 
   // Relecture exhaustive pour les décisions présentant un intéret particulier
-  if (raisonInteretParticulier != null) {
+  if (raisonInteretParticulier && raisonInteretParticulier != null) {
     return 'exhaustive';
   }
 
   // Relecture exhaustive pour les décisions comportant des demandes d'occultation particulières
-  if (additionalTermsToAnnotate != '') {
+  if (additionalTermsToAnnotate && additionalTermsToAnnotate != '') {
     return 'exhaustive';
   }
 
