@@ -6,7 +6,7 @@ describe('updateDocumentRoute', () => {
   const documentRepository = buildDocumentRepository();
 
   it('should update document route', async () => {
-    const document = documentModule.generator.generate({ route: 'simple' });
+    const document = documentModule.generator.generate({ route: 'exhaustive' });
     await documentRepository.insert(document);
 
     const updatedDocument = await updateDocumentRoute(document._id, 'automatic');
