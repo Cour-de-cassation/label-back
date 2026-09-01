@@ -154,7 +154,7 @@ describe('fetchPersonalStatistics', () => {
 
       const aggregatedStatistics = await fetchPersonalStatistics(user, settings);
 
-      expect(aggregatedStatistics).toEqual([{ day: date.setHours(0, 0, 0, 0), exhaustive: 3 }]);
+      expect(aggregatedStatistics).toEqual([{ day: date.setHours(0, 0, 0, 0), total: 3 }]);
     });
   });
 });
