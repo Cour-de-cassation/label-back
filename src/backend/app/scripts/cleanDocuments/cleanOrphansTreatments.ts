@@ -34,7 +34,7 @@ async function cleanOrphansTreatments() {
   for (let i = 0; i < treatments.length; i++) {
     try {
       await documentRepository.findById(treatments[i].documentId);
-    } catch (error) {
+    } catch (_) {
       logger.error({
         ...logerTech,
         message: `Document NOT found for treatment ${treatments[i]._id}`,

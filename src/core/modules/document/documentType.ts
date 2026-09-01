@@ -1,7 +1,6 @@
-import { Category } from 'dbsder-api-types';
 import { ObjectId } from 'mongodb';
 
-export type documentRouteType = 'automatic' | 'exhaustive' | 'simple' | 'confirmation' | 'request' | 'default';
+export type documentRouteType = 'automatic' | 'exhaustive' | 'confirmation' | 'request' | 'default';
 export type documentImporterType = 'recent' | 'manual' | 'default';
 export type documentStatusType = 'loaded' | 'done' | 'free' | 'pending' | 'locked' | 'saved' | 'toBeConfirmed';
 
@@ -29,21 +28,6 @@ export type checklistItemType = {
   _rank?: number | null;
 };
 
-export type nlpVersionType = {
-  version: string;
-  date: string;
-};
-
-export type nlpVersionsType = {
-  juriSpacyTokenizer: nlpVersionType;
-  juritools: nlpVersionType;
-  pseudonymisationApi?: nlpVersionType;
-  nlpApi?: nlpVersionType;
-  model: {
-    name: string;
-  };
-};
-
 export type decisionMetadataType = {
   appealNumber: string;
   additionalTermsToAnnotate: string;
@@ -51,22 +35,14 @@ export type decisionMetadataType = {
     additionalTermsToAnnotate: string[];
     additionalTermsToUnAnnotate: string[];
   };
-  additionalTermsParsingFailed?: boolean;
   categoriesToOmit: string[];
   chamberName: string;
-  civilCaseCode: string;
-  civilMatterCode: string;
-  criminalCaseCode: string;
   date?: number;
   jurisdiction: string;
   occultationBlock?: number;
   NACCode: string;
-  endCaseCode: string;
-  session: string;
-  solution: string;
   motivationOccultation?: boolean;
-  raisonInteretParticulier?: string;
-  sommaire?: string;
+  raisonInteretParticulier?: string | null;
 };
 
 export type reviewStatusType = {
@@ -80,7 +56,6 @@ export type documentType = {
   decisionMetadata: decisionMetadataType;
   documentNumber: number | string;
   importer: documentImporterType;
-  nlpVersions?: nlpVersionsType | null;
   publicationCategory: string[];
   reviewStatus: reviewStatusType;
   route: documentRouteType;

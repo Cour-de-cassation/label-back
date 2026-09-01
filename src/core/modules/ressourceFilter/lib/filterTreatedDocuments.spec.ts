@@ -158,17 +158,11 @@ describe('filterTreatedDocuments', () => {
       documentModule.generator.generate({
         decisionMetadata: documentModule.decisionMetadataGenerator.generate({
           jurisdiction,
-          solution: '',
-          session: '',
           occultationBlock: undefined,
-          criminalCaseCode: '',
-          civilCaseCode: '',
-          civilMatterCode: '',
           chamberName: '',
           date: decisionDate,
           categoriesToOmit: [],
           NACCode: '',
-          endCaseCode: '',
           appealNumber: '',
         }),
       }),

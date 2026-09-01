@@ -51,7 +51,7 @@ describe('fetchPersonalStatistics', () => {
           treatmentDuration: 3,
           treatmentDate: date.getTime(),
           treatmentsSummary: [{ userId: user._id, treatmentDuration: 50 }],
-          route: 'simple' as documentType['route'],
+          route: 'exhaustive' as documentType['route'],
           wordsCount: 9,
         },
       ].map(statisticModule.generator.generate);
@@ -65,7 +65,7 @@ describe('fetchPersonalStatistics', () => {
             text: 'Some text with five words',
             route: 'exhaustive',
           },
-          { status: 'done', route: 'simple' },
+          { status: 'done', route: 'exhaustive' },
           { status: 'saved' },
         ] as const
       ).map(documentModule.generator.generate);
@@ -154,7 +154,7 @@ describe('fetchPersonalStatistics', () => {
 
       const aggregatedStatistics = await fetchPersonalStatistics(user, settings);
 
-      expect(aggregatedStatistics).toEqual([{ day: date.setHours(0, 0, 0, 0), exhaustive: 2, simple: 2 }]);
+      expect(aggregatedStatistics).toEqual([{ day: date.setHours(0, 0, 0, 0), total: 3 }]);
     });
   });
 });

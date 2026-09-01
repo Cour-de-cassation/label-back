@@ -507,6 +507,11 @@ function buildApi(app: Express) {
       const url = await ssoService.acs(req);
       res.redirect(url);
     } catch (err) {
+      logger.error({
+        operations: ['other', 'SSO acs'],
+        path: './src/backend/api/buildApi.ts',
+        message: `${err}`,
+      });
       res.status(500);
       res.redirect(`${API_BASE_URL}/sso/logout`);
     }

@@ -5,11 +5,7 @@ import { Category, LabelTreatments } from 'dbsder-api-types';
 
 export { concat };
 
-function concat(
-  treatments: treatmentType[],
-  nlpVersions?: documentType['nlpVersions'],
-  checklist?: documentType['checklist'],
-): LabelTreatments {
+function concat(treatments: treatmentType[], checklist?: documentType['checklist']): LabelTreatments {
   const labelTreatments: LabelTreatments = [];
 
   const sortedTreatments = treatments.sort((treatment1, treatment2) => treatment1.order - treatment2.order);
@@ -27,7 +23,6 @@ function concat(
         })),
         source: computeSource(currentTreatment.source),
         order,
-        version: currentTreatment.source === 'NLP' ? nlpVersions : undefined,
         checklist:
           currentTreatment.source === 'NLP'
             ? checklist?.map((item) => ({
