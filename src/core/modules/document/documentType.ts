@@ -37,19 +37,12 @@ export type decisionMetadataType = {
   };
   categoriesToOmit: string[];
   chamberName: string;
-  civilCaseCode: string;
-  civilMatterCode: string;
-  criminalCaseCode: string;
   date?: number;
   jurisdiction: string;
   occultationBlock?: number;
   NACCode: string;
-  endCaseCode: string;
-  session: string;
-  solution: string;
   motivationOccultation?: boolean;
   raisonInteretParticulier?: string | null;
-  sommaire?: string;
 };
 
 export type reviewStatusType = {

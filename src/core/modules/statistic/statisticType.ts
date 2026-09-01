@@ -14,7 +14,6 @@ export type statisticType = {
   linkedEntitiesCount: number;
   publicationCategory: string[];
   session?: string;
-  endCaseCode?: string;
   NACCode?: string;
   route: documentRouteType;
   source: string;
