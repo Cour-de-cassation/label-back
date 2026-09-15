@@ -29,14 +29,14 @@ describe('fetchAvailableStatisticFilters', () => {
       {
         route: 'exhaustive' as documentType['route'],
       },
-      { route: 'simple' as documentType['route'] },
+      { route: 'automatic' as documentType['route'] },
     ].map(statisticModule.generator.generate);
     await Promise.all(documents.map(documentRepository.insert));
     await Promise.all(statistics.map(statisticRepository.insert));
 
     const availableStatisticFilters = await fetchAvailableStatisticFilters();
 
-    expect(availableStatisticFilters.routes).toEqual(['automatic', 'exhaustive', 'simple']);
+    expect(availableStatisticFilters.routes).toEqual(['automatic', 'exhaustive']);
   });
 
   it('should fetch all the sources available', async () => {

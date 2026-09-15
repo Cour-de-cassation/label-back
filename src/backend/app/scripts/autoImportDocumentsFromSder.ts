@@ -10,8 +10,6 @@ import { buildPreAssignator } from '../../lib/preAssignator';
 import { assignationService } from '../../modules/assignation';
 import { preAssignationService } from '../../modules/preAssignation';
 import { statisticService } from '../../modules/statistic';
-import { extractRoute } from '../../lib/extractRoute';
-import { updateDocumentRoute } from '../../modules/document/service/documentService/updateDocumentRoute';
 import { updateDocumentStatus } from '../../modules/document/service/documentService/updateDocumentStatus';
 import { getNextStatus } from '@src/core/modules/document/lib';
 import { mapCourtDecisionToDocument } from '@src/courDeCassation/connector/mapper/mapCourtDecisionToDocument';
@@ -104,14 +102,11 @@ async function importNewDocuments(settings: settingsType) {
           settings,
         );
 
-        const routeForDocument = await extractRoute(document);
-        await updateDocumentRoute(document._id, routeForDocument);
-
-        const isPreassignated = await preAssignator.preAssignDocument({ ...document, route: routeForDocument });
+        const isPreassignated = await preAssignator.preAssignDocument(document);
         if (!isPreassignated) {
           const nextStatus = getNextStatus({
             status: document.status,
-            route: routeForDocument,
+            route: document.route,
           });
           await updateDocumentStatus(document._id, nextStatus);
         }

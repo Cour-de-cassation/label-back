@@ -76,7 +76,7 @@ describe('fetchDocumentStatistic', () => {
             text: 'Some text with five words',
             route: 'exhaustive',
           },
-          { status: 'done', route: 'simple' },
+          { status: 'done' },
           { status: 'saved' },
         ] as const
       ).map(documentModule.generator.generate);
