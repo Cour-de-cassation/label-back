@@ -85,14 +85,6 @@ async function importSpecificDocument({
     message: `START: ${documentNumber} - ${source}, lowPriority: ${lowPriority}`,
   });
 
-  if (!['LOCAL', 'DEV', 'PREPROD'].includes(ENV) && source === 'portalis-cph') {
-    logger.info({
-      ...loggerTech,
-      message: `Source portalis-cph is excluded in PRODUCTION environment.`,
-    });
-    return;
-  }
-
   try {
     const courtDecision = await sderApi.fetchCourtDecisionBySourceIdAndSourceName(documentNumber, source);
 
