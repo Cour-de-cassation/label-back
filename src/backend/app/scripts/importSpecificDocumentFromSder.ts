@@ -14,7 +14,6 @@ import { updateDocumentStatus } from '../../modules/document/service/documentSer
 import { getNextStatus } from '@src/core/modules/document/lib';
 import { mapCourtDecisionToDocument } from '@src/courDeCassation/connector/mapper/mapCourtDecisionToDocument';
 import { sderApi } from '@src/courDeCassation/sderApi';
-import { ENV } from '@src/backend/utils/env';
 
 export { importSpecificDocument as importSpecificDocumentFromSder };
 
