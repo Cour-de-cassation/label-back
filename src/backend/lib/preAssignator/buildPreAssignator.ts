@@ -48,7 +48,7 @@ function buildPreAssignator() {
           userId: new ObjectId(preAssignationForDocument.userId),
         });
         await preAssignationService.deletePreAssignation(preAssignationForDocument._id);
-        if (document.route === 'automatic' || document.route === 'simple') {
+        if (document.route === 'automatic') {
           await documentService.updateDocumentRoute(new ObjectId(document._id), 'exhaustive');
         }
         await documentService.updateDocumentStatus(new ObjectId(document._id), 'saved');

@@ -7,8 +7,6 @@ import {
   checklistItemType,
   checklistEntityType,
   decisionMetadataType,
-  nlpVersionType,
-  nlpVersionsType,
   reviewStatusType,
 } from './documentType';
 import {
@@ -30,8 +28,6 @@ export type {
   checklistItemType,
   checklistEntityType,
   decisionMetadataType,
-  nlpVersionType,
-  nlpVersionsType,
   reviewStatusType,
 };
 

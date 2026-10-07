@@ -1,7 +1,7 @@
 export type DecisionLog = {
   decision: {
     _id?: string;
-    sourceId: string;
+    sourceId: string | number;
     sourceName: string;
     publishStatus?: string;
     labelStatus?: string;

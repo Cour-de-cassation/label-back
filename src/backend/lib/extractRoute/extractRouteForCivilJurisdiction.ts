@@ -4,19 +4,30 @@ import { documentService } from '../../modules/document';
 import { logger } from '../../utils';
 import { Category, CodeNac } from 'dbsder-api-types';
 import { DBSDER_API_URL, DBSDER_API_KEY } from '../../utils/env';
-import { DecisionLog, TechLog } from '@src/backend/utils/logger/loggerType';
+import { DecisionLog } from '@src/backend/utils/logger/loggerType';
 
 export { extractRouteForCivilJurisdiction };
 
-async function extractRouteForCivilJurisdiction(document: documentType): Promise<documentType['route']> {
-  const raisonInteretParticulier = document.decisionMetadata.raisonInteretParticulier;
-  const NACCode = document.decisionMetadata.NACCode;
-  const source = document.source;
-  const additionalTermsToAnnotate = document.decisionMetadata.additionalTermsToAnnotate;
-  const checklist = document.checklist;
-  const categoriesToOmit = document.decisionMetadata.categoriesToOmit;
-
-  if (source === 'portalis-cph') {
+async function extractRouteForCivilJurisdiction({
+  raisonInteretParticulier,
+  NACCode,
+  sourceName,
+  sourceId,
+  additionalTermsToAnnotate,
+  checklist,
+  categoriesToOmit,
+  motivationOccultation,
+}: {
+  raisonInteretParticulier: string | null;
+  NACCode: string;
+  sourceName: string;
+  sourceId: string | number;
+  additionalTermsToAnnotate: string | undefined;
+  checklist: unknown[] | undefined;
+  categoriesToOmit: string[];
+  motivationOccultation: boolean | undefined;
+}): Promise<documentType['route']> {
+  if (sourceName === 'portalis-cph') {
     const routeRelecture = 'default';
     logger.info({
       path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
@@ -30,18 +41,18 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
     checklist &&
     checklist.length > 0 &&
     // TEMP : ne pas prendre en compte les checklist si occultation des motifs
-    document.decisionMetadata.motivationOccultation != true
+    !motivationOccultation == true
   ) {
     return 'exhaustive';
   }
 
   // Relecture exhaustive pour les décisions présentant un intéret particulier
-  if (raisonInteretParticulier != null) {
+  if (raisonInteretParticulier && raisonInteretParticulier != null) {
     return 'exhaustive';
   }
 
   // Relecture exhaustive pour les décisions comportant des demandes d'occultation particulières
-  if (additionalTermsToAnnotate != '') {
+  if (additionalTermsToAnnotate && additionalTermsToAnnotate != '') {
     return 'exhaustive';
   }
 
@@ -61,16 +72,15 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
     nonSensibleRatio * 10 < sensibleMinimumRatio ? sensibleMinimumRatio : nonSensibleRatio * 10,
   );
 
-  if (source === 'jurica' || source === 'juricav2' || source === 'juritj') {
+  if (sourceName === 'jurica' || sourceName === 'juricav2' || sourceName === 'juritj') {
     const routeFromDb = await getDecisionRoute(NACCode);
     const loggerTech: DecisionLog = {
       operations: ['other', 'computeRouteFromNac'],
       path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
       message: `Computing route for NACCode: ${NACCode}`,
       decision: {
-        sourceId: document.documentNumber.toString(),
-        sourceName: document.source,
-        labelStatus: document.status,
+        sourceId,
+        sourceName,
       },
     };
     switch (routeFromDb) {
@@ -108,7 +118,7 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
       default:
         throw new Error('Route non trouvée en base');
     }
-  } else if (source === 'juritcom') {
+  } else if (sourceName === 'juritcom') {
     if (!categoriesToOmit.includes(Category.PERSONNEMORALE)) {
       const routeRelecture = Math.random() < sensibleRatio ? 'exhaustive' : 'automatic';
       logger.info({
@@ -120,8 +130,8 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
           },
         )}`,
         decision: {
-          sourceId: document.documentNumber.toString(),
-          sourceName: document.source,
+          sourceId,
+          sourceName,
         },
       });
       return routeRelecture;
@@ -136,8 +146,8 @@ async function extractRouteForCivilJurisdiction(document: documentType): Promise
           },
         )}`,
         decision: {
-          sourceId: document.documentNumber.toString(),
-          sourceName: document.source,
+          sourceId,
+          sourceName,
         },
       });
       return routeRelecture;
@@ -190,6 +200,7 @@ async function getDecisionRoute(code: string): Promise<string | undefined> {
       operations: ['other', 'getDecisionRoute'],
       path: 'src/backend/lib/extractRoute/extractRouteForCivilJurisdiction.ts',
       message: `Failed to fetch code nac for code "${code}"`,
+      stack: `${error}`,
     });
     return undefined;
   }

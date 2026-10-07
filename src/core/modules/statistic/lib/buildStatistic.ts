@@ -38,8 +38,6 @@ function buildStatistic({
       ? document.decisionMetadata.jurisdiction.trim().toLowerCase()
       : '',
     linkedEntitiesCount,
-    session: document.decisionMetadata.session || undefined,
-    endCaseCode: document.decisionMetadata.endCaseCode || undefined,
     NACCode: document.decisionMetadata.NACCode || undefined,
     publicationCategory: document.publicationCategory,
     route: document.route,

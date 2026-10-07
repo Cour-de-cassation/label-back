@@ -2,13 +2,19 @@ import { documentType, stringComparator } from '@src/core';
 
 export { extractRouteForJurinet };
 
-function extractRouteForJurinet(document: documentType): documentType['route'] {
-  const solution = document.decisionMetadata.solution;
-  const session = document.decisionMetadata.session;
-  const publicationCategory = document.publicationCategory;
-  const chamberName = document.decisionMetadata.chamberName;
-  const checklist = document.checklist;
-
+function extractRouteForJurinet({
+  solution,
+  session,
+  publicationCategory,
+  chamberName,
+  checklist,
+}: {
+  solution: string;
+  session: string;
+  publicationCategory: string[];
+  chamberName: string;
+  checklist?: unknown[];
+}): documentType['route'] {
   /* Double relecture :
     - Décisions rendues en Assemblée plénière
     - Décisions rendues en chambre mixte
