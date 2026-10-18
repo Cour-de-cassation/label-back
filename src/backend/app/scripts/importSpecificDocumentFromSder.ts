@@ -31,7 +31,7 @@ function parseArgv() {
       documentNumber: {
         demandOption: true,
         description: 'number of the document you want to import',
-        type: 'number',
+        type: 'string',
       },
       source: {
         demandOption: true,
@@ -55,7 +55,7 @@ function parseArgv() {
     .parseSync();
 
   return {
-    documentNumber: argv.documentNumber as number,
+    documentNumber: argv.documentNumber as string,
     source: argv.source as string,
     lowPriority: !!argv.lowPriority as boolean,
     settings: argv.settings as string,
@@ -68,7 +68,7 @@ async function importSpecificDocument({
   lowPriority,
   settings,
 }: {
-  documentNumber: number;
+  documentNumber: string;
   source: string;
   lowPriority: boolean;
   settings: settingsType;

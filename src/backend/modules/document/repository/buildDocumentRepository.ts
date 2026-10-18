@@ -59,7 +59,13 @@ const buildDocumentRepository = buildRepositoryBuilder<documentType, customDocum
     },
 
     async findOneByDocumentNumberAndSource({ documentNumber, source }) {
-      const document = await collection.findOne({ source, documentNumber });
+      const documentNumberAsNumber = parseInt(documentNumber.toString());
+      const document = await collection.findOne({
+        source,
+        documentNumber: isNaN(documentNumberAsNumber)
+          ? documentNumber
+          : ({ $in: [documentNumber, documentNumberAsNumber] } as any),
+      });
       return document || undefined;
     },
 

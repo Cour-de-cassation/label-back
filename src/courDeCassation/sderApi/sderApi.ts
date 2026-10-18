@@ -89,7 +89,7 @@ const sderApi = {
   },
 
   async fetchCourtDecisionBySourceIdAndSourceName(
-    sourceId: number,
+    sourceId: string,
     sourceName: string,
   ): Promise<AcceptedDocumentTypes | undefined> {
     const decisionList = await fetchDecisions({ sourceId, sourceName });
