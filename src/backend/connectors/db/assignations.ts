@@ -44,24 +44,24 @@ export async function deleteAssignations(filter: Filter<assignationType>) {
   await assignations().deleteMany(filter);
 }
 
-/** Assignations matching the filter whose document exists and matches the document filter, with this document */
-export async function findAssignationsWithDocument(
-  filter: Filter<assignationType>,
-  documentFilter: Filter<documentType> = {},
-) {
+/** Pending or saved documents assignated to the user with their assignation id, saved documents first */
+export async function findAssignedDocumentsOfUser(userId: ObjectId) {
   return assignations()
-    .aggregate<assignationType & { document: documentType }>([
-      { $match: filter },
+    .aggregate<{ document: documentType; assignationId: assignationType['_id'] }>([
+      { $match: { userId } },
       {
         $lookup: {
           from: 'documents',
           localField: 'documentId',
           foreignField: '_id',
           as: 'document',
-          pipeline: [{ $match: documentFilter }],
+          pipeline: [{ $match: { status: { $in: ['pending', 'saved'] } } }],
         },
       },
       { $unwind: '$document' },
+      { $set: { savedFirst: { $cond: [{ $eq: ['$document.status', 'saved'] }, 0, 1] } } },
+      { $sort: { savedFirst: 1, _id: 1 } },
+      { $project: { _id: 0, document: 1, assignationId: '$_id' } },
     ])
     .toArray();
 }

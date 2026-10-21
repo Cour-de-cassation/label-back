@@ -1,4 +1,3 @@
-import { uniq } from 'lodash';
 import { buildAnonymizer, dateBuilder, documentModule, documentType, indexer, settingsModule } from '@src/core';
 import { buildCallAttemptsRegulator } from '../../../utils/callAttemptsRegulator/callAttemptsRegulator';
 import { logger } from '../../../utils';
@@ -11,15 +10,16 @@ import {
   findDocumentById,
   findDocuments,
   findDocumentsProjection,
+  findPublishableDocuments,
+  findToBeConfirmedDocuments,
+  findUntreatedDocuments,
   updateDocumentById,
 } from '../../../connectors/db/documents';
 import { assignationService } from '../../assignation';
 import { problemReportService } from '../../problemReport';
 import { treatmentService } from '../../treatment';
 import { buildFetchDocumentsForUser } from './fetchDocumentsForUser';
-import { fetchToBeConfirmedDocuments } from './fetchToBeConfirmedDocuments';
 import { fetchTreatedDocuments } from './fetchTreatedDocuments';
-import { fetchUntreatedDocuments } from './fetchUntreatedDocuments';
 
 export { documentService };
 
@@ -57,9 +57,9 @@ const documentService = {
   fetchFreeDocumentsIds,
   fetchPublishableDocuments,
   fetchPublishableDocumentsToExport,
-  fetchToBeConfirmedDocuments,
+  fetchToBeConfirmedDocuments: findToBeConfirmedDocuments,
   fetchTreatedDocuments,
-  fetchUntreatedDocuments,
+  fetchUntreatedDocuments: findUntreatedDocuments,
   resetDocument,
   resetDocumentReviewStatus,
   updateDocumentReviewStatus,
@@ -132,14 +132,13 @@ async function fetchAllDocumentsByIds(documentIds: documentType['_id'][]) {
 }
 
 async function fetchAllJurisdictions() {
-  const jurisdictions = await findDistinctDocumentValues<documentType['decisionMetadata']['jurisdiction']>(
-    'decisionMetadata.jurisdiction',
-  );
-  return jurisdictions.filter(Boolean);
+  return findDistinctDocumentValues<documentType['decisionMetadata']['jurisdiction']>('decisionMetadata.jurisdiction', {
+    'decisionMetadata.jurisdiction': { $nin: [null, ''] },
+  });
 }
 
 async function fetchAllPublicationCategories() {
-  return uniq(await findDistinctDocumentValues<string>('publicationCategory'));
+  return findDistinctDocumentValues<string>('publicationCategory');
 }
 
 async function fetchAnonymizedDocumentText(documentId: documentType['_id']) {
@@ -183,56 +182,24 @@ function buildPublicationCategoryLettersFilter(publicationCategoryLetters: strin
 }
 
 async function fetchPublishableDocuments() {
-  const allDocuments = await findDocumentsProjection(
-    {
-      $or: [
-        { route: { $in: ['confirmation'] } },
-        ...buildPublicationCategoryLettersFilter(
-          documentModule.lib.publicationHandler.getPublishedPublicationCategory(),
-        ),
-      ],
-    },
-    ['_id', 'creationDate', 'decisionMetadata', 'documentNumber', 'publicationCategory', 'route', 'status'],
-  );
-
-  return allDocuments.map(
-    ({ _id, creationDate, decisionMetadata, documentNumber, publicationCategory, route, status }) => ({
-      _id,
-      appealNumber: decisionMetadata.appealNumber,
-      chamberName: decisionMetadata.chamberName,
-      jurisdiction: decisionMetadata.jurisdiction,
-      creationDate,
-      documentNumber,
-      publicationCategory,
-      route,
-      status,
-    }),
-  );
+  return findPublishableDocuments({
+    $or: [
+      { route: { $in: ['confirmation'] } },
+      ...buildPublicationCategoryLettersFilter(documentModule.lib.publicationHandler.getPublishedPublicationCategory()),
+    ],
+  });
 }
 
 async function fetchPublishableDocumentsToExport() {
-  const lettersDocuments = await findDocuments({
+  return findDocuments({
     status: 'done',
-    $or: buildPublicationCategoryLettersFilter(documentModule.lib.publicationHandler.getPublishedPublicationCategory()),
-  });
-  const codesDocuments = await findDocuments({
-    status: 'done',
-    $or: documentModule.lib.publicationHandler.getPrioritizedNACCodes().map((NACCode) => ({
-      'decisionMetadata.NACCode': { $in: [NACCode] },
-    })),
-  });
-  const interetParticulierDocuments = await findDocuments({
-    status: 'done',
-    'decisionMetadata.raisonInteretParticulier': { $ne: null },
-  });
-
-  const allDocuments = [...lettersDocuments, ...codesDocuments, ...interetParticulierDocuments];
-  const seenIds = new Set<string>();
-  return allDocuments.filter((doc) => {
-    const idString = doc._id.toString();
-    if (seenIds.has(idString)) return false;
-    seenIds.add(idString);
-    return true;
+    $or: [
+      ...buildPublicationCategoryLettersFilter(documentModule.lib.publicationHandler.getPublishedPublicationCategory()),
+      ...documentModule.lib.publicationHandler.getPrioritizedNACCodes().map((NACCode) => ({
+        'decisionMetadata.NACCode': { $in: [NACCode] },
+      })),
+      { 'decisionMetadata.raisonInteretParticulier': { $ne: null } },
+    ],
   });
 }
 

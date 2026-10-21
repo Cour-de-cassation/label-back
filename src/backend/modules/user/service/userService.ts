@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { assignationType, indexer, userModule, userType } from '@src/core';
-import { findUser, findUsers, insertUser, updateUserById } from '../../../connectors/db/users';
+import { findUser, findUsers, findUsersProjection, insertUser, updateUserById } from '../../../connectors/db/users';
 
 export { userService };
 
@@ -70,12 +70,12 @@ const userService = {
   },
 
   async fetchWorkingUsers() {
-    const users = await findUsers();
+    const users = await findUsersProjection({}, ['email', 'name', 'role']);
 
     if (users.length === 0) {
       throw new Error('No users found');
     }
 
-    return users.map(({ _id, email, name, role }) => ({ _id, email, name, role }));
+    return users;
   },
 };

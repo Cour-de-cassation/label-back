@@ -73,36 +73,7 @@ const problemReportService = {
     await deleteProblemReports({ documentId });
   },
 
-  async fetchProblemReportsWithDetails() {
-    const problemReportsWithDetails = await findProblemReportsWithDetails();
-
-    return problemReportsWithDetails.map(({ document, user, ...problemReport }) => {
-      if (!document) {
-        throw new Error(`The document id ${problemReport.documentId.toHexString()} has no matching document`);
-      }
-      if (!user) {
-        throw new Error(`Couldn't find the user with id: ${problemReport.userId.toHexString()}`);
-      }
-
-      return {
-        problemReport,
-        user: {
-          email: user.email,
-          name: user.name,
-        },
-        document: {
-          _id: document._id,
-          documentNumber: document.documentNumber,
-          source: document.source,
-          jurisdiction: document.decisionMetadata.jurisdiction,
-          appealNumber: document.decisionMetadata.appealNumber,
-          publicationCategory: document.publicationCategory,
-          route: document.route,
-          status: document.status,
-        },
-      };
-    });
-  },
+  fetchProblemReportsWithDetails: findProblemReportsWithDetails,
 
   async updateHasBeenRead(problemReportId: problemReportType['_id'], hasBeenRead: problemReportType['hasBeenRead']) {
     await updateProblemReportById(problemReportId, { hasBeenRead });

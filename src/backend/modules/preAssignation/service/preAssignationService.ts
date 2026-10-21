@@ -3,10 +3,9 @@ import { preAssignationModule, preAssignationType } from '@src/core';
 import {
   deletePreAssignationById,
   findPreAssignation,
-  findPreAssignations,
+  findPreAssignationsWithUserName,
   insertPreAssignation,
 } from '../../../connectors/db/preAssignations';
-import { userService } from '../../user';
 
 export { preAssignationService };
 
@@ -26,15 +25,7 @@ const preAssignationService = {
     await deletePreAssignationById(preAssignationId);
   },
 
-  async fetchAllPreAssignation() {
-    const preAssignations = await findPreAssignations();
-    const usersByIds = await userService.fetchUsersByIds(preAssignations.map(({ userId }) => userId));
-
-    return preAssignations.map((preAssignation) => ({
-      preAssignation,
-      userName: usersByIds[preAssignation.userId.toHexString()].name,
-    }));
-  },
+  fetchAllPreAssignation: findPreAssignationsWithUserName,
 
   async fetchPreAssignationBySourceAndNumber(number: string, source: string) {
     return findPreAssignation({ number, source });

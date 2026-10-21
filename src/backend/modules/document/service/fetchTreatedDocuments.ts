@@ -1,74 +1,32 @@
-import { sumBy } from 'lodash';
 import { settingsType, treatmentModule } from '@src/core';
-import { findDocumentsWithTreatments } from '../../../connectors/db/documents';
-import { getAssignedUserName } from './getAssignedUserName';
+import { findTreatedDocuments } from '../../../connectors/db/documents';
+import { findTreatments } from '../../../connectors/db/treatments';
 
 export { fetchTreatedDocuments };
 
 async function fetchTreatedDocuments(settings: settingsType) {
-  const treatedDocuments = await findDocumentsWithTreatments({ status: { $in: ['done'] } }, [
-    '_id',
-    'decisionMetadata',
-    'creationDate',
-    'documentNumber',
-    'publicationCategory',
-    'reviewStatus',
-    'source',
-    'route',
-  ]);
+  const treatedDocuments = await findTreatedDocuments();
 
-  return treatedDocuments.map(({ assignations, assignedUsers, treatments, ...treatedDocument }) => {
-    let totalTreatmentDuration: number | undefined,
-      lastTreatmentDate: number | undefined,
-      subAnnotationsNonSensitiveCount: number | undefined,
-      surAnnotationsCount: number | undefined,
-      subAnnotationsSensitiveCount: number | undefined = undefined;
-    let userNames: string[] = [];
-    if (assignations.length > 0) {
-      const humanTreatments = treatmentModule.lib.extractHumanTreatments(treatments, assignations);
-      if (humanTreatments.length === 0) {
-        throw new Error(`No human treatment found for document ${treatedDocument._id.toHexString()}`);
+  return Promise.all(
+    treatedDocuments.map(async ({ humanTreatmentsCount, humanTreatmentIds, ...treatedDocument }) => {
+      if (humanTreatmentsCount === 0) {
+        throw new Error(`No human treatment found for document ${treatedDocument.document._id.toHexString()}`);
       }
-      userNames = humanTreatments.map(({ userId }) => getAssignedUserName(assignedUsers, userId));
-      totalTreatmentDuration = sumBy(humanTreatments, ({ treatment }) => treatment.duration);
-      lastTreatmentDate = humanTreatments[humanTreatments.length - 1].treatment.lastUpdateDate;
-
-      if (humanTreatments.length === 1) {
-        const humanTreatment = humanTreatments[0];
-        subAnnotationsNonSensitiveCount = humanTreatment.treatment.subAnnotationsNonSensitiveCount;
-        subAnnotationsSensitiveCount = humanTreatment.treatment.subAnnotationsSensitiveCount;
-        surAnnotationsCount = humanTreatment.treatment.surAnnotationsCount;
-      } else {
-        const treatmentInfo = treatmentModule.lib.aggregateTreatmentInfo(
-          humanTreatments.map(({ treatment }) => treatment),
-          settings,
-        );
-        subAnnotationsNonSensitiveCount = treatmentInfo.subAnnotationsNonSensitiveCount;
-        subAnnotationsSensitiveCount = treatmentInfo.subAnnotationsSensitiveCount;
-        surAnnotationsCount = treatmentInfo.surAnnotationsCount;
+      if (!humanTreatmentIds) {
+        return treatedDocument;
       }
-    }
 
-    return {
-      document: {
-        _id: treatedDocument._id,
-        creationDate: treatedDocument.creationDate,
-        documentNumber: treatedDocument.documentNumber,
-        jurisdiction: treatedDocument.decisionMetadata.jurisdiction,
-        occultationBlock: treatedDocument.decisionMetadata.occultationBlock,
-        publicationCategory: treatedDocument.publicationCategory,
-        reviewStatus: treatedDocument.reviewStatus,
-        route: treatedDocument.route,
-        source: treatedDocument.source,
-      },
-      totalTreatmentDuration,
-      lastTreatmentDate,
-      statistic: {
-        subAnnotationsNonSensitiveCount,
-        surAnnotationsCount,
-        subAnnotationsSensitiveCount,
-      },
-      userNames,
-    };
-  });
+      // Several human treatments: annotations counts depend on the settings
+      const humanTreatments = (await findTreatments({ _id: { $in: humanTreatmentIds } })).sort(
+        (treatment1, treatment2) => treatment1.order - treatment2.order,
+      );
+      const { subAnnotationsNonSensitiveCount, surAnnotationsCount, subAnnotationsSensitiveCount } =
+        treatmentModule.lib.aggregateTreatmentInfo(humanTreatments, settings);
+
+      return {
+        ...treatedDocument,
+        statistic: { subAnnotationsNonSensitiveCount, surAnnotationsCount, subAnnotationsSensitiveCount },
+      };
+    }),
+  );
 }

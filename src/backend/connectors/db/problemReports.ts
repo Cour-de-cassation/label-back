@@ -31,22 +31,22 @@ export async function deleteProblemReports(filter: Filter<problemReportType>) {
   await problemReports().deleteMany(filter);
 }
 
-/** Problem reports with the reported document and the reporting user (undefined if they do not exist anymore) */
+/** Problem reports with the reported document and the reporting user, skipped if one of them does not exist anymore */
 export async function findProblemReportsWithDetails() {
   return problemReports()
-    .aggregate<
-      problemReportType & {
-        document?: Pick<
-          documentType,
-          '_id' | 'documentNumber' | 'source' | 'publicationCategory' | 'route' | 'status'
-        > & { decisionMetadata: Pick<documentType['decisionMetadata'], 'jurisdiction' | 'appealNumber'> };
-        user?: Pick<userType, '_id' | 'email' | 'name'>;
-      }
-    >([
+    .aggregate<{
+      problemReport: problemReportType;
+      user: Pick<userType, 'email' | 'name'>;
+      document: Pick<documentType, '_id' | 'documentNumber' | 'source' | 'publicationCategory' | 'route' | 'status'> & {
+        jurisdiction: documentType['decisionMetadata']['jurisdiction'];
+        appealNumber?: documentType['decisionMetadata']['appealNumber'];
+      };
+    }>([
+      { $replaceWith: { problemReport: '$$ROOT' } },
       {
         $lookup: {
           from: 'documents',
-          localField: 'documentId',
+          localField: 'problemReport.documentId',
           foreignField: '_id',
           as: 'document',
           pipeline: [
@@ -54,8 +54,8 @@ export async function findProblemReportsWithDetails() {
               $project: {
                 documentNumber: 1,
                 source: 1,
-                'decisionMetadata.jurisdiction': 1,
-                'decisionMetadata.appealNumber': 1,
+                jurisdiction: '$decisionMetadata.jurisdiction',
+                appealNumber: '$decisionMetadata.appealNumber',
                 publicationCategory: 1,
                 route: 1,
                 status: 1,
@@ -67,14 +67,14 @@ export async function findProblemReportsWithDetails() {
       {
         $lookup: {
           from: 'users',
-          localField: 'userId',
+          localField: 'problemReport.userId',
           foreignField: '_id',
           as: 'user',
-          pipeline: [{ $project: { email: 1, name: 1 } }],
+          pipeline: [{ $project: { _id: 0, email: 1, name: 1 } }],
         },
       },
-      { $unwind: { path: '$document', preserveNullAndEmptyArrays: true } },
-      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      { $unwind: '$document' },
+      { $unwind: '$user' },
     ])
     .toArray();
 }

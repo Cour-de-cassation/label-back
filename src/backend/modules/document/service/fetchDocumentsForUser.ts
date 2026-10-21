@@ -1,7 +1,7 @@
-import { assignationType, documentModule, documentType, userType } from '@src/core';
+import { assignationType, documentModule, documentType } from '@src/core';
 import { logger } from '../../../utils';
 import { assignationService } from '../../assignation';
-import { findAssignationsWithDocument } from '../../../connectors/db/assignations';
+import { findAssignedDocumentsOfUser } from '../../../connectors/db/assignations';
 import { findRandomDocumentToTreat, updateDocument } from '../../../connectors/db/documents';
 import { ObjectId } from 'mongodb';
 
@@ -17,7 +17,7 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
     }> = [];
 
     // Documents already assignated to the user are fetched
-    const alreadyAssignatedDocuments = await fetchAlreadyAssignatedDocuments(new ObjectId(userId));
+    const alreadyAssignatedDocuments = await findAssignedDocumentsOfUser(new ObjectId(userId));
     for (let i = 0; i < alreadyAssignatedDocuments.length && i < documentsMaxCount; i++) {
       checkCallAttempts(userId.toHexString());
       const alreadyAssignatedDocument = alreadyAssignatedDocuments[i];
@@ -112,19 +112,5 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
       return assignDocumentByPriority(priority, documentIdsToExclude);
     }
     return updatedDocument;
-  }
-
-  async function fetchAlreadyAssignatedDocuments(userId: userType['_id']): Promise<
-    Array<{
-      document: documentType;
-      assignationId: assignationType['_id'];
-    }>
-  > {
-    const assignations = await findAssignationsWithDocument({ userId }, { status: { $in: ['pending', 'saved'] } });
-    return assignations
-      .map(({ _id, document }) => ({ document, assignationId: _id }))
-      .sort(({ document: document1 }, { document: document2 }) =>
-        document1.status === 'saved' ? -1 : document2.status === 'saved' ? 1 : 0,
-      );
   }
 }

@@ -44,8 +44,8 @@ export async function countDocuments(filter: Filter<documentType> = {}) {
   return documents().countDocuments(filter);
 }
 
-export async function findDistinctDocumentValues<T>(field: string): Promise<T[]> {
-  return documents().distinct(field, {}) as Promise<T[]>;
+export async function findDistinctDocumentValues<T>(field: string, filter: Filter<documentType> = {}): Promise<T[]> {
+  return documents().distinct(field, filter) as Promise<T[]>;
 }
 
 /**
@@ -114,17 +114,267 @@ type documentWithAssignationsType<K extends keyof documentType> = Pick<documentT
   assignedUsers: Pick<userType, '_id' | 'name'>[];
 };
 
-/** Documents with their assignations and the assigned users */
-export async function findDocumentsWithAssignations<K extends keyof documentType = keyof documentType>(
-  filter: Filter<documentType>,
-  fields?: K[],
-) {
+/** Names of the users of the given assignations (as `$$assignation` items), skipping missing users */
+function assignedUserNames(assignationsExpression: unknown, userIdPath = '$$assignation.userId') {
+  return {
+    $filter: {
+      input: {
+        $map: {
+          input: assignationsExpression,
+          as: 'assignation',
+          in: {
+            $getField: {
+              field: 'name',
+              input: {
+                $first: {
+                  $filter: { input: '$assignedUsers', as: 'user', cond: { $eq: ['$$user._id', userIdPath] } },
+                },
+              },
+            },
+          },
+        },
+      },
+      as: 'name',
+      cond: { $eq: [{ $type: '$$name' }, 'string'] },
+    },
+  };
+}
+
+/** Treatments matching the assignations of the document sorted by order, as `{ treatment, userId }` */
+const addHumanTreatments: Document = {
+  $set: {
+    humanTreatments: {
+      $sortArray: {
+        input: {
+          $filter: {
+            input: {
+              $map: {
+                input: '$assignations',
+                as: 'assignation',
+                in: {
+                  userId: '$$assignation.userId',
+                  treatment: {
+                    $first: {
+                      $filter: {
+                        input: '$treatments',
+                        as: 'treatment',
+                        cond: { $eq: ['$$treatment._id', '$$assignation.treatmentId'] },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            as: 'humanTreatment',
+            cond: { $eq: [{ $type: '$$humanTreatment.treatment' }, 'object'] },
+          },
+        },
+        sortBy: { 'treatment.order': 1 },
+      },
+    },
+  },
+};
+
+/** Human treatments infos, or nothing when the document has no assignation */
+function ifAssigned(expression: unknown) {
+  return { $cond: [{ $gt: [{ $size: '$assignations' }, 0] }, expression, '$$REMOVE'] };
+}
+
+const humanTreatmentsSummary = {
+  totalTreatmentDuration: ifAssigned({ $sum: '$humanTreatments.treatment.duration' }),
+  lastTreatmentDate: ifAssigned({ $last: '$humanTreatments.treatment.lastUpdateDate' }),
+  userNames: assignedUserNames('$humanTreatments'),
+};
+
+const lookupTreatmentsSummaries: Document = {
+  $lookup: {
+    from: 'treatments',
+    localField: '_id',
+    foreignField: 'documentId',
+    as: 'treatments',
+    pipeline: [
+      {
+        $project: {
+          order: 1,
+          duration: 1,
+          lastUpdateDate: 1,
+          subAnnotationsNonSensitiveCount: 1,
+          subAnnotationsSensitiveCount: 1,
+          surAnnotationsCount: 1,
+        },
+      },
+    ],
+  },
+};
+
+/** Untreated documents with the names of the assigned users (none for free documents) */
+export async function findUntreatedDocuments() {
   return documents()
-    .aggregate<documentWithAssignationsType<K>>([
-      { $match: filter },
-      ...projectFields(fields),
+    .aggregate<{
+      document: Pick<
+        documentType,
+        '_id' | 'creationDate' | 'documentNumber' | 'publicationCategory' | 'source' | 'route' | 'status'
+      > & {
+        decisionDate?: documentType['decisionMetadata']['date'];
+        occultationBlock?: documentType['decisionMetadata']['occultationBlock'];
+        jurisdiction: documentType['decisionMetadata']['jurisdiction'];
+      };
+      userNames: string[];
+    }>([
+      { $match: { status: { $in: ['free', 'pending', 'saved', 'locked'] } } },
       lookupAssignations,
       lookupAssignedUsers,
+      {
+        $project: {
+          _id: 0,
+          document: {
+            _id: '$_id',
+            creationDate: '$creationDate',
+            decisionDate: '$decisionMetadata.date',
+            documentNumber: '$documentNumber',
+            occultationBlock: '$decisionMetadata.occultationBlock',
+            jurisdiction: '$decisionMetadata.jurisdiction',
+            publicationCategory: '$publicationCategory',
+            source: '$source',
+            route: '$route',
+            status: '$status',
+          },
+          // Assignations of free documents are not relevant
+          userNames: { $cond: [{ $eq: ['$status', 'free'] }, [], assignedUserNames('$assignations')] },
+        },
+      },
+    ])
+    .toArray();
+}
+
+/** Documents to be confirmed with the summary of their human treatments */
+export async function findToBeConfirmedDocuments() {
+  return documents()
+    .aggregate<{
+      document: Pick<documentType, '_id' | 'documentNumber' | 'publicationCategory' | 'route' | 'reviewStatus'> & {
+        jurisdiction: documentType['decisionMetadata']['jurisdiction'];
+        occultationBlock?: documentType['decisionMetadata']['occultationBlock'];
+      };
+      totalTreatmentDuration?: number;
+      lastTreatmentDate?: number;
+      userNames: string[];
+    }>([
+      { $match: { status: 'toBeConfirmed' } },
+      lookupAssignations,
+      lookupAssignedUsers,
+      lookupTreatmentsSummaries,
+      addHumanTreatments,
+      {
+        $project: {
+          _id: 0,
+          document: {
+            _id: '$_id',
+            documentNumber: '$documentNumber',
+            jurisdiction: '$decisionMetadata.jurisdiction',
+            occultationBlock: '$decisionMetadata.occultationBlock',
+            publicationCategory: '$publicationCategory',
+            route: '$route',
+            reviewStatus: '$reviewStatus',
+          },
+          ...humanTreatmentsSummary,
+        },
+      },
+    ])
+    .toArray();
+}
+
+/**
+ * Treated documents with the summary of their human treatments.
+ * The annotations counts come from the human treatment when there is only one; when there are several,
+ * `humanTreatmentIds` (sorted by order) is returned instead so the counts can be aggregated with the settings.
+ */
+export async function findTreatedDocuments() {
+  return documents()
+    .aggregate<{
+      document: Pick<
+        documentType,
+        '_id' | 'creationDate' | 'documentNumber' | 'publicationCategory' | 'reviewStatus' | 'route' | 'source'
+      > & {
+        jurisdiction: documentType['decisionMetadata']['jurisdiction'];
+        occultationBlock?: documentType['decisionMetadata']['occultationBlock'];
+      };
+      totalTreatmentDuration?: number;
+      lastTreatmentDate?: number;
+      statistic: {
+        subAnnotationsNonSensitiveCount?: number;
+        surAnnotationsCount?: number;
+        subAnnotationsSensitiveCount?: number;
+      };
+      userNames: string[];
+      humanTreatmentsCount?: number;
+      humanTreatmentIds?: ObjectId[];
+    }>([
+      { $match: { status: 'done' } },
+      lookupAssignations,
+      lookupAssignedUsers,
+      lookupTreatmentsSummaries,
+      addHumanTreatments,
+      {
+        $set: {
+          singleHumanTreatment: {
+            $cond: [{ $eq: [{ $size: '$humanTreatments' }, 1] }, { $first: '$humanTreatments.treatment' }, null],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          document: {
+            _id: '$_id',
+            creationDate: '$creationDate',
+            documentNumber: '$documentNumber',
+            jurisdiction: '$decisionMetadata.jurisdiction',
+            occultationBlock: '$decisionMetadata.occultationBlock',
+            publicationCategory: '$publicationCategory',
+            reviewStatus: '$reviewStatus',
+            route: '$route',
+            source: '$source',
+          },
+          ...humanTreatmentsSummary,
+          statistic: {
+            subAnnotationsNonSensitiveCount: '$singleHumanTreatment.subAnnotationsNonSensitiveCount',
+            surAnnotationsCount: '$singleHumanTreatment.surAnnotationsCount',
+            subAnnotationsSensitiveCount: '$singleHumanTreatment.subAnnotationsSensitiveCount',
+          },
+          humanTreatmentsCount: ifAssigned({ $size: '$humanTreatments' }),
+          humanTreatmentIds: {
+            $cond: [{ $gt: [{ $size: '$humanTreatments' }, 1] }, '$humanTreatments.treatment._id', '$$REMOVE'],
+          },
+        },
+      },
+    ])
+    .toArray();
+}
+
+/** Publishable documents (filtered by the caller) flattened for the publication list */
+export async function findPublishableDocuments(filter: Filter<documentType>) {
+  return documents()
+    .aggregate<
+      Pick<documentType, '_id' | 'creationDate' | 'documentNumber' | 'publicationCategory' | 'route' | 'status'> & {
+        appealNumber?: documentType['decisionMetadata']['appealNumber'];
+        chamberName?: documentType['decisionMetadata']['chamberName'];
+        jurisdiction: documentType['decisionMetadata']['jurisdiction'];
+      }
+    >([
+      { $match: filter },
+      {
+        $project: {
+          _id: 1,
+          appealNumber: '$decisionMetadata.appealNumber',
+          chamberName: '$decisionMetadata.chamberName',
+          jurisdiction: '$decisionMetadata.jurisdiction',
+          creationDate: 1,
+          documentNumber: 1,
+          publicationCategory: 1,
+          route: 1,
+          status: 1,
+        },
+      },
     ])
     .toArray();
 }
