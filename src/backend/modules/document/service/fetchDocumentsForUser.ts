@@ -1,9 +1,8 @@
 import { assignationType, documentModule, documentType, userType } from '@src/core';
-import { indexer } from '@src/core';
 import { logger } from '../../../utils';
 import { assignationService } from '../../assignation';
-import { treatmentService } from '../../treatment';
-import { findDocuments, findRandomDocument, updateDocument } from '../../../connectors/db/documents';
+import { findAssignationsWithDocument } from '../../../connectors/db/assignations';
+import { findRandomDocumentToTreat, updateDocument } from '../../../connectors/db/documents';
 import { ObjectId } from 'mongodb';
 
 export { buildFetchDocumentsForUser };
@@ -16,9 +15,6 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
       document: documentType;
       assignationId: assignationType['_id'];
     }> = [];
-
-    // We get all documents that can be assigned
-    const documentIdsWithAnnotations = await treatmentService.fetchTreatedDocumentIds();
 
     // Documents already assignated to the user are fetched
     const alreadyAssignatedDocuments = await fetchAlreadyAssignatedDocuments(new ObjectId(userId));
@@ -36,7 +32,7 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
     // We fill the pool of assignated documents with new ones
     for (let i = documents.length; i < documentsMaxCount; i++) {
       try {
-        const assignatedDocument = await fetchDocumentForUser(new ObjectId(userId), documentIdsWithAnnotations);
+        const assignatedDocument = await fetchDocumentForUser(new ObjectId(userId));
         documents.push(assignatedDocument);
       } catch (error) {
         logger.error({
@@ -50,18 +46,15 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
     return documents;
   }
 
-  async function fetchDocumentForUser(
-    userId: ObjectId,
-    documentIdsToSearchIn: documentType['_id'][],
-  ): Promise<{
+  async function fetchDocumentForUser(userId: ObjectId): Promise<{
     document: documentType;
     assignationId: assignationType['_id'];
   }> {
     checkCallAttempts(userId.toHexString());
 
-    return assignNewDocument(documentIdsToSearchIn);
+    return assignNewDocument();
 
-    async function assignNewDocument(documentIdsToSearchIn: documentType['_id'][]): Promise<{
+    async function assignNewDocument(): Promise<{
       document: documentType;
       assignationId: assignationType['_id'];
     }> {
@@ -69,7 +62,7 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
 
       // Get document by priority
       for (let priority = 4; priority >= 0; priority--) {
-        document = await assignDocumentByPriority(priority, documentIdsToSearchIn);
+        document = await assignDocumentByPriority(priority);
         if (document) {
           break;
         }
@@ -89,17 +82,21 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
 
   async function assignDocumentByPriority(
     priority: documentType['priority'],
-    documentIdsToSearchIn: documentType['_id'][],
+    documentIdsToExclude: documentType['_id'][] = [],
   ): Promise<documentType | undefined> {
-    const document = await findRandomDocument({ priority, status: 'free', _id: { $in: documentIdsToSearchIn } });
+    // Only documents with at least one treatment (i.e. already annotated by the NLP) can be assigned
+    const document = await findRandomDocumentToTreat({
+      priority,
+      status: 'free',
+      _id: { $nin: documentIdsToExclude },
+    });
 
     if (!document) {
       return undefined;
     }
     if ((await assignationService.fetchAssignationsOfDocumentId(document?._id)).length != 0) {
-      // If the document is assignated, remove the document from the list
-      documentIdsToSearchIn = documentIdsToSearchIn.filter((documentId) => !documentId.equals(document?._id));
-      return assignDocumentByPriority(priority, documentIdsToSearchIn);
+      // If the document is assignated, exclude it from the search
+      return assignDocumentByPriority(priority, [...documentIdsToExclude, document._id]);
     }
 
     const nextStatus = documentModule.lib.getNextStatus({
@@ -112,7 +109,7 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
       { status: nextStatus, updateDate: new Date().getTime() },
     );
     if (updatedDocument?.status !== nextStatus) {
-      return assignDocumentByPriority(priority, documentIdsToSearchIn);
+      return assignDocumentByPriority(priority, documentIdsToExclude);
     }
     return updatedDocument;
   }
@@ -123,18 +120,9 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
       assignationId: assignationType['_id'];
     }>
   > {
-    const documentIdsAssignated = await assignationService.fetchDocumentIdsAssignatedToUserId(userId);
-
-    const assignatedDocuments = await findDocuments({
-      _id: { $in: documentIdsAssignated.map(({ documentId }) => documentId) },
-    });
-    const documentsById = indexer.indexBy(assignatedDocuments, ({ _id }) => _id.toHexString());
-    return documentIdsAssignated
-      .map(({ documentId, assignationId }) => ({
-        document: documentsById[documentId.toHexString()],
-        assignationId,
-      }))
-      .filter(({ document }) => document.status === 'pending' || document.status === 'saved')
+    const assignations = await findAssignationsWithDocument({ userId }, { status: { $in: ['pending', 'saved'] } });
+    return assignations
+      .map(({ _id, document }) => ({ document, assignationId: _id }))
       .sort(({ document: document1 }, { document: document2 }) =>
         document1.status === 'saved' ? -1 : document2.status === 'saved' ? 1 : 0,
       );

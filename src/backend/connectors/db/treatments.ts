@@ -29,10 +29,6 @@ export async function countTreatments(filter: Filter<treatmentType> = {}) {
   return treatments().countDocuments(filter);
 }
 
-export async function findTreatedDocumentIds() {
-  return treatments().distinct('documentId', {});
-}
-
 export async function findTreatmentsExtremumLastUpdateDate(sources: treatmentType['source'][]) {
   const [min] = await treatments()
     .find({ source: { $in: sources } })

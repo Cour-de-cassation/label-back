@@ -35,7 +35,6 @@ const { checkCallAttempts } = buildCallAttemptsRegulator(
 const documentService = {
   assertDocumentIsPublishable,
   assertDocumentStatus,
-  countDocumentsWithoutAnnotations,
   countDoneDocuments: () => countDocumentsByStatus('done'),
   countFreeDocuments: () => countDocumentsByStatus('free'),
   countLockedDocuments: () => countDocumentsByStatus('locked'),
@@ -55,9 +54,7 @@ const documentService = {
   fetchDocumentBySourceAndDocumentNumber,
   fetchDocumentsForUser: buildFetchDocumentsForUser(checkCallAttempts),
   fetchDocumentsReadyToExport,
-  fetchDoneDocuments: () => findDocuments({ status: 'done' }),
   fetchFreeDocumentsIds,
-  fetchLockedDocuments: () => findDocuments({ status: 'locked' }),
   fetchPublishableDocuments,
   fetchPublishableDocumentsToExport,
   fetchToBeConfirmedDocuments,
@@ -114,11 +111,6 @@ async function assertDocumentStatus({
 
 async function countDocumentsByStatus(status: documentType['status']) {
   return countDocuments({ status });
-}
-
-async function countDocumentsWithoutAnnotations() {
-  const treatedDocumentIds = await treatmentService.fetchTreatedDocumentIds();
-  return countDocuments({ _id: { $nin: treatedDocumentIds } });
 }
 
 async function deleteDocument(id: documentType['_id']) {

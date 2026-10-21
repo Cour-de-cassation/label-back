@@ -1,5 +1,5 @@
-import { Filter, ObjectId } from 'mongodb';
-import { documentType } from '@src/core';
+import { Document, Filter, ObjectId } from 'mongodb';
+import { assignationType, documentType, treatmentType, userType } from '@src/core';
 import { mongo } from '../../utils';
 import { buildProjection } from './projection';
 
@@ -49,18 +49,110 @@ export async function findDistinctDocumentValues<T>(field: string): Promise<T[]>
 }
 
 /**
- * Pick a random document among the 50 most recent and the 50 oldest (by decision date)
- * matching the filter, to treat a mix of recent and old documents.
+ * Pick a random document having at least one treatment among the 50 most recent and the 50 oldest
+ * (by decision date) matching the filter, to treat a mix of recent and old documents.
  */
-export async function findRandomDocument(filter: Filter<documentType>) {
-  const mostRecentDocuments = await documents().find(filter).sort({ 'decisionMetadata.date': -1 }).limit(50).toArray();
-  const leastRecentDocuments = await documents().find(filter).sort({ 'decisionMetadata.date': 1 }).limit(50).toArray();
-  const combinedDocuments = [...mostRecentDocuments, ...leastRecentDocuments];
+export async function findRandomDocumentToTreat(filter: Filter<documentType>) {
+  const findTreatedDocuments = (direction: 1 | -1) =>
+    documents()
+      .aggregate<documentType>([
+        { $match: filter },
+        { $sort: { 'decisionMetadata.date': direction } },
+        {
+          $lookup: {
+            from: 'treatments',
+            localField: '_id',
+            foreignField: 'documentId',
+            as: 'treatments',
+            pipeline: [{ $limit: 1 }, { $project: { _id: 1 } }],
+          },
+        },
+        { $match: { 'treatments.0': { $exists: true } } },
+        { $limit: 50 },
+        { $project: { treatments: 0 } },
+      ])
+      .toArray();
+
+  const combinedDocuments = [...(await findTreatedDocuments(-1)), ...(await findTreatedDocuments(1))];
 
   if (combinedDocuments.length === 0) {
     return undefined;
   }
   return combinedDocuments[Math.floor(Math.random() * combinedDocuments.length)];
+}
+
+const lookupAssignations: Document = {
+  $lookup: { from: 'assignations', localField: '_id', foreignField: 'documentId', as: 'assignations' },
+};
+
+const lookupAssignedUsers: Document = {
+  $lookup: {
+    from: 'users',
+    localField: 'assignations.userId',
+    foreignField: '_id',
+    as: 'assignedUsers',
+    pipeline: [{ $project: { name: 1 } }],
+  },
+};
+
+const lookupTreatments: Document = {
+  $lookup: {
+    from: 'treatments',
+    localField: '_id',
+    foreignField: 'documentId',
+    as: 'treatments',
+    pipeline: [{ $sort: { order: 1 } }],
+  },
+};
+
+function projectFields<K extends keyof documentType>(fields?: K[]): Document[] {
+  return fields ? [{ $project: buildProjection<documentType>(fields) }] : [];
+}
+
+type documentWithAssignationsType<K extends keyof documentType> = Pick<documentType, K | '_id'> & {
+  assignations: assignationType[];
+  assignedUsers: Pick<userType, '_id' | 'name'>[];
+};
+
+/** Documents with their assignations and the assigned users */
+export async function findDocumentsWithAssignations<K extends keyof documentType = keyof documentType>(
+  filter: Filter<documentType>,
+  fields?: K[],
+) {
+  return documents()
+    .aggregate<documentWithAssignationsType<K>>([
+      { $match: filter },
+      ...projectFields(fields),
+      lookupAssignations,
+      lookupAssignedUsers,
+    ])
+    .toArray();
+}
+
+/**
+ * Documents with their assignations, assigned users and treatments
+ * sorted by order. Throws if a document has no treatment.
+ */
+export async function findDocumentsWithTreatments<K extends keyof documentType = keyof documentType>(
+  filter: Filter<documentType>,
+  fields?: K[],
+) {
+  const documentsWithTreatments = await documents()
+    .aggregate<documentWithAssignationsType<K> & { treatments: treatmentType[] }>([
+      { $match: filter },
+      ...projectFields(fields),
+      lookupAssignations,
+      lookupAssignedUsers,
+      lookupTreatments,
+    ])
+    .toArray();
+
+  documentsWithTreatments.forEach(({ _id, treatments }) => {
+    if (treatments.length === 0) {
+      throw new Error(`The document id ${_id.toHexString()} has no matching treatments`);
+    }
+  });
+  return documentsWithTreatments;
 }
 
 /** Returns the updated document, or undefined if no document matched the filter */

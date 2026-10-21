@@ -1,14 +1,12 @@
 import { sumBy } from 'lodash';
-import { assignationType, treatmentModule } from '@src/core';
-import { assignationService } from '../../assignation';
-import { treatmentService } from '../../treatment';
-import { userService } from '../../user';
-import { findDocumentsProjection } from '../../../connectors/db/documents';
+import { treatmentModule } from '@src/core';
+import { findDocumentsWithTreatments } from '../../../connectors/db/documents';
+import { getAssignedUserName } from './getAssignedUserName';
 
 export { fetchToBeConfirmedDocuments };
 
 async function fetchToBeConfirmedDocuments() {
-  const toBeConfirmedDocuments = await findDocumentsProjection({ status: { $in: ['toBeConfirmed'] } }, [
+  const toBeConfirmedDocuments = await findDocumentsWithTreatments({ status: { $in: ['toBeConfirmed'] } }, [
     '_id',
     'decisionMetadata',
     'documentNumber',
@@ -17,25 +15,13 @@ async function fetchToBeConfirmedDocuments() {
     'route',
   ]);
 
-  const documentIds = toBeConfirmedDocuments.map(({ _id }) => _id);
-  const assignationsByDocumentId: Record<string, assignationType[] | undefined> =
-    await assignationService.fetchAssignationsByDocumentIds(documentIds, {
-      assertEveryDocumentIsAssigned: false,
-    });
-
-  const usersByIds = await userService.fetchUsers();
-  const treatmentsByDocumentId = await treatmentService.fetchTreatmentsByDocumentIds(documentIds);
-
-  return toBeConfirmedDocuments.map((toBeConfirmedDocument) => {
-    const documentIdString = toBeConfirmedDocument._id.toHexString();
-    const assignations = assignationsByDocumentId[documentIdString];
+  return toBeConfirmedDocuments.map(({ assignations, assignedUsers, treatments, ...toBeConfirmedDocument }) => {
     let totalTreatmentDuration: number | undefined, lastTreatmentDate: number | undefined;
     let userNames: string[] = [];
-    if (assignations !== undefined) {
-      const treatments = treatmentsByDocumentId[documentIdString];
+    if (assignations.length > 0) {
       const humanTreatments = treatmentModule.lib.extractHumanTreatments(treatments, assignations);
 
-      userNames = humanTreatments.map(({ userId }) => usersByIds[userId.toHexString()].name);
+      userNames = humanTreatments.map(({ userId }) => getAssignedUserName(assignedUsers, userId));
       totalTreatmentDuration = sumBy(humanTreatments, ({ treatment }) => treatment.duration);
 
       lastTreatmentDate = humanTreatments[humanTreatments.length - 1].treatment.lastUpdateDate;

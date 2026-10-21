@@ -1,9 +1,8 @@
 import { ObjectId } from 'mongodb';
-import { annotationsDiffType, documentType, indexer, settingsType, treatmentModule, treatmentType } from '@src/core';
+import { annotationsDiffType, documentType, settingsType, treatmentModule, treatmentType } from '@src/core';
 import {
   countTreatments,
   deleteTreatments,
-  findTreatedDocumentIds,
   findTreatmentById,
   findTreatments,
   insertTreatment,
@@ -57,28 +56,8 @@ const treatmentService = {
     return treatmentModule.lib.computeAnnotations(treatments);
   },
 
-  async fetchTreatedDocumentIds() {
-    return findTreatedDocumentIds();
-  },
-
   async fetchTreatmentsByDocumentId(documentId: ObjectId) {
     return findTreatments({ documentId });
-  },
-
-  async fetchTreatmentsByDocumentIds(documentIds: ObjectId[]) {
-    const treatments = await findTreatments({ documentId: { $in: documentIds } });
-    const sortedTreatments = treatments.sort((treatmentA, treatmentB) => treatmentA.order - treatmentB.order);
-    const treatmentsByDocumentIds = indexer.indexManyBy(sortedTreatments, (treatment) =>
-      treatment.documentId.toHexString(),
-    );
-
-    indexer.assertEveryIdIsDefined(
-      documentIds.map((documentId) => documentId.toHexString()),
-      treatmentsByDocumentIds,
-      (_id) => `The document id ${_id} has no matching treatments`,
-    );
-
-    return treatmentsByDocumentIds;
   },
 
   async resetTreatmentLastUpdateDate(treatmentId: treatmentType['_id']) {

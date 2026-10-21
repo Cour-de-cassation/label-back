@@ -1,15 +1,12 @@
 import { flatten } from 'lodash';
 import {
-  assignationType,
   ressourceFilterModule,
   ressourceFilterType,
   settingsType,
   statisticsCreator,
   treatmentModule,
 } from '@src/core';
-import { assignationService } from '../../assignation';
-import { documentService } from '../../document';
-import { treatmentService } from '../../treatment';
+import { findDocumentsWithTreatments } from '../../../connectors/db/documents';
 import { findStatistics } from '../../../connectors/db/statistics';
 import { buildRessourceFilterRequest } from '../../ressourceFilter';
 
@@ -21,28 +18,15 @@ async function fetchFilteredStatistics(filter: ressourceFilterType, settings: se
   return [...statistics, ...doneDocumentStatistics];
 
   async function computeStatisticsFromDoneDocuments() {
-    const doneDocuments = await documentService.fetchDoneDocuments();
-    const lockedDocuments = await documentService.fetchLockedDocuments();
-    const allDocuments = [...doneDocuments, ...lockedDocuments];
-    const documentIds = allDocuments.map(({ _id }) => _id);
+    const documentsWithTreatments = await findDocumentsWithTreatments({ status: { $in: ['done', 'locked'] } });
 
-    const assignationsByDocumentId: Record<string, assignationType[] | undefined> =
-      await assignationService.fetchAssignationsByDocumentIds(documentIds, {
-        assertEveryDocumentIsAssigned: false,
-      });
-    const treatmentsByDocumentId = await treatmentService.fetchTreatmentsByDocumentIds(documentIds);
-
-    const treatedDocuments = allDocuments.map((document) => {
-      const assignations = assignationsByDocumentId[document._id.toHexString()];
-      const treatments = treatmentsByDocumentId[document._id.toHexString()];
-      const humanTreatments = assignations ? treatmentModule.lib.extractHumanTreatments(treatments, assignations) : [];
-
-      return {
+    const treatedDocuments = documentsWithTreatments.map(
+      ({ assignations, assignedUsers: _, treatments, ...document }) => ({
         document,
         treatments,
-        humanTreatments,
-      };
-    });
+        humanTreatments: treatmentModule.lib.extractHumanTreatments(treatments, assignations),
+      }),
+    );
 
     const filteredTreatedDocuments = ressourceFilterModule.lib.filterTreatedDocuments({
       ressourceFilter: filter,

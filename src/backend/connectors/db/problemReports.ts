@@ -1,5 +1,5 @@
 import { Filter, ObjectId } from 'mongodb';
-import { problemReportType } from '@src/core';
+import { documentType, problemReportType, userType } from '@src/core';
 import { mongo } from '../../utils';
 
 const problemReports = () => mongo.getDb().collection<problemReportType>('problemReports');
@@ -29,4 +29,52 @@ export async function deleteProblemReportById(_id: ObjectId) {
 
 export async function deleteProblemReports(filter: Filter<problemReportType>) {
   await problemReports().deleteMany(filter);
+}
+
+/** Problem reports with the reported document and the reporting user (undefined if they do not exist anymore) */
+export async function findProblemReportsWithDetails() {
+  return problemReports()
+    .aggregate<
+      problemReportType & {
+        document?: Pick<
+          documentType,
+          '_id' | 'documentNumber' | 'source' | 'publicationCategory' | 'route' | 'status'
+        > & { decisionMetadata: Pick<documentType['decisionMetadata'], 'jurisdiction' | 'appealNumber'> };
+        user?: Pick<userType, '_id' | 'email' | 'name'>;
+      }
+    >([
+      {
+        $lookup: {
+          from: 'documents',
+          localField: 'documentId',
+          foreignField: '_id',
+          as: 'document',
+          pipeline: [
+            {
+              $project: {
+                documentNumber: 1,
+                source: 1,
+                'decisionMetadata.jurisdiction': 1,
+                'decisionMetadata.appealNumber': 1,
+                publicationCategory: 1,
+                route: 1,
+                status: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+          pipeline: [{ $project: { email: 1, name: 1 } }],
+        },
+      },
+      { $unwind: { path: '$document', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+    ])
+    .toArray();
 }

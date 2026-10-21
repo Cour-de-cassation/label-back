@@ -93,38 +93,8 @@ const assignationService = {
     return assignation?._id;
   },
 
-  async fetchAssignationsByDocumentIds(
-    documentIdsToSearchIn: ObjectId[],
-    options: { assertEveryDocumentIsAssigned: boolean },
-  ) {
-    const assignations = await findAssignations({ documentId: { $in: documentIdsToSearchIn } });
-    const assignationsByDocumentIds = indexer.indexManyBy(assignations, (assignation) =>
-      assignation.documentId.toHexString(),
-    );
-
-    if (options?.assertEveryDocumentIsAssigned) {
-      indexer.assertEveryIdIsDefined(
-        documentIdsToSearchIn.map((documentId) => documentId.toHexString()),
-        assignationsByDocumentIds,
-        (_id) => `The document ${_id} has no matching assignations`,
-      );
-    }
-    return assignationsByDocumentIds;
-  },
-
   async fetchAssignationsOfDocumentId(documentId: ObjectId): Promise<assignationType[]> {
     return findAssignations({ documentId });
-  },
-
-  async fetchDocumentIdsAssignatedToUserId(
-    userId: userType['_id'],
-  ): Promise<Array<{ documentId: documentType['_id']; assignationId: assignationType['_id'] }>> {
-    const assignations = await findAssignations({ userId });
-
-    return assignations.map((assignation) => ({
-      documentId: assignation.documentId,
-      assignationId: assignation._id,
-    }));
   },
 
   async findOrCreateByDocumentIdAndUserId({

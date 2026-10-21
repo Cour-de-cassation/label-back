@@ -1,5 +1,5 @@
 import { Filter, ObjectId } from 'mongodb';
-import { assignationType } from '@src/core';
+import { assignationType, documentType } from '@src/core';
 import { mongo } from '../../utils';
 import { buildProjection } from './projection';
 
@@ -42,4 +42,26 @@ export async function deleteAssignationById(_id: ObjectId) {
 
 export async function deleteAssignations(filter: Filter<assignationType>) {
   await assignations().deleteMany(filter);
+}
+
+/** Assignations matching the filter whose document exists and matches the document filter, with this document */
+export async function findAssignationsWithDocument(
+  filter: Filter<assignationType>,
+  documentFilter: Filter<documentType> = {},
+) {
+  return assignations()
+    .aggregate<assignationType & { document: documentType }>([
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'documents',
+          localField: 'documentId',
+          foreignField: '_id',
+          as: 'document',
+          pipeline: [{ $match: documentFilter }],
+        },
+      },
+      { $unwind: '$document' },
+    ])
+    .toArray();
 }

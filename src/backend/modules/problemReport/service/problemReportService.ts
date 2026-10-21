@@ -5,7 +5,7 @@ import {
   countProblemReports,
   deleteProblemReportById,
   deleteProblemReports,
-  findProblemReports,
+  findProblemReportsWithDetails,
   insertProblemReport,
   updateProblemReportById,
 } from '../../../connectors/db/problemReports';
@@ -74,21 +74,23 @@ const problemReportService = {
   },
 
   async fetchProblemReportsWithDetails() {
-    const problemReports = await findProblemReports();
+    const problemReportsWithDetails = await findProblemReportsWithDetails();
 
-    const documentsById = await documentService.fetchAllDocumentsByIds(
-      problemReports.map(({ documentId }) => documentId),
-    );
+    return problemReportsWithDetails.map(({ document, user, ...problemReport }) => {
+      if (!document) {
+        throw new Error(`The document id ${problemReport.documentId.toHexString()} has no matching document`);
+      }
+      if (!user) {
+        throw new Error(`Couldn't find the user with id: ${problemReport.userId.toHexString()}`);
+      }
 
-    const usersByIds = await userService.fetchUsersByIds(problemReports.map(({ userId }) => userId));
-
-    return problemReports.map((problemReport) => {
-      const userIdString = problemReport.userId.toHexString();
-      const { email, name } = usersByIds[userIdString];
-      let documentToReturn = undefined;
-      try {
-        const document = documentsById[problemReport.documentId.toHexString()];
-        documentToReturn = {
+      return {
+        problemReport,
+        user: {
+          email: user.email,
+          name: user.name,
+        },
+        document: {
           _id: document._id,
           documentNumber: document.documentNumber,
           source: document.source,
@@ -97,18 +99,7 @@ const problemReportService = {
           publicationCategory: document.publicationCategory,
           route: document.route,
           status: document.status,
-        };
-      } catch (error) {
-        throw new Error(`Error while formating problemReports : ${error}`);
-      }
-
-      return {
-        problemReport,
-        user: {
-          email,
-          name,
         },
-        document: documentToReturn,
       };
     });
   },
