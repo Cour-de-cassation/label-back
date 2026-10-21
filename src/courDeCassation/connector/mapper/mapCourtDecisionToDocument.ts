@@ -9,6 +9,7 @@ import {
   DecisionTcom,
   DecisionTj,
   LabelTreatments,
+  Origin,
 } from 'dbsder-api-types';
 import { extractRouteForJurinet } from '@src/backend/lib/extractRoute/extractRouteForJurinet';
 import { extractRouteForCivilJurisdiction } from '@src/backend/lib/extractRoute/extractRouteForCivilJurisdiction';
@@ -20,19 +21,20 @@ async function mapCourtDecisionToDocument(
   importer: documentType['importer'],
 ): Promise<documentType> {
   switch (decision.sourceName) {
-    case 'jurinet':
+    case Origin.JURINET:
       return mapDecisionCc(decision, importer);
-    case 'jurica':
+    case Origin.JURICA:
       return mapDecisionCa(decision, importer);
-    case 'juricav2':
+    case Origin.JURICA_V2:
       return mapDecisionCav2(decision, importer);
-    case 'juritj':
+    case Origin.JURITJ:
       return mapDecisionTj(decision, importer);
-    case 'juritcom':
+    case Origin.JURITCOM:
       return mapDecisionTcom(decision, importer);
-    case 'portalis-cph':
+    case Origin.PORTALIS_CPH:
       return mapDecisionCph(decision, importer);
     default:
+      decision satisfies never
       throw new Error(`Source non gérée.`);
   }
 }
