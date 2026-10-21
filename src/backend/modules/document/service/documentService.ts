@@ -5,7 +5,6 @@ import { settingsLoader } from '../../../lib/settingsLoader';
 import {
   countDocuments,
   deleteDocumentById,
-  findDistinctDocumentValues,
   findDocument,
   findDocumentById,
   findDocuments,
@@ -44,11 +43,6 @@ const documentService = {
   deleteDocument,
   fetchAllDocumentsByIds,
   fetchAllExportableDocuments: () => findDocuments({ status: 'done' }),
-  fetchAllImporters: () => findDistinctDocumentValues<documentType['importer']>('importer'),
-  fetchAllJurisdictions,
-  fetchAllPublicationCategories,
-  fetchAllRoutes: () => findDistinctDocumentValues<documentType['route']>('route'),
-  fetchAllSources: () => findDistinctDocumentValues<documentType['source']>('source'),
   fetchAnonymizedDocumentText,
   fetchDocument: findDocumentById,
   fetchDocumentBySourceAndDocumentNumber,
@@ -129,16 +123,6 @@ async function fetchAllDocumentsByIds(documentIds: documentType['_id'][]) {
     (_id) => `The document id ${_id} has no matching document`,
   );
   return documentsByIds;
-}
-
-async function fetchAllJurisdictions() {
-  return findDistinctDocumentValues<documentType['decisionMetadata']['jurisdiction']>('decisionMetadata.jurisdiction', {
-    'decisionMetadata.jurisdiction': { $nin: [null, ''] },
-  });
-}
-
-async function fetchAllPublicationCategories() {
-  return findDistinctDocumentValues<string>('publicationCategory');
 }
 
 async function fetchAnonymizedDocumentText(documentId: documentType['_id']) {

@@ -44,10 +44,6 @@ export async function countDocuments(filter: Filter<documentType> = {}) {
   return documents().countDocuments(filter);
 }
 
-export async function findDistinctDocumentValues<T>(field: string, filter: Filter<documentType> = {}): Promise<T[]> {
-  return documents().distinct(field, filter) as Promise<T[]>;
-}
-
 /**
  * Pick a random document having at least one treatment among the 50 most recent and the 50 oldest
  * (by decision date) matching the filter, to treat a mix of recent and old documents.
@@ -419,4 +415,109 @@ export async function deleteDocumentById(_id: ObjectId) {
   if (deletedCount !== 1) {
     throw new Error(`No documents with _id ${_id.toHexString()}`);
   }
+}
+
+const groupFilterValues = (jurisdiction: unknown) => ({
+  $group: {
+    _id: null,
+    jurisdictions: { $addToSet: jurisdiction },
+    publicationCategories: { $addToSet: '$publicationCategory' },
+    routes: { $addToSet: '$route' },
+    importers: { $addToSet: '$importer' },
+    sources: { $addToSet: '$source' },
+  },
+});
+
+/** Sorted union of the values of the documents and of the recent statistics, without empty values */
+function mergeFilterValues(field: string, isArrayField = false) {
+  const flatten = (input: unknown) =>
+    isArrayField ? { $reduce: { input, initialValue: [], in: { $setUnion: ['$$value', '$$this'] } } } : input;
+  return {
+    $sortArray: {
+      input: {
+        $filter: {
+          input: {
+            $setUnion: [flatten(`$${field}`), flatten({ $ifNull: [{ $first: `$recentStatistics.${field}` }, []] })],
+          },
+          cond: { $not: [{ $in: ['$$this', [null, '']] }] },
+        },
+      },
+      sortBy: 1,
+    },
+  };
+}
+
+function extremumDate(operator: '$min' | '$max', field: 'minDate' | 'maxDate') {
+  return {
+    $ifNull: [
+      { [operator]: [{ $first: `$statisticsDates.${field}` }, { $first: `$humanTreatmentsDates.${field}` }] },
+      '$$REMOVE',
+    ],
+  };
+}
+
+/**
+ * Values available for the statistic filters:
+ * - lists: values of all the documents (lowercased jurisdictions) and of the statistics of the last 6 months
+ * - dates: treatment dates of the statistics (of the documents sources) and of the human treatments
+ * Undefined when there is no document.
+ */
+export async function findAvailableStatisticFilters() {
+  const sixMonthsAgo = Date.now() - 6 * 30 * 24 * 60 * 60 * 1000;
+
+  const [availableStatisticFilters] = await documents()
+    .aggregate<{
+      minDate?: number;
+      maxDate?: number;
+      jurisdictions: string[];
+      publicationCategories: string[];
+      routes: documentType['route'][];
+      importers: documentType['importer'][];
+      sources: documentType['source'][];
+    }>([
+      groupFilterValues({ $toLower: '$decisionMetadata.jurisdiction' }),
+      {
+        $lookup: {
+          from: 'statistics',
+          pipeline: [{ $match: { treatmentDate: { $gte: sixMonthsAgo } } }, groupFilterValues('$jurisdiction')],
+          as: 'recentStatistics',
+        },
+      },
+      {
+        $lookup: {
+          from: 'statistics',
+          let: { sources: '$sources' },
+          pipeline: [
+            { $match: { $expr: { $in: ['$source', '$$sources'] } } },
+            { $group: { _id: null, minDate: { $min: '$treatmentDate' }, maxDate: { $max: '$treatmentDate' } } },
+          ],
+          as: 'statisticsDates',
+        },
+      },
+      {
+        $lookup: {
+          from: 'treatments',
+          pipeline: [
+            { $match: { source: { $in: ['annotator', 'admin'] } } },
+            { $group: { _id: null, minDate: { $min: '$lastUpdateDate' }, maxDate: { $max: '$lastUpdateDate' } } },
+          ],
+          as: 'humanTreatmentsDates',
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          minDate: extremumDate('$min', 'minDate'),
+          maxDate: extremumDate('$max', 'maxDate'),
+          jurisdictions: mergeFilterValues('jurisdictions'),
+          publicationCategories: mergeFilterValues('publicationCategories', true),
+          routes: mergeFilterValues('routes'),
+          importers: mergeFilterValues('importers'),
+          sources: mergeFilterValues('sources'),
+        },
+      },
+    ])
+    .toArray();
+
+  return availableStatisticFilters;
 }

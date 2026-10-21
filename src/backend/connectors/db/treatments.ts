@@ -29,20 +29,6 @@ export async function countTreatments(filter: Filter<treatmentType> = {}) {
   return treatments().countDocuments(filter);
 }
 
-export async function findTreatmentsExtremumLastUpdateDate(sources: treatmentType['source'][]) {
-  const [min] = await treatments()
-    .find({ source: { $in: sources } })
-    .sort({ lastUpdateDate: 1 })
-    .limit(1)
-    .toArray();
-  const [max] = await treatments()
-    .find({ source: { $in: sources } })
-    .sort({ lastUpdateDate: -1 })
-    .limit(1)
-    .toArray();
-  return { minDate: min?.lastUpdateDate, maxDate: max?.lastUpdateDate };
-}
-
 export async function updateTreatmentById(_id: ObjectId, fields: Partial<treatmentType>) {
   await treatments().updateOne({ _id }, { $set: fields });
 }
