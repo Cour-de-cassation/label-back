@@ -1,7 +1,7 @@
 import { TechLog } from '@src/backend/utils/logger/loggerType';
 import { assignationService } from '../../../modules/assignation';
-import { buildDocumentRepository } from '../../../modules/document';
 import { logger } from '../../../utils';
+import { findDocumentsProjection } from '../../../connectors/db/documents';
 
 export { cleanFreeDocuments };
 
@@ -19,9 +19,7 @@ async function cleanFreeDocuments() {
     message: 'START',
   });
 
-  const documentRepository = buildDocumentRepository();
-
-  const freeDocuments = await documentRepository.findAllByStatusProjection(['free'], ['_id']);
+  const freeDocuments = await findDocumentsProjection({ status: 'free' }, ['_id']);
   logger.info({
     ...logerTech,
     message: `${freeDocuments.length} free documents found. ${JSON.stringify({ freeDocumentsCount: freeDocuments.length })}`,

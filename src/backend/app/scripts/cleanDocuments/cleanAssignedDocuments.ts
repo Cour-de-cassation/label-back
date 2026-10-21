@@ -1,8 +1,9 @@
-import { buildAssignationRepository } from '../../../modules/assignation';
-import { documentService, buildDocumentRepository } from '../../../modules/document';
+import { findAssignationsProjection } from '../../../connectors/db/assignations';
+import { documentService } from '../../../modules/document';
 import { logger } from '../../../utils';
 import { ObjectId } from 'mongodb';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
+import { findDocumentsProjection } from '../../../connectors/db/documents';
 
 export { cleanAssignedDocuments };
 
@@ -17,11 +18,9 @@ async function cleanAssignedDocuments() {
     message: 'START',
   };
   logger.info(loggerTech);
-  const documentRepository = buildDocumentRepository();
-  const assignedDocuments = await documentRepository.findAllByStatusProjection(['pending', 'saved'], ['_id', 'status']);
+  const assignedDocuments = await findDocumentsProjection({ status: { $in: ['pending', 'saved'] } }, ['_id', 'status']);
 
-  const assignationRepository = buildAssignationRepository();
-  const assignations = await assignationRepository.findAllProjection(['_id', 'documentId']);
+  const assignations = await findAssignationsProjection({}, ['_id', 'documentId']);
 
   logger.info({
     ...loggerTech,

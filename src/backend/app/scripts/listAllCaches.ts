@@ -1,6 +1,6 @@
 import { withMongo } from './withMongo';
 import { cacheType, timeOperator } from '@src/core';
-import { buildCacheRepository } from '../../modules/cache';
+import { findCaches } from '../../connectors/db/caches';
 import { logger } from '../../utils';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
 
@@ -20,9 +20,7 @@ async function listAllCaches() {
   };
   logger.info({ ...loggerTech, message: 'START' });
 
-  const cacheRepository = buildCacheRepository();
-
-  const caches = await cacheRepository.findAll();
+  const caches = await findCaches();
   logger.info({
     ...loggerTech,
     message: `${caches.length} caches found`,

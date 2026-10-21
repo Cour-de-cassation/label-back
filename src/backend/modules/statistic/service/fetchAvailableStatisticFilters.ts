@@ -1,15 +1,14 @@
 import { uniq } from 'lodash';
 import { statisticType } from '@src/core';
 import { documentService } from '../../document';
-import { buildStatisticRepository } from '../repository';
+import { findStatisticsProjection } from '../../../connectors/db/statistics';
 import { fetchExtremumDates } from './fetchExtremumDates';
 
 export { fetchAvailableStatisticFilters };
 
 async function fetchAvailableStatisticFilters() {
-  const statisticRepository = buildStatisticRepository();
-
-  const statisticFields = await statisticRepository.findRecentStatisticsProjection([
+  const sixMonthsAgo = Date.now() - 6 * 30 * 24 * 60 * 60 * 1000;
+  const statisticFields = await findStatisticsProjection({ treatmentDate: { $gte: sixMonthsAgo } }, [
     'publicationCategory',
     'route',
     'importer',

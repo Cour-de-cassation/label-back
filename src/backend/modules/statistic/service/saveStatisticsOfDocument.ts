@@ -1,7 +1,7 @@
 import { documentType, settingsType, statisticsCreator, timeOperator, treatmentModule } from '@src/core';
 import { assignationService } from '../../assignation';
 import { treatmentService } from '../../treatment';
-import { buildStatisticRepository } from '../repository';
+import { insertStatistic } from '../../../connectors/db/statistics';
 import { logger } from '../../../utils';
 import { userService } from '../../user';
 import { ObjectId } from 'mongodb';
@@ -9,8 +9,6 @@ import { ObjectId } from 'mongodb';
 export { saveStatisticsOfDocument };
 
 async function saveStatisticsOfDocument(document: documentType, settings: settingsType, comment: string) {
-  const statisticRepository = buildStatisticRepository();
-
   const treatments = await treatmentService.fetchTreatmentsByDocumentId(document._id);
 
   const assignations = await assignationService.fetchAssignationsOfDocumentId(document._id);
@@ -74,5 +72,5 @@ async function saveStatisticsOfDocument(document: documentType, settings: settin
     },
   });
 
-  await statisticRepository.insert(statistic);
+  await insertStatistic(statistic);
 }

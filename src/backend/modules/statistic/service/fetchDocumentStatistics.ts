@@ -1,4 +1,4 @@
-import { buildStatisticRepository } from '../repository';
+import { findStatistics } from '../../../connectors/db/statistics';
 import { statisticType } from '@src/core';
 import { userService } from '../../user';
 import { ObjectId } from 'mongodb';
@@ -6,8 +6,7 @@ import { ObjectId } from 'mongodb';
 export { fetchDocumentStatistics };
 
 async function fetchDocumentStatistics(documentNumber: statisticType['documentNumber']) {
-  const documentStatisticsRepository = buildStatisticRepository();
-  const documentStatistics = await documentStatisticsRepository.findAllStatisticsByDocumentNumber(documentNumber);
+  const documentStatistics = await findStatistics({ documentNumber: { $eq: documentNumber } });
 
   const usersDocumentsStatistics = await Promise.all(
     documentStatistics.map(async (documentStatistic) => {

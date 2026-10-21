@@ -1,9 +1,10 @@
 import { documentType } from '@src/core';
-import { assignationService, buildAssignationRepository } from '../../../modules/assignation';
-import { buildDocumentRepository } from '../../../modules/document';
+import { assignationService } from '../../../modules/assignation';
+import { findAssignationsProjection } from '../../../connectors/db/assignations';
 import { logger } from '../../../utils';
 import { ObjectId } from 'mongodb';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
+import { findDocumentsProjection } from '../../../connectors/db/documents';
 
 export { cleanAssignations };
 
@@ -19,11 +20,9 @@ async function cleanAssignations() {
   };
   logger.info(loggerTech);
   const FORBIDDEN_STATUSES_FOR_ASSIGNATED_DOCUMENT: documentType['status'][] = ['free'];
-  const documentRepository = buildDocumentRepository();
-  const assignationRepository = buildAssignationRepository();
 
-  const documents = await documentRepository.findAllProjection(['_id', 'status']);
-  const assignations = await assignationRepository.findAllProjection(['_id', 'documentId']);
+  const documents = await findDocumentsProjection({}, ['_id', 'status']);
+  const assignations = await findAssignationsProjection({}, ['_id', 'documentId']);
   logger.info({
     ...loggerTech,
     message: `Start checking all assignations`,

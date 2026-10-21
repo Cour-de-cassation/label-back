@@ -1,7 +1,14 @@
 import { documentType, problemReportModule, problemReportType } from '@src/core';
 import { documentService } from '../../document';
 import { userService } from '../../user';
-import { buildProblemReportRepository } from '../repository';
+import {
+  countProblemReports,
+  deleteProblemReportById,
+  deleteProblemReports,
+  findProblemReports,
+  insertProblemReport,
+  updateProblemReportById,
+} from '../../../connectors/db/problemReports';
 import { logger } from '../../../utils';
 import { ObjectId } from 'mongodb';
 
@@ -20,12 +27,10 @@ const problemReportService = {
     problemType: problemReportType['type'];
   }) {
     try {
-      const problemReportRepository = buildProblemReportRepository();
-
       const documents = await documentService.fetchAllDocumentsByIds([documentId]);
       const users = await userService.fetchUsersByIds([userId]);
 
-      await problemReportRepository.insert(
+      await insertProblemReport(
         problemReportModule.lib.buildProblemReport({
           userId,
           documentId,
@@ -61,18 +66,15 @@ const problemReportService = {
   },
 
   async deleteProblemReportById(problemReportId: problemReportType['_id']) {
-    const problemReportRepository = buildProblemReportRepository();
-    await problemReportRepository.deleteById(problemReportId);
+    await deleteProblemReportById(problemReportId);
   },
 
   async deleteProblemReportsByDocumentId(documentId: documentType['_id']) {
-    const problemReportRepository = buildProblemReportRepository();
-    await problemReportRepository.deleteByDocumentId(documentId);
+    await deleteProblemReports({ documentId });
   },
 
   async fetchProblemReportsWithDetails() {
-    const problemReportRepository = buildProblemReportRepository();
-    const problemReports = await problemReportRepository.findAll();
+    const problemReports = await findProblemReports();
 
     const documentsById = await documentService.fetchAllDocumentsByIds(
       problemReports.map(({ documentId }) => documentId),
@@ -112,12 +114,10 @@ const problemReportService = {
   },
 
   async updateHasBeenRead(problemReportId: problemReportType['_id'], hasBeenRead: problemReportType['hasBeenRead']) {
-    const problemReportRepository = buildProblemReportRepository();
-    return problemReportRepository.updateOne(problemReportId, { hasBeenRead });
+    await updateProblemReportById(problemReportId, { hasBeenRead });
   },
 
   async countUnreadProblemReports() {
-    const problemReportRepository = buildProblemReportRepository();
-    return problemReportRepository.countUnread();
+    return countProblemReports({ hasBeenRead: false });
   },
 };

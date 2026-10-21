@@ -1,8 +1,8 @@
 import { withMongo } from './withMongo';
 import { timeOperator } from '@src/core';
-import { buildProblemReportRepository } from '../../modules/problemReport';
-import { buildDocumentRepository } from '../../modules/document';
+import { findProblemReports } from '../../connectors/db/problemReports';
 import { logger } from '../../utils';
+import { findDocumentById } from '../../connectors/db/documents';
 
 export { listDocumentsWithProblemReports };
 
@@ -19,10 +19,7 @@ async function listDocumentsWithProblemReports() {
     message: 'START',
   });
 
-  const problemnReportsRepository = buildProblemReportRepository();
-  const documentRepository = buildDocumentRepository();
-
-  const problemReports = await problemnReportsRepository.findAll();
+  const problemReports = await findProblemReports();
   logger.info({
     operations: ['other', 'listDocumentsWithProblemReports'],
     path: 'src/backend/app/scripts/listDocumentsWithProblemReports.ts',
@@ -30,7 +27,7 @@ async function listDocumentsWithProblemReports() {
   });
   for (let index = 0; index < problemReports.length; index++) {
     const problemReport = problemReports[index];
-    const document = await documentRepository.findById(problemReport['documentId']);
+    const document = await findDocumentById(problemReport['documentId']);
 
     logger.info({
       operations: ['other', 'listDocumentsWithProblemReports'],

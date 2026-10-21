@@ -10,14 +10,13 @@ import {
 import { assignationService } from '../../assignation';
 import { documentService } from '../../document';
 import { treatmentService } from '../../treatment';
-import { buildStatisticRepository } from '../repository';
+import { findStatistics } from '../../../connectors/db/statistics';
+import { buildRessourceFilterRequest } from '../../ressourceFilter';
 
 export { fetchFilteredStatistics };
 
 async function fetchFilteredStatistics(filter: ressourceFilterType, settings: settingsType) {
-  const statisticRepository = buildStatisticRepository();
-
-  const statistics = await statisticRepository.findAllByRessourceFilter(filter);
+  const statistics = await findStatistics(buildRessourceFilterRequest(filter));
   const doneDocumentStatistics = await computeStatisticsFromDoneDocuments();
   return [...statistics, ...doneDocumentStatistics];
 
