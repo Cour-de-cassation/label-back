@@ -6,7 +6,6 @@ import { ENV } from '../utils/env';
 import { ssoService } from '../modules/sso';
 import { settingsLoader } from '../lib/settingsLoader';
 import { assignationService } from '../modules/assignation';
-import { cacheService } from '../modules/cache';
 import { documentService } from '../modules/document';
 import { problemReportService } from '../modules/problemReport';
 import { statisticService } from '../modules/statistic';
@@ -97,20 +96,7 @@ function buildApi(app: Express) {
   app.get(
     `${API_BASE_URL}/availableStatisticFilters`,
     withAuth(['admin', 'scrutator'], async (user, req, res) => {
-      const cache = (await cacheService.fetchAllByKey('availableStatisticFilters'))[0];
-      if (cache) {
-        res.status(200).json(JSON.parse(cache.content));
-      } else {
-        res.status(200).json({
-          publicationCategories: [],
-          maxDate: undefined,
-          minDate: undefined,
-          routes: [],
-          importers: [],
-          sources: [],
-          jurisdictions: [],
-        });
-      }
+      res.status(200).json(await statisticService.fetchAvailableStatisticFilters());
     }),
   );
 
