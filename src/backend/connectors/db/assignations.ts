@@ -1,7 +1,6 @@
 import { Filter, ObjectId } from 'mongodb';
 import { assignationType, documentType } from '@src/core';
 import { mongo } from '../../utils';
-import { buildProjection } from './projection';
 
 const assignations = () => mongo.getDb().collection<assignationType>('assignations');
 
@@ -17,16 +16,6 @@ export async function insertAssignation(assignation: assignationType) {
 
 export async function findAssignations(filter: Filter<assignationType> = {}) {
   return assignations().find(filter).toArray();
-}
-
-export async function findAssignationsProjection<K extends keyof assignationType>(
-  filter: Filter<assignationType>,
-  fields: K[],
-) {
-  return assignations()
-    .find(filter)
-    .project<Pick<assignationType, K | '_id'>>(buildProjection<assignationType>(fields))
-    .toArray();
 }
 
 export async function findAssignation(filter: Filter<assignationType>) {
@@ -64,4 +53,24 @@ export async function findAssignedDocumentsOfUser(userId: ObjectId) {
       { $project: { _id: 0, document: 1, assignationId: '$_id' } },
     ])
     .toArray();
+}
+
+/** Assignations whose document does not exist anymore or is free */
+export function findAssignationsOfMissingOrFreeDocuments() {
+  return assignations().aggregate<Pick<assignationType, '_id' | 'treatmentId'>>(
+    [
+      {
+        $lookup: {
+          from: 'documents',
+          localField: 'documentId',
+          foreignField: '_id',
+          as: 'document',
+          pipeline: [{ $project: { _id: 0, status: 1 } }],
+        },
+      },
+      { $match: { $or: [{ document: { $size: 0 } }, { 'document.status': 'free' }] } },
+      { $project: { _id: 1, treatmentId: 1 } },
+    ],
+    { allowDiskUse: true },
+  );
 }

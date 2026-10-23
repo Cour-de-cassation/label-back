@@ -401,7 +401,6 @@ export async function findDocumentsWithTreatments<K extends keyof documentType =
   return documentsWithTreatments;
 }
 
-/** Returns the updated document, or undefined if no document matched the filter */
 export async function updateDocument(filter: Filter<documentType>, fields: Partial<documentType>) {
   return (await documents().findOneAndUpdate(filter, { $set: fields }, { returnDocument: 'after' })) ?? undefined;
 }
@@ -520,4 +519,36 @@ export async function findAvailableStatisticFilters() {
     .toArray();
 
   return availableStatisticFilters;
+}
+
+export function findAssignedDocumentIdsWithoutAssignation() {
+  return documents().aggregate<{ _id: ObjectId }>(
+    [
+      { $match: { status: { $in: ['pending', 'saved'] } } },
+      {
+        $lookup: {
+          from: 'assignations',
+          localField: '_id',
+          foreignField: 'documentId',
+          as: 'assignations',
+          pipeline: [{ $limit: 1 }, { $project: { _id: 1 } }],
+        },
+      },
+      { $match: { assignations: { $size: 0 } } },
+      { $project: { _id: 1 } },
+    ],
+    { allowDiskUse: true },
+  );
+}
+
+export async function updateDocumentsStatusByIds(
+  ids: ObjectId[],
+  status: documentType['status'],
+  filter: Filter<documentType> = {},
+) {
+  const { modifiedCount } = await documents().updateMany(
+    { ...filter, _id: { $in: ids } },
+    { $set: { status, updateDate: new Date().getTime() } },
+  );
+  return modifiedCount;
 }

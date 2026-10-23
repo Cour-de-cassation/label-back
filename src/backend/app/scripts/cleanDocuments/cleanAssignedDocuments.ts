@@ -1,9 +1,10 @@
-import { findAssignationsProjection } from '../../../connectors/db/assignations';
-import { documentService } from '../../../modules/document';
-import { logger } from '../../../utils';
-import { ObjectId } from 'mongodb';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
-import { findDocumentsProjection } from '../../../connectors/db/documents';
+import { logger } from '../../../utils';
+import { forEachBatch } from '../../../connectors/db/batch';
+import {
+  findAssignedDocumentIdsWithoutAssignation,
+  updateDocumentsStatusByIds,
+} from '../../../connectors/db/documents';
 
 export { cleanAssignedDocuments };
 
@@ -18,27 +19,18 @@ async function cleanAssignedDocuments() {
     message: 'START',
   };
   logger.info(loggerTech);
-  const assignedDocuments = await findDocumentsProjection({ status: { $in: ['pending', 'saved'] } }, ['_id', 'status']);
 
-  const assignations = await findAssignationsProjection({}, ['_id', 'documentId']);
+  let freedCount = 0;
+  const inconsistentCount = await forEachBatch(findAssignedDocumentIdsWithoutAssignation(), async (documents) => {
+    freedCount += await updateDocumentsStatusByIds(
+      documents.map(({ _id }) => _id),
+      'free',
+      { status: { $in: ['pending', 'saved'] } },
+    );
+  });
 
   logger.info({
     ...loggerTech,
-    message: 'Start checking all assigned documents',
+    message: `DONE: ${inconsistentCount} pending or saved documents without assignation, ${freedCount} reset to free`,
   });
-
-  await Promise.all(
-    assignedDocuments.map(async (document) => {
-      const assignation = assignations.find(({ documentId }) => documentId.equals(new ObjectId(document._id)));
-      if (!assignation) {
-        logger.info({
-          ...loggerTech,
-          message: `Inconsistency: assignation not found for document status ${document.status}. Resetting the document to free...`,
-        });
-        await documentService.updateDocumentStatus(document._id, 'free');
-      }
-      return;
-    }),
-  );
-  logger.info({ ...loggerTech, message: 'DONE' });
 }

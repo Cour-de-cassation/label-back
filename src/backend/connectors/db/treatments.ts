@@ -7,6 +7,7 @@ const treatments = () => mongo.getDb().collection<treatmentType>('treatments');
 export async function ensureTreatmentsIndexes() {
   await treatments().createIndex({ documentId: 1 });
   await treatments().createIndex({ documentId: 1, order: 1 }, { unique: true });
+  await treatments().createIndex({ lastUpdateDate: 1 });
 }
 
 export async function insertTreatment(treatment: treatmentType) {
@@ -42,4 +43,25 @@ export async function deleteTreatmentById(_id: ObjectId) {
 
 export async function deleteTreatments(filter: Filter<treatmentType>) {
   await treatments().deleteMany(filter);
+}
+
+export function findOrphanTreatmentIdsUpdatedBefore(date: number) {
+  return treatments().aggregate<{ _id: ObjectId }>(
+    [
+      { $match: { lastUpdateDate: { $lt: date } } },
+      { $project: { documentId: 1 } },
+      {
+        $lookup: {
+          from: 'documents',
+          localField: 'documentId',
+          foreignField: '_id',
+          as: 'document',
+          pipeline: [{ $limit: 1 }, { $project: { _id: 1 } }],
+        },
+      },
+      { $match: { document: { $size: 0 } } },
+      { $project: { _id: 1 } },
+    ],
+    { allowDiskUse: true },
+  );
 }
