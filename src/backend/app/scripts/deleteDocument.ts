@@ -2,10 +2,11 @@ import yargs from 'yargs';
 import { withMongo } from './withMongo';
 import { loadSettingsFromPath } from './loadSettings';
 import { logger } from '../../utils';
-import { buildDocumentRepository, documentService } from '../../modules/document';
+import { documentService } from '../../modules/document';
 import { documentType, settingsType } from '@src/core';
 import { statisticService } from '../../modules/statistic';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
+import { findDocument } from '../../connectors/db/documents';
 
 export { deleteDocument };
 
@@ -28,11 +29,7 @@ async function deleteDocument(
     message: 'deleteDocument',
   };
   logger.info({ ...loggerTech, message: 'START' });
-  const documentRepository = buildDocumentRepository();
-  const document = await documentRepository.findOneByDocumentNumberAndSource({
-    documentNumber,
-    source,
-  });
+  const document = await findDocument({ documentNumber, source });
 
   if (document) {
     await statisticService.saveStatisticsOfDocument(document, settings, 'deleted with script');

@@ -8,7 +8,7 @@ import {
   settingsType,
 } from '@src/core';
 import { documentService } from '../../document';
-import { buildTreatmentRepository } from '../repository';
+import { findTreatments, insertTreatment } from '../../../connectors/db/treatments';
 
 export { createTreatment };
 
@@ -26,9 +26,7 @@ async function createTreatment(
   },
   settings: settingsType,
 ): Promise<treatmentType['_id']> {
-  const treatmentRepository = buildTreatmentRepository();
-
-  const previousTreatments = await treatmentRepository.findAllByDocumentId(documentId);
+  const previousTreatments = await findTreatments({ documentId });
   const sortedTreatments = treatmentModule.lib.sortInConsistentOrder(previousTreatments);
   const order = sortedTreatments.length > 0 ? sortedTreatments[sortedTreatments.length - 1].order + 1 : 0;
   const annotationsDiff = annotationsDiffModule.lib.computeAnnotationsDiff(previousAnnotations, nextAnnotations);
@@ -66,7 +64,7 @@ async function createTreatment(
 
   treatmentModule.lib.assertTreatmentsSourcesFollowRightOrder([...sortedTreatments, treatment]);
 
-  await treatmentRepository.insert(treatment);
+  await insertTreatment(treatment);
 
   return treatment._id;
 }

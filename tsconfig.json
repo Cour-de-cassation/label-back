@@ -15,5 +15,5 @@
     "target": "ES2022"
   },
   "exclude": ["node_modules", "dist"],
-  "include": ["src/**/*", "src/setupTests.ts"]
+  "include": ["src/**/*"]
 }
