@@ -8,7 +8,7 @@ import {
 } from '@src/core';
 import { documentService } from '../../document';
 import { userService } from '../../user';
-import { buildTreatmentRepository } from '../repository';
+import { findTreatmentById, findTreatments, updateTreatmentById } from '../../../connectors/db/treatments';
 
 export { updateTreatment };
 
@@ -21,15 +21,13 @@ async function updateTreatment({
   assignation: assignationType;
   settings: settingsType;
 }) {
-  const treatmentRepository = buildTreatmentRepository();
-
   const userRole = await userService.fetchUserRole(assignation.userId);
   if (userRole === 'admin') {
     await documentService.updateDocumentReviewStatus(assignation.documentId, {
       hasBeenAmended: true,
     });
   }
-  const treatments = await treatmentRepository.findAllByDocumentId(assignation.documentId);
+  const treatments = await findTreatments({ documentId: assignation.documentId });
   const sortedTreatments = treatmentModule.lib.sortInConsistentOrder(treatments);
 
   const document = await documentService.fetchDocument(assignation.documentId);
@@ -42,7 +40,7 @@ async function updateTreatment({
 
   const actionToPerform = `update treatment for documentId ${assignation.documentId.toHexString()}`;
   const previousAnnotations = treatmentModule.lib.computeAnnotations(sortedTreatments);
-  const treatment = await treatmentRepository.findById(assignation.treatmentId);
+  const treatment = await findTreatmentById(assignation.treatmentId);
   annotationsDiffModule.lib.assertAnnotationsDiffAreConsistent(
     annotationsDiff,
     {
@@ -69,5 +67,5 @@ async function updateTreatment({
     settingsForDocument,
   );
 
-  await treatmentRepository.updateOne(assignation.treatmentId, updatedTreatment);
+  await updateTreatmentById(assignation.treatmentId, updatedTreatment);
 }
