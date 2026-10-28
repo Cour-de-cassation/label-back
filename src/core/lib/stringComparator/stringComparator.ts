@@ -7,9 +7,7 @@ export { stringComparator };
 export type { stringComparisonSensitivityType };
 
 type stringComparisonSensitivityType =
-  | { kind: 'levenshteinDistance'; threshold: number }
-  | { kind: 'caseInsensitive' }
-  | { kind: 'inclusion' };
+  { kind: 'levenshteinDistance'; threshold: number } | { kind: 'caseInsensitive' } | { kind: 'inclusion' };
 
 const stringComparator = {
   insensitiveEqual(str1: string, str2: string): boolean {
