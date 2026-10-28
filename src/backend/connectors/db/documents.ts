@@ -16,8 +16,13 @@ export async function insertDocument(document: documentType) {
   await documents().insertOne(document);
 }
 
-export async function findDocuments(filter: Filter<documentType> = {}, limit?: number) {
+export async function findDocuments(
+  filter: Filter<documentType> = {},
+  limit?: number,
+  sort?: { field: string; direction: 1 | -1 },
+) {
   const cursor = documents().find(filter);
+  if (sort !== undefined) cursor.sort(sort.field, sort.direction);
   return (limit !== undefined ? cursor.limit(limit) : cursor).toArray();
 }
 
@@ -42,39 +47,6 @@ export async function findDocumentById(_id: ObjectId) {
 
 export async function countDocuments(filter: Filter<documentType> = {}) {
   return documents().countDocuments(filter);
-}
-
-/**
- * Pick a random document having at least one treatment among the 50 most recent and the 50 oldest
- * (by decision date) matching the filter, to treat a mix of recent and old documents.
- */
-export async function findRandomDocumentToTreat(filter: Filter<documentType>) {
-  const findTreatedDocuments = (direction: 1 | -1) =>
-    documents()
-      .aggregate<documentType>([
-        { $match: filter },
-        { $sort: { 'decisionMetadata.date': direction } },
-        {
-          $lookup: {
-            from: 'treatments',
-            localField: '_id',
-            foreignField: 'documentId',
-            as: 'treatments',
-            pipeline: [{ $limit: 1 }, { $project: { _id: 1 } }],
-          },
-        },
-        { $match: { 'treatments.0': { $exists: true } } },
-        { $limit: 50 },
-        { $project: { treatments: 0 } },
-      ])
-      .toArray();
-
-  const combinedDocuments = [...(await findTreatedDocuments(-1)), ...(await findTreatedDocuments(1))];
-
-  if (combinedDocuments.length === 0) {
-    return undefined;
-  }
-  return combinedDocuments[Math.floor(Math.random() * combinedDocuments.length)];
 }
 
 const lookupAssignations: Document = {

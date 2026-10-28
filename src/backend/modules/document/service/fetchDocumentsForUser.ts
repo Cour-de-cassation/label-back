@@ -2,8 +2,8 @@ import { assignationType, documentModule, documentType } from '@src/core';
 import { logger } from '../../../utils';
 import { assignationService } from '../../assignation';
 import { findAssignedDocumentsOfUser } from '../../../connectors/db/assignations';
-import { findRandomDocumentToTreat, updateDocument } from '../../../connectors/db/documents';
-import { ObjectId } from 'mongodb';
+import { findDocuments, updateDocument } from '../../../connectors/db/documents';
+import { Filter, ObjectId } from 'mongodb';
 
 export { buildFetchDocumentsForUser };
 
@@ -52,44 +52,44 @@ function buildFetchDocumentsForUser(checkCallAttempts: (identifier: string) => v
   }> {
     checkCallAttempts(userId.toHexString());
 
-    return assignNewDocument();
+    let document: documentType | undefined;
 
-    async function assignNewDocument(): Promise<{
-      document: documentType;
-      assignationId: assignationType['_id'];
-    }> {
-      let document: documentType | undefined;
-
-      // Get document by priority
-      for (let priority = 4; priority >= 0; priority--) {
-        document = await assignDocumentByPriority(priority);
-        if (document) {
-          break;
-        }
+    // Get document by priority
+    for (let priority = 4; priority >= 0; priority--) {
+      document = await assignDocumentByPriority(priority);
+      if (document) {
+        break;
       }
-      if (!document) {
-        throw new Error(`No free document available`);
-      }
-
-      const assignation = await assignationService.createAssignation({
-        userId,
-        documentId: document._id,
-      });
-
-      return { document, assignationId: assignation._id };
     }
+    if (!document) {
+      throw new Error(`No free document available`);
+    }
+
+    const assignation = await assignationService.createAssignation({
+      userId,
+      documentId: document._id,
+    });
+
+    return { document, assignationId: assignation._id };
   }
 
   async function assignDocumentByPriority(
     priority: documentType['priority'],
     documentIdsToExclude: documentType['_id'][] = [],
   ): Promise<documentType | undefined> {
-    // Only documents with at least one treatment (i.e. already annotated by the NLP) can be assigned
-    const document = await findRandomDocumentToTreat({
+    const filter = {
       priority,
       status: 'free',
       _id: { $nin: documentIdsToExclude },
-    });
+    } satisfies Filter<documentType>;
+
+    const [oldest, newest] = await Promise.all([
+      findDocuments(filter, 50, { field: 'decisionMetadata.date', direction: 1 }),
+      findDocuments(filter, 50, { field: 'decisionMetadata.date', direction: -1 }),
+    ]);
+
+    const recentAndOldDocuments = [...oldest, ...newest];
+    const document = recentAndOldDocuments[Math.floor(Math.random() * recentAndOldDocuments.length)];
 
     if (!document) {
       return undefined;
