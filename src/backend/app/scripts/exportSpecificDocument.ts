@@ -23,7 +23,7 @@ function parseArgv() {
       documentNumber: {
         demandOption: true,
         description: 'number of the document you want to export',
-        type: 'number',
+        type: 'string',
       },
       source: {
         demandOption: true,
@@ -42,14 +42,14 @@ function parseArgv() {
     .parseSync();
 
   return {
-    documentNumber: argv.documentNumber as number,
+    documentNumber: argv.documentNumber as string,
     source: argv.source as string,
     settings: argv.settings as string,
   };
 }
 
 async function exportSpecificDocument(
-  { documentNumber, source }: { documentNumber: number; source: string },
+  { documentNumber, source }: { documentNumber: string; source: string },
   settings: settingsType,
 ) {
   const loggerDecision: DecisionLog = {

@@ -147,7 +147,11 @@ async function fetchDocumentBySourceAndDocumentNumber({
   source: documentType['source'];
   documentNumber: documentType['documentNumber'];
 }) {
-  return findDocument({ source, documentNumber });
+  const documentNumberAsNumber = parseInt(documentNumber.toString());
+  return findDocument({
+    source,
+    documentNumber: isNaN(documentNumberAsNumber) ? documentNumber : { $in: [documentNumber, documentNumberAsNumber] },
+  });
 }
 
 async function fetchDocumentsReadyToExport(days: number) {
