@@ -1,7 +1,7 @@
 import { withMongo } from './withMongo';
-import { buildDocumentRepository } from '../../modules/document';
 import { logger } from '../../utils';
 import { TechLog, DecisionLog } from '@src/backend/utils/logger/loggerType';
+import { findDocuments } from '../../connectors/db/documents';
 
 export { listAllDocuments };
 
@@ -20,9 +20,7 @@ async function listAllDocuments() {
 
   logger.info({ ...loggerTech, message: 'START' });
 
-  const documentRepository = buildDocumentRepository();
-
-  const documents = await documentRepository.findAll();
+  const documents = await findDocuments();
   logger.info({ ...loggerTech, message: `${documents.length} documents found` });
 
   for (let index = 0; index < documents.length; index++) {

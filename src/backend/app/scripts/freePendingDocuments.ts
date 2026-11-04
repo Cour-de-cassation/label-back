@@ -1,8 +1,9 @@
 import { withMongo } from './withMongo';
 import { dateBuilder, documentModule } from '@src/core';
-import { buildDocumentRepository, documentService } from '../../modules/document';
+import { documentService } from '../../modules/document';
 import { logger } from '../../utils';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
+import { findDocumentsProjection } from '../../connectors/db/documents';
 
 export { freePendingDocuments };
 
@@ -19,13 +20,11 @@ async function freePendingDocuments() {
   };
   logger.info({ ...loggerTech, message: 'START' });
 
-  const documentRepository = buildDocumentRepository();
-
   logger.info({
     ...loggerTech,
     message: 'Fetching pending documents',
   });
-  const pendingDocuments = await documentRepository.findAllByStatusProjection(['pending'], ['_id', 'updateDate']);
+  const pendingDocuments = await findDocumentsProjection({ status: 'pending' }, ['_id', 'updateDate']);
   logger.info({
     ...loggerTech,
     message: `${pendingDocuments.length} documents fetched`,

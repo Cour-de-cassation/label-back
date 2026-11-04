@@ -1,3 +1,3 @@
-import { buildFakeRessourceFilterRequest, buildRessourceFilterRequest } from './repository';
+import { buildRessourceFilterRequest } from './buildRessourceFilterRequest';
 
-export { buildFakeRessourceFilterRequest, buildRessourceFilterRequest };
+export { buildRessourceFilterRequest };

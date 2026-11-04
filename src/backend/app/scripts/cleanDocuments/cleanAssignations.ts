@@ -1,15 +1,14 @@
-import { documentType } from '@src/core';
-import { assignationService, buildAssignationRepository } from '../../../modules/assignation';
-import { buildDocumentRepository } from '../../../modules/document';
-import { logger } from '../../../utils';
-import { ObjectId } from 'mongodb';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
+import { logger } from '../../../utils';
+import { forEachBatch } from '../../../connectors/db/batch';
+import { deleteAssignations, findAssignationsOfMissingOrFreeDocuments } from '../../../connectors/db/assignations';
+import { deleteTreatments } from '../../../connectors/db/treatments';
 
 export { cleanAssignations };
 
 /**
- * Delete all the assignations linked to a document
- * which is either loaded, being annotated by the NLP engine, or free
+ * Delete the assignations (and their treatments) linked to a document
+ * which does not exist anymore or is free
  */
 async function cleanAssignations() {
   const loggerTech: TechLog = {
@@ -18,29 +17,14 @@ async function cleanAssignations() {
     message: 'START',
   };
   logger.info(loggerTech);
-  const FORBIDDEN_STATUSES_FOR_ASSIGNATED_DOCUMENT: documentType['status'][] = ['free'];
-  const documentRepository = buildDocumentRepository();
-  const assignationRepository = buildAssignationRepository();
 
-  const documents = await documentRepository.findAllProjection(['_id', 'status']);
-  const assignations = await assignationRepository.findAllProjection(['_id', 'documentId']);
-  logger.info({
-    ...loggerTech,
-    message: `Start checking all assignations`,
+  const deletedCount = await forEachBatch(findAssignationsOfMissingOrFreeDocuments(), async (assignations) => {
+    await deleteTreatments({ _id: { $in: assignations.map(({ treatmentId }) => treatmentId) } });
+    await deleteAssignations({ _id: { $in: assignations.map(({ _id }) => _id) } });
   });
 
-  await Promise.all(
-    assignations.map(async (assignation) => {
-      const document = documents.find(({ _id }) => _id.equals(new ObjectId(assignation.documentId)));
-      if (!document || FORBIDDEN_STATUSES_FOR_ASSIGNATED_DOCUMENT.includes(document.status)) {
-        logger.info({
-          ...loggerTech,
-          message: `Inconsistency: document not found or status inconsistent. Deleting the assignation...`,
-        });
-        await assignationService.deleteAssignation(assignation._id);
-      }
-      return;
-    }),
-  );
-  logger.info({ ...loggerTech, message: 'DONE' });
+  logger.info({
+    ...loggerTech,
+    message: `DONE: ${deletedCount} assignations of missing or free documents deleted with their treatments`,
+  });
 }

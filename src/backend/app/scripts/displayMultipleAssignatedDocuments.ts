@@ -1,9 +1,9 @@
 import { withMongo } from './withMongo';
 import { logger } from '../../utils';
 import { assignationService } from '../../modules/assignation';
-import { buildDocumentRepository } from '../../modules/document';
 import { userService } from '../../modules/user';
 import { TechLog } from '@src/backend/utils/logger/loggerType';
+import { findDocuments } from '../../connectors/db/documents';
 
 export { displayMultipleAssignatedDocuments };
 
@@ -20,8 +20,7 @@ async function displayMultipleAssignatedDocuments() {
     message: 'displayMultipleAssignatedDocuments',
   };
   logger.info({ ...loggerTech, message: 'START' });
-  const documentRepository = buildDocumentRepository();
-  const documents = await documentRepository.findAll();
+  const documents = await findDocuments();
 
   let documentCount = 0;
   for (const document of documents) {

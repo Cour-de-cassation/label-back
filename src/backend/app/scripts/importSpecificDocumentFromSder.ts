@@ -2,7 +2,7 @@ import yargs from 'yargs';
 import { withMongo } from './withMongo';
 import { loadSettingsFromPath } from './loadSettings';
 import { annotationModule, annotationType, assignationType, documentType, settingsType } from '@src/core';
-import { buildDocumentRepository, documentService } from '../../modules/document';
+import { documentService } from '../../modules/document';
 import { logger } from '../../utils';
 import { DecisionLog, TechLog } from '@src/backend/utils/logger/loggerType';
 import { treatmentService } from '../../modules/treatment';
@@ -10,11 +10,10 @@ import { buildPreAssignator } from '../../lib/preAssignator';
 import { assignationService } from '../../modules/assignation';
 import { preAssignationService } from '../../modules/preAssignation';
 import { statisticService } from '../../modules/statistic';
-import { updateDocumentStatus } from '../../modules/document/service/documentService/updateDocumentStatus';
 import { getNextStatus } from '@src/core/modules/document/lib';
 import { mapCourtDecisionToDocument } from '@src/courDeCassation/connector/mapper/mapCourtDecisionToDocument';
 import { sderApi } from '@src/courDeCassation/sderApi';
-import { ENV } from '@src/backend/utils/env';
+import { findDocument, insertDocument as insertDocumentInDb } from '../../connectors/db/documents';
 
 export { importSpecificDocument as importSpecificDocumentFromSder };
 
@@ -84,14 +83,6 @@ async function importSpecificDocument({
     ...loggerTech,
     message: `START: ${documentNumber} - ${source}, lowPriority: ${lowPriority}`,
   });
-
-  if (!['LOCAL', 'DEV', 'PREPROD'].includes(ENV) && source === 'portalis-cph') {
-    logger.info({
-      ...loggerTech,
-      message: `Source portalis-cph is excluded in PRODUCTION environment.`,
-    });
-    return;
-  }
 
   try {
     const courtDecision = await sderApi.fetchCourtDecisionBySourceIdAndSourceName(documentNumber, source);
@@ -164,7 +155,7 @@ async function importSpecificDocument({
           status: document.status,
           route: 'exhaustive',
         });
-        await updateDocumentStatus(document._id, nextStatus);
+        await documentService.updateDocumentStatus(document._id, nextStatus);
       }
     }
 
@@ -190,10 +181,9 @@ async function insertDocument(document: documentType, settings: settingsType) {
       labelStatus: document.status,
     },
   };
-  const documentRepository = buildDocumentRepository();
   let assignations: assignationType[] = [];
 
-  const sameDocument = await documentRepository.findOneByExternalId(document.externalId);
+  const sameDocument = await findDocument({ externalId: document.externalId });
   if (sameDocument) {
     logger.info({
       ...loggerDecision,
@@ -209,7 +199,7 @@ async function insertDocument(document: documentType, settings: settingsType) {
   }
 
   try {
-    const insertedDocument = documentRepository.insert(document);
+    await insertDocumentInDb(document);
     logger.info({
       ...loggerDecision,
       message: `Document ${document.source}:${document.documentNumber} has been inserted in database imported by ${document.importer}`,
@@ -226,7 +216,6 @@ async function insertDocument(document: documentType, settings: settingsType) {
         number: document.documentNumber.toString(),
       });
     }
-    return insertedDocument;
   } catch (error) {
     logger.error({
       ...loggerDecision,

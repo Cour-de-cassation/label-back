@@ -45,15 +45,13 @@ jest.mock('../../../utils', () => ({
   },
 }));
 jest.mock('../../user', () => ({
-  buildUserRepository: jest.fn().mockImplementation(() => ({
-    findByEmail: jest.fn().mockResolvedValueOnce({
+  userService: {
+    fetchUserByEmail: jest.fn().mockResolvedValueOnce({
       _id: '63e7d8764f1a0a2f6c123457',
       email: 'test@example.com',
       name: 'Test User',
       role: 'annotator',
     }),
-  })),
-  userService: {
     createUser: jest.fn(),
     updateUser: jest.fn().mockResolvedValue({ success: true }),
   },

@@ -2,7 +2,7 @@ import yargs from 'yargs';
 import { withMongo } from './withMongo';
 import { loadSettingsFromPath } from './loadSettings';
 import { annotationModule, annotationType, assignationType, documentType, settingsType } from '@src/core';
-import { buildDocumentRepository, documentService } from '../../modules/document';
+import { documentService } from '../../modules/document';
 import { logger } from '../../utils';
 import { DecisionLog, TechLog } from '@src/backend/utils/logger/loggerType';
 import { treatmentService } from '../../modules/treatment';
@@ -10,19 +10,17 @@ import { buildPreAssignator } from '../../lib/preAssignator';
 import { assignationService } from '../../modules/assignation';
 import { preAssignationService } from '../../modules/preAssignation';
 import { statisticService } from '../../modules/statistic';
-import { extractRoute } from '../../lib/extractRoute';
-import { updateDocumentRoute } from '../../modules/document/service/documentService/updateDocumentRoute';
-import { updateDocumentStatus } from '../../modules/document/service/documentService/updateDocumentStatus';
 import { getNextStatus } from '@src/core/modules/document/lib';
 import { mapCourtDecisionToDocument } from '@src/courDeCassation/connector/mapper/mapCourtDecisionToDocument';
 import { sderApi } from '@src/courDeCassation/sderApi';
 import { ENV } from '@src/backend/utils/env';
+import { findDocument, insertDocument as insertDocumentInDb } from '../../connectors/db/documents';
 
 export { importNewDocuments as autoImportDocumentsFromSder };
 
 const SOURCES = ['LOCAL', 'DEV', 'PREPROD'].includes(ENV)
   ? ['jurinet', 'jurica', 'juricav2', 'juritj', 'juritcom', 'portalis-cph']
-  : ['jurinet', 'jurica', 'juritj', 'juritcom'];
+  : ['jurinet', 'jurica', 'juritj', 'juritcom', 'portalis-cph'];
 
 if (require.main === module) {
   (async () => {
@@ -104,16 +102,13 @@ async function importNewDocuments(settings: settingsType) {
           settings,
         );
 
-        const routeForDocument = await extractRoute(document);
-        await updateDocumentRoute(document._id, routeForDocument);
-
-        const isPreassignated = await preAssignator.preAssignDocument({ ...document, route: routeForDocument });
+        const isPreassignated = await preAssignator.preAssignDocument(document);
         if (!isPreassignated) {
           const nextStatus = getNextStatus({
             status: document.status,
-            route: routeForDocument,
+            route: document.route,
           });
-          await updateDocumentStatus(document._id, nextStatus);
+          await documentService.updateDocumentStatus(document._id, nextStatus);
         }
 
         await sderApi.setCourtDecisionLoaded(document.externalId);
@@ -135,10 +130,9 @@ async function insertDocument(document: documentType, settings: settingsType) {
       labelStatus: document.status,
     },
   };
-  const documentRepository = buildDocumentRepository();
   let assignations: assignationType[] = [];
 
-  const sameDocument = await documentRepository.findOneByExternalId(document.externalId);
+  const sameDocument = await findDocument({ externalId: document.externalId });
   if (sameDocument) {
     logger.info({
       ...loggerDecision,
@@ -154,7 +148,7 @@ async function insertDocument(document: documentType, settings: settingsType) {
   }
 
   try {
-    const insertedDocument = documentRepository.insert(document);
+    await insertDocumentInDb(document);
     logger.info({
       ...loggerDecision,
       message: `Document ${document.source}:${document.documentNumber} has been inserted in database imported by ${document.importer}`,
@@ -171,7 +165,6 @@ async function insertDocument(document: documentType, settings: settingsType) {
         number: document.documentNumber.toString(),
       });
     }
-    return insertedDocument;
   } catch (error) {
     logger.error({
       ...loggerDecision,

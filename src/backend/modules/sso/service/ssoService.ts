@@ -1,5 +1,5 @@
 import { SamlService } from '../../../utils/saml';
-import { buildUserRepository, userService } from '../../user';
+import { userService } from '../../user';
 import { logger, jwtHandler } from '../../../utils';
 import every from 'lodash/every';
 import { ObjectId } from 'mongodb';
@@ -95,8 +95,7 @@ export async function acs(req: any) {
 }
 
 export async function getUserByEmail(email: string) {
-  const userRepository = buildUserRepository();
-  return (await userRepository.findByEmail(email)) as userType;
+  return (await userService.fetchUserByEmail(email)) as userType;
 }
 
 export function setUserSessionAndReturnRedirectUrl(req: Request | any, user: userType, sessionIndex: string) {
