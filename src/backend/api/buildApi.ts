@@ -1,7 +1,7 @@
 import { Express, Request, Response, NextFunction } from 'express';
 import { mapValues } from 'lodash';
 import { userType } from '@src/core';
-import { logger } from '../utils';
+import { HttpError, logger } from '../utils';
 import { ENV } from '../utils/env';
 import { ssoService } from '../modules/sso';
 import { settingsLoader } from '../lib/settingsLoader';
@@ -532,7 +532,7 @@ function withAuth(
     try {
       const currentUser = req.user ?? null;
       if (!currentUser) {
-        throw new Error(`user session has expired or is invalid`);
+        throw new HttpError(401, `user session has expired or is invalid`);
       }
 
       const resolvedUser: userType = {
