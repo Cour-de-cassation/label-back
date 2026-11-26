@@ -1,4 +1,5 @@
 import { expressRequestHandlerType } from './express';
+import { HttpError } from '../errors';
 
 export { buildHandlingErrorController };
 
@@ -9,7 +10,7 @@ const buildHandlingErrorController =
       const response = await controller(req, res, next);
       res.send(response);
     } catch (error) {
-      res.status(500);
+      res.status(error instanceof HttpError ? error.statusCode : 500);
       next(error);
     }
   };

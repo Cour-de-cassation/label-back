@@ -1,5 +1,5 @@
 import { userModule, userType } from '@src/core';
-import { logger } from '../../utils';
+import { HttpError, logger } from '../../utils';
 import { ObjectId } from 'mongodb';
 
 export { buildAuthenticatedController };
@@ -25,7 +25,7 @@ function buildAuthenticatedController<inT, outT>({
   }) => {
     const currentUser = req.user ?? null;
     if (!currentUser) {
-      const error = new Error(`user session has expired or is invalid`);
+      const error = new HttpError(401, `user session has expired or is invalid`);
       logger.error({
         operations: ['other', 'buildAuthenticatedController'],
         path: './src/backend/api/buildAuthenticatedController/buildAuthenticatedController.ts',
